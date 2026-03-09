@@ -162,6 +162,7 @@ cd tikship
 2. **Initialize installation**
 
 ```bash
+npm ci
 npm run init
 ```
 
