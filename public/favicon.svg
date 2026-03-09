@@ -1,0 +1,37 @@
+<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="tikship-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff" />
+      <stop offset="100%" stop-color="#999" />
+    </linearGradient>
+  </defs>
+  <!-- Letter "T" -->
+  <path
+    d="M 30 28 L 70 28 L 70 38 L 58 38 L 58 72 L 42 72 L 42 38 L 30 38 Z"
+    fill="url(#tikship-gradient)"
+  />
+</svg>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

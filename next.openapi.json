@@ -1,0 +1,179 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "TikShip API Documentation",
+    "version": "1.0.0",
+    "description": "Complete API documentation for TikShip platform including admin, user, and public endpoints. This API provides comprehensive functionality for e-commerce operations, user management, content management, and payment processing."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/api",
+      "description": "Local development server"
+    },
+    {
+      "url": "https://your-production-domain",
+      "description": "Production server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Admin authentication token. Include in Authorization header as: Bearer {token}"
+      },
+      "sessionAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "next-auth.session-token",
+        "description": "NextAuth session cookie for user authentication"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Admin - Auth",
+      "description": "Admin authentication endpoints"
+    },
+    {
+      "name": "Admin - Members",
+      "description": "User management endpoints for administrators"
+    },
+    {
+      "name": "Admin - Products",
+      "description": "Product management endpoints"
+    },
+    {
+      "name": "Admin - Orders",
+      "description": "Order management endpoints"
+    },
+    {
+      "name": "Admin - Posts",
+      "description": "Content management endpoints"
+    },
+    {
+      "name": "Admin - Roles",
+      "description": "Role and permission management"
+    },
+    {
+      "name": "Admin - Users",
+      "description": "Admin user management"
+    },
+    {
+      "name": "Admin - Dashboard",
+      "description": "Dashboard statistics and analytics"
+    },
+    {
+      "name": "Admin - Audit",
+      "description": "Audit log management"
+    },
+    {
+      "name": "User - Auth",
+      "description": "User authentication and registration"
+    },
+    {
+      "name": "User - Profile",
+      "description": "User profile management"
+    },
+    {
+      "name": "User - Orders",
+      "description": "User order management"
+    },
+    {
+      "name": "Public - Products",
+      "description": "Public product endpoints"
+    },
+    {
+      "name": "Public - Posts",
+      "description": "Public blog and page endpoints"
+    },
+    {
+      "name": "Payment - Stripe",
+      "description": "Stripe payment integration"
+    },
+    {
+      "name": "Payment - PayPal",
+      "description": "PayPal payment integration"
+    },
+    {
+      "name": "Upload",
+      "description": "File upload endpoints"
+    }
+  ],
+  "defaultResponseSet": "common",
+  "responseSets": {
+    "common": ["400", "500"],
+    "auth": ["400", "401", "403", "500"],
+    "public": ["400", "500"]
+  },
+  "errorConfig": {
+    "template": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string",
+          "example": "{{ERROR_MESSAGE}}"
+        },
+        "code": {
+          "type": "string",
+          "example": "{{ERROR_CODE}}"
+        }
+      }
+    },
+    "codes": {
+      "400": {
+        "description": "Bad Request",
+        "variables": {
+          "ERROR_MESSAGE": "Invalid request parameters",
+          "ERROR_CODE": "BAD_REQUEST"
+        }
+      },
+      "401": {
+        "description": "Unauthorized",
+        "variables": {
+          "ERROR_MESSAGE": "Authentication required",
+          "ERROR_CODE": "UNAUTHORIZED"
+        }
+      },
+      "403": {
+        "description": "Forbidden",
+        "variables": {
+          "ERROR_MESSAGE": "Access denied",
+          "ERROR_CODE": "FORBIDDEN"
+        }
+      },
+      "404": {
+        "description": "Not Found",
+        "variables": {
+          "ERROR_MESSAGE": "Resource not found",
+          "ERROR_CODE": "NOT_FOUND"
+        }
+      },
+      "409": {
+        "description": "Conflict",
+        "variables": {
+          "ERROR_MESSAGE": "Resource already exists",
+          "ERROR_CODE": "CONFLICT"
+        }
+      },
+      "500": {
+        "description": "Internal Server Error",
+        "variables": {
+          "ERROR_MESSAGE": "An unexpected error occurred",
+          "ERROR_CODE": "INTERNAL_ERROR"
+        }
+      }
+    }
+  },
+  "apiDir": "./src/app/api",
+  "schemaDir": "./src",
+  "schemaFiles": [],
+  "docsUrl": "api-docs",
+  "ui": "scalar",
+  "outputFile": "openapi.json",
+  "outputDir": "./public",
+  "includeOpenApiRoutes": false,
+  "ignoreRoutes": [],
+  "debug": false
+}

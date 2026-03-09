@@ -1,0 +1,189 @@
+'use client'
+
+import { useState, useEffect, useCallback } from 'react'
+import { useTranslations } from 'next-intl'
+import { Table, Column } from '@/components/ui/Table'
+import { useApi } from '@/hooks/useApi'
+import { toast } from '@/lib/utils/toast'
+import { siteConfig } from '@/config/site'
+import { AuditLog, AuditLogsListResponse } from '@/types/admin'
+import { useAdminPagination as usePagination } from '@/hooks/useAdminPagination'
+import { truncateId } from '@/lib/utils/string'
+import { getAuditActionVariant, getBadgeClassName } from '@/lib/utils/badge'
+import { formatters } from '@/lib/utils/formatters'
+
+export default function AuditLogsPage() {
+  const t = useTranslations('admin.audit_logs')
+  const {
+    page: currentPage,
+    handlePageChange,
+    handleFilterChange: syncFilters,
+    getParam,
+    pageSize,
+  } = usePagination({ pageSize: siteConfig.admin.pageSize })
+
+  const actionParam = getParam('action')
+  const resourceParam = getParam('resource')
+
+  const [logs, setLogs] = useState<AuditLog[]>([])
+  const [filters, setFilters] = useState({
+    action: actionParam || '',
+    resource: resourceParam || '',
+  })
+  const [pagination, setPagination] = useState({
+    page: 1,
+    pageSize: siteConfig.admin.pageSize,
+    total: 0,
+    totalPages: 0,
+  })
+
+  // API
+  const auditLogsApi = useApi<AuditLogsListResponse>('/api/admin/audit-logs', 'GET')
+
+  // Debounce filters sync to URL
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const hasActionChanged = filters.action !== (actionParam || '')
+      const hasResourceChanged = filters.resource !== (resourceParam || '')
+
+      if (hasActionChanged || hasResourceChanged) {
+        syncFilters({
+          action: filters.action || undefined,
+          resource: filters.resource || undefined,
+        })
+      }
+    }, 500)
+
+    return () => clearTimeout(timer)
+  }, [filters.action, filters.resource, actionParam, resourceParam, syncFilters])
+
+  const updateFilterState = (key: string, value: string) => {
+    setFilters(prev => ({ ...prev, [key]: value }))
+  }
+
+  const fetchLogs = useCallback(
+    async (page: number) => {
+      const { success, data: result } = await auditLogsApi.request(undefined, {
+        params: {
+          page,
+          pageSize,
+          action: actionParam,
+          resource: resourceParam,
+        },
+        onError: (err: string) => toast.error(err),
+      })
+
+      if (success && result) {
+        setLogs(result.logs)
+        setPagination(prev => ({
+          ...prev,
+          page: result.page,
+          total: result.total,
+          totalPages: result.totalPages,
+        }))
+      }
+    },
+    [auditLogsApi, pageSize, actionParam, resourceParam]
+  )
+
+  // Fetch logs whenever URL params change (Source of Truth)
+  useEffect(() => {
+    fetchLogs(currentPage)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage, pageSize, actionParam, resourceParam])
+
+  const columns: Column<AuditLog>[] = [
+    {
+      key: 'time',
+      label: t('time'),
+      render: log => (
+        <span className="whitespace-nowrap text-sm">{formatters.date(log.createdAt)}</span>
+      ),
+    },
+    {
+      key: 'user',
+      label: t('user'),
+      render: log => (
+        <div className="flex flex-col">
+          <span className="font-semibold text-sm">
+            {log.adminUser.name || log.adminUser.username}
+          </span>
+          <span className="text-xs text-base-content/60">{log.adminUser.email}</span>
+        </div>
+      ),
+    },
+    {
+      key: 'action',
+      label: t('action'),
+      render: log => (
+        <span
+          className={`badge badge-sm font-mono ${getBadgeClassName(getAuditActionVariant(log.action))}`}
+        >
+          {log.action}
+        </span>
+      ),
+    },
+    {
+      key: 'resource',
+      label: t('resource'),
+      render: log => (
+        <div className="flex flex-col">
+          <span className="text-sm">{log.resource}</span>
+          {log.resourceId && (
+            <span className="text-xs text-base-content/60 font-mono">
+              ID: {truncateId(log.resourceId)}
+            </span>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: 'ipAddress',
+      label: t('ip_address'),
+      render: log => <span className="text-sm font-mono">{log.ipAddress || '-'}</span>,
+    },
+    {
+      key: 'details',
+      label: t('details'),
+      render: log => (
+        <span className="max-w-xs truncate text-sm italic opacity-70">{log.details || '-'}</span>
+      ),
+    },
+  ]
+
+  return (
+    <div>
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold">{t('title')}</h1>
+        <p className="mt-2 text-base-content/70">{t('subtitle')}</p>
+      </div>
+
+      <div className="mb-4 grid gap-4 md:grid-cols-2">
+        <input
+          type="text"
+          placeholder={t('filter_action')}
+          className="input input-bordered w-full h-10"
+          value={filters.action}
+          onChange={e => updateFilterState('action', e.target.value)}
+        />
+        <input
+          type="text"
+          placeholder={t('filter_resource')}
+          className="input input-bordered w-full h-10"
+          value={filters.resource}
+          onChange={e => updateFilterState('resource', e.target.value)}
+        />
+      </div>
+
+      <Table
+        columns={columns}
+        data={logs}
+        loading={auditLogsApi.loading}
+        emptyMessage={t('no_logs')}
+        pagination={pagination}
+        onPageChange={handlePageChange}
+        getRowKey={log => log.id}
+      />
+    </div>
+  )
+}

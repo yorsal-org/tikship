@@ -1,0 +1,57 @@
+@charset "UTF-8";
+@import 'tailwindcss';
+@plugin "daisyui" {
+  themes: all;
+}
+@plugin "@tailwindcss/typography";
+
+@font-face {
+  font-family: 'SpaceGrotesk';
+  src: url('/fonts/SpaceGrotesk-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme {
+  --font-sans: 'SpaceGrotesk', sans-serif;
+}
+
+@layer components {
+  /* React Datepicker DaisyUI Overrides */
+  .react-datepicker {
+    @apply !bg-base-100 !text-base-content !border-base-content/20 !font-sans !rounded-lg !shadow-xl;
+  }
+  .react-datepicker__header {
+    @apply !bg-base-200 !border-b-base-content/10 !rounded-t-lg;
+  }
+  .react-datepicker__current-month,
+  .react-datepicker__day-name,
+  .react-datepicker-time__header {
+    @apply !text-base-content;
+  }
+  .react-datepicker__day {
+    @apply !text-base-content hover:!bg-base-200 !rounded-md;
+  }
+  .react-datepicker__day--selected,
+  .react-datepicker__day--keyboard-selected,
+  .react-datepicker__time-container
+    .react-datepicker__time
+    .react-datepicker__time-box
+    ul.react-datepicker__time-list
+    li.react-datepicker__time-list-item--selected {
+    @apply !bg-primary !text-primary-content !rounded-md;
+  }
+  .react-datepicker__day--disabled {
+    @apply !text-base-content/30;
+  }
+  .react-datepicker__time-container {
+    @apply !border-l-base-content/10 !bg-base-100;
+  }
+  .react-datepicker__time {
+    @apply !bg-base-100;
+  }
+  .react-datepicker__time-list-item {
+    @apply hover:!bg-base-200 !text-base-content;
+  }
+}

@@ -1,0 +1,4543 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "TikShip API Documentation",
+    "version": "1.0.0",
+    "description": "Complete API documentation for TikShip platform including admin, user, and public endpoints. This API provides comprehensive functionality for e-commerce operations, user management, content management, and payment processing."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/api",
+      "description": "Local development server"
+    },
+    {
+      "url": "https://your-production-domain",
+      "description": "Production server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Admin authentication token. Include in Authorization header as: Bearer {token}"
+      },
+      "sessionAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "next-auth.session-token",
+        "description": "NextAuth session cookie for user authentication"
+      }
+    },
+    "schemas": {
+      "AuditLogQueryParams": {
+        "type": "object",
+        "properties": {
+          "adminUserId": {
+            "type": "string",
+            "description": "Filter by admin user ID"
+          },
+          "action": {
+            "type": "string",
+            "description": "Filter by action"
+          },
+          "resource": {
+            "type": "string",
+            "description": "Filter by resource type"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "Start date (ISO format)"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "End date (ISO format)"
+          },
+          "page": {
+            "type": "number",
+            "description": "Page number"
+          },
+          "pageSize": {
+            "type": "number",
+            "description": "Items per page"
+          }
+        }
+      },
+      "AdminLoginBody": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "Admin username",
+            "nullable": false
+          },
+          "password": {
+            "type": "string",
+            "description": "Admin password",
+            "nullable": false
+          }
+        }
+      },
+      "CreateCategoryBody": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Category name",
+            "nullable": false
+          },
+          "description": {
+            "type": "string",
+            "description": "Category description",
+            "nullable": true
+          }
+        }
+      },
+      "UpdateMemberPasswordBody": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string",
+            "description": "New password",
+            "nullable": false
+          }
+        }
+      },
+      "UpdateMemberStatusBody": {
+        "type": "object",
+        "properties": {
+          "isActive": {
+            "type": "boolean",
+            "description": "Active status",
+            "nullable": false
+          }
+        }
+      },
+      "MemberQueryParams": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "number",
+            "description": "Page number (default: 1)"
+          },
+          "pageSize": {
+            "type": "number",
+            "description": "Items per page (default: 10)"
+          },
+          "search": {
+            "type": "string",
+            "description": "Search by name or email"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "inactive"
+            ],
+            "description": "Filter by status"
+          }
+        }
+      },
+      "UpdateOrderStatusBody": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "Order status",
+            "nullable": false
+          }
+        }
+      },
+      "OrderQueryParams": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "number",
+            "description": "Page number (default: 1)"
+          },
+          "pageSize": {
+            "type": "number",
+            "description": "Items per page (default: 10)"
+          },
+          "status": {
+            "type": "string",
+            "description": "Filter by order status"
+          },
+          "paymentProvider": {
+            "type": "string",
+            "description": "Filter by payment provider"
+          },
+          "search": {
+            "type": "string",
+            "description": "Search query"
+          },
+          "export": {
+            "type": "boolean",
+            "description": "Export all orders without pagination"
+          }
+        }
+      },
+      "UpdatePermissionBody": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Permission name",
+            "nullable": false
+          },
+          "description": {
+            "type": "string",
+            "description": "Permission description",
+            "nullable": true
+          },
+          "resource": {
+            "type": "string",
+            "description": "Resource type",
+            "nullable": false
+          },
+          "action": {
+            "type": "string",
+            "description": "Action type",
+            "nullable": false
+          }
+        }
+      },
+      "CreatePermissionBody": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Permission code",
+            "nullable": false
+          },
+          "name": {
+            "type": "string",
+            "description": "Permission name",
+            "nullable": false
+          },
+          "description": {
+            "type": "string",
+            "description": "Permission description",
+            "nullable": true
+          },
+          "resource": {
+            "type": "string",
+            "description": "Resource type",
+            "nullable": false
+          },
+          "action": {
+            "type": "string",
+            "description": "Action type",
+            "nullable": false
+          }
+        }
+      },
+      "UpdatePostBody": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Post title",
+            "nullable": true
+          },
+          "slug": {
+            "type": "string",
+            "description": "URL slug",
+            "nullable": true
+          },
+          "content": {
+            "type": "string",
+            "description": "Post content",
+            "nullable": true
+          },
+          "excerpt": {
+            "type": "string",
+            "description": "Post excerpt",
+            "nullable": true
+          },
+          "featuredImage": {
+            "type": "string",
+            "description": "Featured image URL",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "published"
+            ],
+            "description": "Post status",
+            "nullable": true
+          },
+          "categoryId": {
+            "type": "string",
+            "description": "Category ID",
+            "nullable": true
+          },
+          "tagIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tag IDs",
+            "nullable": true
+          }
+        }
+      },
+      "PostQueryParams": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "article",
+              "page"
+            ],
+            "description": "Post type"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "published",
+              "archived"
+            ],
+            "description": "Post status"
+          },
+          "categoryId": {
+            "type": "string",
+            "description": "Category ID"
+          },
+          "tagId": {
+            "type": "string",
+            "description": "Tag ID"
+          },
+          "search": {
+            "type": "string",
+            "description": "Search query"
+          },
+          "page": {
+            "type": "number",
+            "description": "Page number"
+          },
+          "pageSize": {
+            "type": "number",
+            "description": "Items per page"
+          }
+        }
+      },
+      "CreatePostBody": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Post title",
+            "nullable": false
+          },
+          "slug": {
+            "type": "string",
+            "description": "URL slug",
+            "nullable": false
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "article",
+              "page"
+            ],
+            "description": "Post type",
+            "nullable": true
+          },
+          "content": {
+            "type": "string",
+            "description": "Post content",
+            "nullable": true
+          },
+          "excerpt": {
+            "type": "string",
+            "description": "Post excerpt",
+            "nullable": true
+          },
+          "featuredImage": {
+            "type": "string",
+            "description": "Featured image URL",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "published"
+            ],
+            "description": "Post status",
+            "nullable": true
+          },
+          "categoryId": {
+            "type": "string",
+            "description": "Category ID",
+            "nullable": true
+          },
+          "tagIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tag IDs",
+            "nullable": true
+          }
+        }
+      },
+      "UpdateProductBody": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Product name",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "description": "Product description",
+            "nullable": true
+          },
+          "content": {
+            "type": "string",
+            "description": "Product content (rich text)",
+            "nullable": true
+          },
+          "image": {
+            "type": "string",
+            "description": "Product image URL",
+            "nullable": true
+          },
+          "slug": {
+            "type": "string",
+            "description": "URL slug",
+            "nullable": true
+          },
+          "price": {
+            "type": "number",
+            "description": "Price in cents",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "description": "Currency code",
+            "nullable": true
+          },
+          "quantity": {
+            "type": "number",
+            "description": "Stock quantity (null means unlimited)",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Active status",
+            "nullable": true
+          },
+          "metadata": {
+            "type": "string",
+            "description": "Additional metadata (JSON string)",
+            "nullable": true
+          }
+        }
+      },
+      "CheckPriceIdParams": {
+        "type": "object",
+        "properties": {
+          "stripePriceId": {
+            "type": "string",
+            "description": "Stripe price ID to check"
+          },
+          "paypalPlanId": {
+            "type": "string",
+            "description": "PayPal plan ID to check"
+          }
+        }
+      },
+      "ProductQueryParams": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "number",
+            "description": "Page number (default: 1)"
+          },
+          "pageSize": {
+            "type": "number",
+            "description": "Items per page (default: 10)"
+          },
+          "search": {
+            "type": "string",
+            "description": "Search by product name or slug"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "inactive"
+            ],
+            "description": "Filter by status"
+          }
+        }
+      },
+      "CreateProductBody": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Product name",
+            "nullable": false
+          },
+          "description": {
+            "type": "string",
+            "description": "Product description",
+            "nullable": true
+          },
+          "content": {
+            "type": "string",
+            "description": "Product content (rich text)",
+            "nullable": true
+          },
+          "image": {
+            "type": "string",
+            "description": "Product image URL",
+            "nullable": true
+          },
+          "slug": {
+            "type": "string",
+            "description": "URL slug",
+            "nullable": false
+          },
+          "price": {
+            "type": "number",
+            "description": "Price in cents",
+            "nullable": false
+          },
+          "currency": {
+            "type": "string",
+            "description": "Currency code (default: usd)",
+            "nullable": true
+          },
+          "quantity": {
+            "type": "number",
+            "description": "Stock quantity (null means unlimited)",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Active status",
+            "nullable": true
+          },
+          "metadata": {
+            "type": "string",
+            "description": "Additional metadata (JSON string)",
+            "nullable": true
+          }
+        }
+      },
+      "AssignRolePermissionsBody": {
+        "type": "object",
+        "properties": {
+          "permissionIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Permission IDs to assign",
+            "nullable": false
+          }
+        }
+      },
+      "UpdateRoleBody": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Role name",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "description": "Role description",
+            "nullable": true
+          },
+          "isDefault": {
+            "type": "boolean",
+            "description": "Is default role",
+            "nullable": true
+          },
+          "permissionIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Permission IDs to assign",
+            "nullable": true
+          }
+        }
+      },
+      "CreateRoleBody": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Role name",
+            "nullable": false
+          },
+          "description": {
+            "type": "string",
+            "description": "Role description",
+            "nullable": true
+          },
+          "isDefault": {
+            "type": "boolean",
+            "description": "Is default role",
+            "nullable": true
+          },
+          "permissionIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Permission IDs to assign",
+            "nullable": true
+          }
+        }
+      },
+      "AssignAdminUserRolesBody": {
+        "type": "object",
+        "properties": {
+          "roleIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Role IDs to assign",
+            "nullable": false
+          }
+        }
+      },
+      "UpdateAdminUserBody": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "Username",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "description": "Email address",
+            "nullable": true
+          },
+          "password": {
+            "type": "string",
+            "description": "Password",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name",
+            "nullable": true
+          },
+          "avatar": {
+            "type": "string",
+            "description": "Avatar URL",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Active status",
+            "nullable": true
+          },
+          "roleIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Role IDs to assign",
+            "nullable": true
+          }
+        }
+      },
+      "CreateAdminUserBody": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "Username",
+            "nullable": false
+          },
+          "email": {
+            "type": "string",
+            "description": "Email address",
+            "nullable": false
+          },
+          "password": {
+            "type": "string",
+            "description": "Password",
+            "nullable": false
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name",
+            "nullable": true
+          },
+          "isSuperuser": {
+            "type": "boolean",
+            "description": "Is superuser",
+            "nullable": true
+          },
+          "roleIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Role IDs to assign",
+            "nullable": true
+          }
+        }
+      },
+      "CompleteRegistrationBody": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "Verification token",
+            "nullable": false
+          },
+          "name": {
+            "type": "string",
+            "description": "User name",
+            "nullable": false
+          },
+          "password": {
+            "type": "string",
+            "description": "Password",
+            "nullable": false
+          },
+          "avatarUrl": {
+            "type": "string",
+            "description": "Avatar URL",
+            "nullable": true
+          }
+        }
+      },
+      "SendVerificationCodeBody": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Email address",
+            "nullable": false
+          }
+        }
+      },
+      "VerifyCodeBody": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Email address",
+            "nullable": false
+          },
+          "code": {
+            "type": "string",
+            "description": "Verification code",
+            "nullable": false
+          }
+        }
+      },
+      "CaptureOrderBody": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "description": "PayPal order ID",
+            "nullable": false
+          }
+        }
+      },
+      "CreateCheckoutBody": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "string",
+            "description": "Product ID",
+            "nullable": false
+          },
+          "paymentMethodId": {
+            "type": "string",
+            "description": "Payment method ID",
+            "nullable": false
+          },
+          "quantity": {
+            "type": "number",
+            "description": "Quantity (default: 1)",
+            "nullable": true
+          },
+          "successUrl": {
+            "type": "string",
+            "description": "Success redirect URL",
+            "nullable": true
+          },
+          "cancelUrl": {
+            "type": "string",
+            "description": "Cancel redirect URL",
+            "nullable": true
+          },
+          "paymentProvider": {
+            "type": "string",
+            "enum": [
+              "stripe",
+              "paypal"
+            ],
+            "description": "Payment provider",
+            "nullable": true
+          }
+        }
+      },
+      "PublicPostQueryParams": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "number",
+            "description": "Page number"
+          },
+          "pageSize": {
+            "type": "number",
+            "description": "Items per page"
+          },
+          "search": {
+            "type": "string",
+            "description": "Search query"
+          },
+          "categoryId": {
+            "type": "string",
+            "description": "Category ID"
+          },
+          "tagId": {
+            "type": "string",
+            "description": "Tag ID"
+          }
+        }
+      },
+      "UpdateUserProfileBody": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "User display name (2-50 characters)",
+            "nullable": true
+          },
+          "image": {
+            "type": "string",
+            "description": "Profile image URL",
+            "nullable": true
+          }
+        }
+      },
+      "UpdatePasswordBody": {
+        "type": "object",
+        "properties": {
+          "currentPassword": {
+            "type": "string",
+            "description": "Current password (required if password exists)",
+            "nullable": true
+          },
+          "newPassword": {
+            "type": "string",
+            "description": "New password (min 8 characters)",
+            "nullable": false
+          }
+        }
+      }
+    },
+    "responses": {
+      "400": {
+        "description": "Bad Request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example": "Invalid request parameters"
+                },
+                "code": {
+                  "type": "string",
+                  "example": "400"
+                }
+              }
+            }
+          }
+        }
+      },
+      "401": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example": "Authentication required"
+                },
+                "code": {
+                  "type": "string",
+                  "example": "401"
+                }
+              }
+            }
+          }
+        }
+      },
+      "403": {
+        "description": "Forbidden",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example": "Access denied"
+                },
+                "code": {
+                  "type": "string",
+                  "example": "403"
+                }
+              }
+            }
+          }
+        }
+      },
+      "404": {
+        "description": "Not Found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example": "Resource not found"
+                },
+                "code": {
+                  "type": "string",
+                  "example": "404"
+                }
+              }
+            }
+          }
+        }
+      },
+      "409": {
+        "description": "Conflict",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example": "Resource already exists"
+                },
+                "code": {
+                  "type": "string",
+                  "example": "409"
+                }
+              }
+            }
+          }
+        }
+      },
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example": "An unexpected error occurred"
+                },
+                "code": {
+                  "type": "string",
+                  "example": "500"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Admin - Auth",
+      "description": "Admin authentication endpoints"
+    },
+    {
+      "name": "Admin - Members",
+      "description": "User management endpoints for administrators"
+    },
+    {
+      "name": "Admin - Products",
+      "description": "Product management endpoints"
+    },
+    {
+      "name": "Admin - Orders",
+      "description": "Order management endpoints"
+    },
+    {
+      "name": "Admin - Posts",
+      "description": "Content management endpoints"
+    },
+    {
+      "name": "Admin - Roles",
+      "description": "Role and permission management"
+    },
+    {
+      "name": "Admin - Users",
+      "description": "Admin user management"
+    },
+    {
+      "name": "Admin - Dashboard",
+      "description": "Dashboard statistics and analytics"
+    },
+    {
+      "name": "Admin - Audit",
+      "description": "Audit log management"
+    },
+    {
+      "name": "User - Auth",
+      "description": "User authentication and registration"
+    },
+    {
+      "name": "User - Profile",
+      "description": "User profile management"
+    },
+    {
+      "name": "User - Orders",
+      "description": "User order management"
+    },
+    {
+      "name": "Public - Products",
+      "description": "Public product endpoints"
+    },
+    {
+      "name": "Public - Posts",
+      "description": "Public blog and page endpoints"
+    },
+    {
+      "name": "Payment - Stripe",
+      "description": "Stripe payment integration"
+    },
+    {
+      "name": "Payment - PayPal",
+      "description": "PayPal payment integration"
+    },
+    {
+      "name": "Upload",
+      "description": "File upload endpoints"
+    }
+  ],
+  "paths": {
+    "/admin/audit-logs": {
+      "get": {
+        "operationId": "get-admin-audit-logs",
+        "summary": "Get audit logs",
+        "description": "Retrieve audit logs with filtering options for tracking admin actions",
+        "tags": [
+          "Admin - Audit"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "adminUserId",
+            "schema": {
+              "type": "string",
+              "description": "Filter by admin user ID"
+            },
+            "required": false,
+            "description": "Filter by admin user ID"
+          },
+          {
+            "in": "query",
+            "name": "action",
+            "schema": {
+              "type": "string",
+              "description": "Filter by action"
+            },
+            "required": false,
+            "description": "Filter by action"
+          },
+          {
+            "in": "query",
+            "name": "resource",
+            "schema": {
+              "type": "string",
+              "description": "Filter by resource type"
+            },
+            "required": false,
+            "description": "Filter by resource type"
+          },
+          {
+            "in": "query",
+            "name": "startDate",
+            "schema": {
+              "type": "string",
+              "description": "Start date (ISO format)"
+            },
+            "required": false,
+            "description": "Start date (ISO format)"
+          },
+          {
+            "in": "query",
+            "name": "endDate",
+            "schema": {
+              "type": "string",
+              "description": "End date (ISO format)"
+            },
+            "required": false,
+            "description": "End date (ISO format)"
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "number",
+              "description": "Page number"
+            },
+            "required": false,
+            "description": "Page number"
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "number",
+              "description": "Items per page"
+            },
+            "required": false,
+            "description": "Items per page"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Returns paginated list of audit logs"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/admin/me": {
+      "get": {
+        "operationId": "get-admin-me",
+        "summary": "Get current admin user",
+        "description": "Retrieve the currently authenticated admin user's profile information",
+        "tags": [
+          "Admin - Auth"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/admin/auth/login": {
+      "post": {
+        "operationId": "post-admin-auth-login",
+        "summary": "Admin login",
+        "description": "Authenticate admin user with username and password",
+        "tags": [
+          "Admin - Auth"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminLoginBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Login successful, returns user info and sets auth cookie"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "429 too many login attempts": {
+            "$ref": "#/components/responses/429 too many login attempts"
+          }
+        }
+      }
+    },
+    "/admin/auth/logout": {
+      "post": {
+        "operationId": "post-admin-auth-logout",
+        "summary": "Admin logout",
+        "description": "Logout the current admin user and clear authentication token",
+        "tags": [
+          "Admin - Auth"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/admin/dashboard/stats": {
+      "get": {
+        "operationId": "get-admin-dashboard-stats",
+        "summary": "Get dashboard statistics",
+        "description": "Retrieve comprehensive dashboard statistics including users, orders, revenue, and trends",
+        "tags": [
+          "Admin - Dashboard"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Returns comprehensive dashboard statistics"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/admin/members": {
+      "get": {
+        "operationId": "get-admin-members",
+        "summary": "Get members list",
+        "description": "Retrieve paginated list of members with search and status filtering",
+        "tags": [
+          "Admin - Members"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "number",
+              "description": "Page number (default: 1)"
+            },
+            "required": false,
+            "description": "Page number (default: 1)"
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "number",
+              "description": "Items per page (default: 10)"
+            },
+            "required": false,
+            "description": "Items per page (default: 10)"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string",
+              "description": "Search by name or email"
+            },
+            "required": false,
+            "description": "Search by name or email"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "active",
+                "inactive"
+              ],
+              "description": "Filter by status"
+            },
+            "required": false,
+            "description": "Filter by status"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Returns paginated list of members"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/admin/members/{id}": {
+      "get": {
+        "operationId": "get-admin-members-{id}",
+        "summary": "Get user details",
+        "description": "Retrieve detailed information about a specific user including accounts and login history",
+        "tags": [
+          "Admin - Members"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Returns user details"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "put": {
+        "operationId": "put-admin-members-{id}",
+        "summary": "Update user status",
+        "description": "Update user's active status (enable/disable account)",
+        "tags": [
+          "Admin - Members"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMemberStatusBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User status updated successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete-admin-members-{id}",
+        "summary": "Delete user",
+        "description": "Permanently delete a user account and all associated data",
+        "tags": [
+          "Admin - Members"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/admin/members/stats": {
+      "get": {
+        "operationId": "get-admin-members-stats",
+        "summary": "Get member statistics",
+        "description": "Retrieve member statistics including total users, new registrations, and activity metrics",
+        "tags": [
+          "Admin - Members"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Returns member statistics"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/admin/members/{id}/password": {
+      "put": {
+        "operationId": "put-admin-members-{id}-password",
+        "summary": "Update user password",
+        "description": "Admin can update a user's password",
+        "tags": [
+          "Admin - Members"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMemberPasswordBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Password updated successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/admin/members/{id}/password-status": {
+      "get": {
+        "operationId": "get-admin-members-{id}-password-status",
+        "summary": "Check user password status",
+        "description": "Check if user has a password set",
+        "tags": [
+          "Admin - Members"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Returns password status"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/admin/orders": {
+      "get": {
+        "operationId": "get-admin-orders",
+        "summary": "Get orders list",
+        "description": "Retrieve paginated list of orders with filtering and search options",
+        "tags": [
+          "Admin - Orders"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "number",
+              "description": "Page number (default: 1)"
+            },
+            "required": false,
+            "description": "Page number (default: 1)"
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "number",
+              "description": "Items per page (default: 10)"
+            },
+            "required": false,
+            "description": "Items per page (default: 10)"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "description": "Filter by order status"
+            },
+            "required": false,
+            "description": "Filter by order status"
+          },
+          {
+            "in": "query",
+            "name": "paymentProvider",
+            "schema": {
+              "type": "string",
+              "description": "Filter by payment provider"
+            },
+            "required": false,
+            "description": "Filter by payment provider"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string",
+              "description": "Search query"
+            },
+            "required": false,
+            "description": "Search query"
+          },
+          {
+            "in": "query",
+            "name": "export",
+            "schema": {
+              "type": "boolean",
+              "description": "Export all orders without pagination"
+            },
+            "required": false,
+            "description": "Export all orders without pagination"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Returns paginated list of orders"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/admin/orders/{id}": {
+      "get": {
+        "operationId": "get-admin-orders-{id}",
+        "summary": "Get order details",
+        "description": "Get a single order by ID with product and user information",
+        "tags": [
+          "Admin - Orders"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Returns order details"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patch-admin-orders-{id}",
+        "summary": "Update order status",
+        "description": "Update order status (pending, completed, failed, refunded)",
+        "tags": [
+          "Admin - Orders"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateOrderStatusBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order status updated successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/admin/orders/stats": {
+      "get": {
+        "operationId": "get-admin-orders-stats",
+        "summary": "Get order statistics",
+        "description": "Retrieve order statistics including total count, status breakdown, and revenue",
+        "tags": [
+          "Admin - Orders"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Returns order statistics"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/admin/categories": {
+      "get": {
+        "operationId": "get-admin-categories",
+        "summary": "Get categories",
+        "description": "Retrieve all post categories",
+        "tags": [
+          "Admin - Posts"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Returns list of categories"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "post": {
+        "operationId": "post-admin-categories",
+        "summary": "Create category",
+        "description": "Create a new post category",
+        "tags": [
+          "Admin - Posts"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCategoryBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Category created successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete-admin-categories",
+        "summary": "Delete category",
+        "description": "Delete a post category by ID",
+        "tags": [
+          "Admin - Posts"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Category deleted successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/admin/posts": {
+      "get": {
+        "operationId": "get-admin-posts",
+        "summary": "Get posts list",
+        "description": "Retrieve paginated list of posts (articles or pages) with filtering options",
+        "tags": [
+          "Admin - Posts"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "article",
+                "page"
+              ],
+              "description": "Post type"
+            },
+            "required": false,
+            "description": "Post type"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "draft",
+                "published",
+                "archived"
+              ],
+              "description": "Post status"
+            },
+            "required": false,
+            "description": "Post status"
+          },
+          {
+            "in": "query",
+            "name": "categoryId",
+            "schema": {
+              "type": "string",
+              "description": "Category ID"
+            },
+            "required": false,
+            "description": "Category ID"
+          },
+          {
+            "in": "query",
+            "name": "tagId",
+            "schema": {
+              "type": "string",
+              "description": "Tag ID"
+            },
+            "required": false,
+            "description": "Tag ID"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string",
+              "description": "Search query"
+            },
+            "required": false,
+            "description": "Search query"
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "number",
+              "description": "Page number"
+            },
+            "required": false,
+            "description": "Page number"
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "number",
+              "description": "Items per page"
+            },
+            "required": false,
+            "description": "Items per page"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Returns paginated list of posts"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "post": {
+        "operationId": "post-admin-posts",
+        "summary": "Create post",
+        "description": "Create a new post (article or page)",
+        "tags": [
+          "Admin - Posts"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePostBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Post created successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/admin/tags": {
+      "get": {
+        "operationId": "get-admin-tags",
+        "summary": "Get tags",
+        "description": "Retrieve all post tags",
+        "tags": [
+          "Admin - Posts"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Returns list of tags"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/admin/posts/{id}": {
+      "get": {
+        "operationId": "get-admin-posts-{id}",
+        "summary": "Get post details",
+        "description": "Retrieve detailed information about a specific post",
+        "tags": [
+          "Admin - Posts"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Returns post details"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "put": {
+        "operationId": "put-admin-posts-{id}",
+        "summary": "Update post",
+        "description": "Update post information including title, content, status, and metadata",
+        "tags": [
+          "Admin - Posts"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePostBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Post updated successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete-admin-posts-{id}",
+        "summary": "Delete post",
+        "description": "Delete post (move to trash or permanent deletion)",
+        "tags": [
+          "Admin - Posts"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Post deleted successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/admin/posts/stats": {
+      "get": {
+        "operationId": "get-admin-posts-stats",
+        "summary": "Get post statistics",
+        "description": "Retrieve statistics for posts (articles or pages)",
+        "tags": [
+          "Admin - Posts"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Returns post statistics"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/admin/products": {
+      "get": {
+        "operationId": "get-admin-products",
+        "summary": "Get products list",
+        "description": "Retrieve paginated list of products with filtering options",
+        "tags": [
+          "Admin - Products"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "number",
+              "description": "Page number (default: 1)"
+            },
+            "required": false,
+            "description": "Page number (default: 1)"
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "number",
+              "description": "Items per page (default: 10)"
+            },
+            "required": false,
+            "description": "Items per page (default: 10)"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string",
+              "description": "Search by product name or slug"
+            },
+            "required": false,
+            "description": "Search by product name or slug"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "active",
+                "inactive"
+              ],
+              "description": "Filter by status"
+            },
+            "required": false,
+            "description": "Filter by status"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Returns paginated list of products"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "post": {
+        "operationId": "post-admin-products",
+        "summary": "Create product",
+        "description": "Create a new product with pricing and payment method configuration",
+        "tags": [
+          "Admin - Products"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProductBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Product created successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/admin/products/{id}": {
+      "get": {
+        "operationId": "get-admin-products-{id}",
+        "summary": "Get product details",
+        "description": "Retrieve detailed information about a specific product",
+        "tags": [
+          "Admin - Products"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Returns product details"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patch-admin-products-{id}",
+        "summary": "Update product",
+        "description": "Update product information including pricing, payment methods, and metadata",
+        "tags": [
+          "Admin - Products"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProductBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Product updated successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/admin/products/check-price-id": {
+      "get": {
+        "operationId": "get-admin-products-check-price-id",
+        "summary": "Check if price ID exists",
+        "description": "Check if a Stripe price ID or PayPal plan ID already exists",
+        "tags": [
+          "Admin - Products"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "stripePriceId",
+            "schema": {
+              "type": "string",
+              "description": "Stripe price ID to check"
+            },
+            "required": false,
+            "description": "Stripe price ID to check"
+          },
+          {
+            "in": "query",
+            "name": "paypalPlanId",
+            "schema": {
+              "type": "string",
+              "description": "PayPal plan ID to check"
+            },
+            "required": false,
+            "description": "PayPal plan ID to check"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Returns whether price ID exists"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/admin/products/stats": {
+      "get": {
+        "operationId": "get-admin-products-stats",
+        "summary": "Get product statistics",
+        "description": "Retrieve product statistics including total count, active/inactive status, and revenue",
+        "tags": [
+          "Admin - Products"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Returns product statistics"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/admin/products/{id}/payment-methods": {
+      "get": {
+        "operationId": "get-admin-products-{id}-payment-methods",
+        "summary": "Get payment methods for a product",
+        "description": "Retrieve all payment methods configured for a specific product",
+        "tags": [
+          "Admin - Products"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Returns list of payment methods"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "post": {
+        "operationId": "post-admin-products-{id}-payment-methods",
+        "summary": "Create payment method for a product",
+        "description": "Add a new payment method (Stripe or PayPal) to a product",
+        "tags": [
+          "Admin - Products"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Payment method created successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/admin/products/{id}/toggle-active": {
+      "post": {
+        "operationId": "post-admin-products-{id}-toggle-active",
+        "summary": "Toggle product active status",
+        "description": "Toggle product active/inactive status",
+        "tags": [
+          "Admin - Products"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Product status toggled successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/admin/products/{id}/payment-methods/{methodId}": {
+      "patch": {
+        "operationId": "patch-admin-products-{id}-payment-methods-{methodId}",
+        "summary": "Update payment method",
+        "description": "Update an existing payment method configuration",
+        "tags": [
+          "Admin - Products"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Payment method updated successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete-admin-products-{id}-payment-methods-{methodId}",
+        "summary": "Delete payment method",
+        "description": "Remove a payment method from a product",
+        "tags": [
+          "Admin - Products"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Payment method deleted successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/admin/permissions": {
+      "get": {
+        "operationId": "get-admin-permissions",
+        "summary": "Get permissions",
+        "description": "Retrieve all available permissions from database",
+        "tags": [
+          "Admin - Roles"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Returns list of permissions"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "post": {
+        "operationId": "post-admin-permissions",
+        "summary": "Create permission",
+        "description": "Create a custom permission (non-system)",
+        "tags": [
+          "Admin - Roles"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePermissionBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Permission created successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/admin/roles": {
+      "get": {
+        "operationId": "get-admin-roles",
+        "summary": "Get roles",
+        "description": "Retrieve all admin roles with permissions count",
+        "tags": [
+          "Admin - Roles"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Returns list of roles"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "post": {
+        "operationId": "post-admin-roles",
+        "summary": "Create role",
+        "description": "Create a new admin role with optional permissions",
+        "tags": [
+          "Admin - Roles"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRoleBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Role created successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/admin/permissions/{id}": {
+      "patch": {
+        "operationId": "patch-admin-permissions-{id}",
+        "summary": "Update permission",
+        "description": "Update a custom permission (only non-system permissions)",
+        "tags": [
+          "Admin - Roles"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePermissionBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Permission updated successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete-admin-permissions-{id}",
+        "summary": "Delete permission",
+        "description": "Delete a custom permission (only non-system permissions)",
+        "tags": [
+          "Admin - Roles"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/admin/roles/{id}": {
+      "get": {
+        "operationId": "get-admin-roles-{id}",
+        "summary": "Get role details",
+        "description": "Get role details with permissions and user count",
+        "tags": [
+          "Admin - Roles"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Returns role details"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patch-admin-roles-{id}",
+        "summary": "Update role",
+        "description": "Update role information and permissions",
+        "tags": [
+          "Admin - Roles"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRoleBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Role updated successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "put": {
+        "operationId": "put-admin-roles-{id}",
+        "summary": "Update role (alias)",
+        "description": "Update role information and permissions (alias for PATCH)",
+        "tags": [
+          "Admin - Roles"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRoleBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Role updated successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete-admin-roles-{id}",
+        "summary": "Delete role",
+        "description": "Delete an admin role",
+        "tags": [
+          "Admin - Roles"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/admin/roles/{id}/permissions": {
+      "put": {
+        "operationId": "put-admin-roles-{id}-permissions",
+        "summary": "Assign permissions to role",
+        "description": "Assign or update permissions for a specific role",
+        "tags": [
+          "Admin - Roles"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignRolePermissionsBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Permissions assigned successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/admin/users": {
+      "get": {
+        "operationId": "get-admin-users",
+        "summary": "Get admin users",
+        "description": "Retrieve all admin users with their roles",
+        "tags": [
+          "Admin - Users"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Returns paginated list of admin users"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "post": {
+        "operationId": "post-admin-users",
+        "summary": "Create admin user",
+        "description": "Create a new admin user with optional role assignments",
+        "tags": [
+          "Admin - Users"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAdminUserBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Admin user created successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/admin/users/{id}": {
+      "get": {
+        "operationId": "get-admin-users-{id}",
+        "summary": "Get admin user details",
+        "description": "Get admin user details with roles and permissions",
+        "tags": [
+          "Admin - Users"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Returns admin user details"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patch-admin-users-{id}",
+        "summary": "Update admin user",
+        "description": "Update admin user information",
+        "tags": [
+          "Admin - Users"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAdminUserBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Admin user updated successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "put": {
+        "operationId": "put-admin-users-{id}",
+        "summary": "Update admin user with roles",
+        "description": "Update admin user information including roles",
+        "tags": [
+          "Admin - Users"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAdminUserBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Admin user updated successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete-admin-users-{id}",
+        "summary": "Delete admin user",
+        "description": "Delete an admin user (cannot delete self or superuser)",
+        "tags": [
+          "Admin - Users"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/admin/users/{id}/roles": {
+      "post": {
+        "operationId": "post-admin-users-{id}-roles",
+        "summary": "Assign roles to admin user",
+        "description": "Assign or update roles for a specific admin user",
+        "tags": [
+          "Admin - Users"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignAdminUserRolesBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Roles assigned successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/paypal/capture": {
+      "post": {
+        "operationId": "post-paypal-capture",
+        "summary": "Capture a PayPal order",
+        "description": "Capture a PayPal order after user approval",
+        "tags": [
+          "Payment - PayPal"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CaptureOrderBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order captured successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/paypal/checkout": {
+      "post": {
+        "operationId": "post-paypal-checkout",
+        "summary": "Create a PayPal order or subscription",
+        "description": "Create a PayPal payment order or subscription checkout",
+        "tags": [
+          "Payment - PayPal"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCheckoutBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PayPal order/subscription created successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/paypal/webhook": {
+      "post": {
+        "operationId": "post-paypal-webhook",
+        "summary": "Handle PayPal webhook events",
+        "description": "Process PayPal webhook events for payment and subscription status updates",
+        "tags": [
+          "Payment - PayPal"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/stripe/checkout": {
+      "post": {
+        "operationId": "post-stripe-checkout",
+        "summary": "Create a checkout session",
+        "description": "Create a payment checkout session (supports both Stripe and PayPal)",
+        "tags": [
+          "Payment - Stripe"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCheckoutBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Checkout session created successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/stripe/webhook": {
+      "post": {
+        "operationId": "post-stripe-webhook",
+        "summary": "Handle Stripe webhook events",
+        "description": "Process Stripe webhook events for payment status updates",
+        "tags": [
+          "Payment - Stripe"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/products/{slug}": {
+      "get": {
+        "operationId": "get-products-{slug}",
+        "summary": "Get product by slug",
+        "description": "Retrieve product details by slug for public viewing",
+        "tags": [
+          "Products"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Returns product details"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/products/{slug}/payment-methods": {
+      "get": {
+        "operationId": "get-products-{slug}-payment-methods",
+        "summary": "Get payment methods for a product by slug",
+        "description": "Retrieve active payment methods for a specific product",
+        "tags": [
+          "Products"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Returns list of payment methods"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/posts/blog": {
+      "get": {
+        "operationId": "get-posts-blog",
+        "summary": "List published articles",
+        "description": "Get paginated list of published blog articles for public viewing",
+        "tags": [
+          "Public - Posts"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "number",
+              "description": "Page number"
+            },
+            "required": false,
+            "description": "Page number"
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "number",
+              "description": "Items per page"
+            },
+            "required": false,
+            "description": "Items per page"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string",
+              "description": "Search query"
+            },
+            "required": false,
+            "description": "Search query"
+          },
+          {
+            "in": "query",
+            "name": "categoryId",
+            "schema": {
+              "type": "string",
+              "description": "Category ID"
+            },
+            "required": false,
+            "description": "Category ID"
+          },
+          {
+            "in": "query",
+            "name": "tagId",
+            "schema": {
+              "type": "string",
+              "description": "Tag ID"
+            },
+            "required": false,
+            "description": "Tag ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Returns paginated list of published articles"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/posts/categories": {
+      "get": {
+        "operationId": "get-posts-categories",
+        "summary": "Get categories",
+        "description": "Retrieve all post categories for public viewing",
+        "tags": [
+          "Public - Posts"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Returns list of categories"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/posts/blog/{slug}": {
+      "get": {
+        "operationId": "get-posts-blog-{slug}",
+        "summary": "Get a published article by slug",
+        "description": "Retrieve a published blog article by its slug",
+        "tags": [
+          "Public - Posts"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Returns article details"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/posts/page/{slug}": {
+      "get": {
+        "operationId": "get-posts-page-{slug}",
+        "summary": "Get a published page by slug",
+        "description": "Retrieve a published page by its slug for public viewing",
+        "tags": [
+          "Public - Posts"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Returns page details"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/products": {
+      "get": {
+        "operationId": "get-products",
+        "summary": "Get active products list",
+        "description": "Retrieve list of active products for public display",
+        "tags": [
+          "Public - Products"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Returns list of active products"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/upload/avatar": {
+      "post": {
+        "operationId": "post-upload-avatar",
+        "summary": "Upload avatar",
+        "description": "Upload user avatar image using configured upload provider (local or ImgBB)",
+        "tags": [
+          "Upload"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Avatar uploaded successfully, returns URL"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/admin/upload/image": {
+      "post": {
+        "operationId": "post-admin-upload-image",
+        "summary": "Upload image by admin",
+        "description": "Upload an image file to local public directory or ImgBB storage. Supports common image formats with size and type validation.",
+        "tags": [
+          "Upload"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/auth/register/complete": {
+      "post": {
+        "operationId": "post-auth-register-complete",
+        "summary": "Complete registration",
+        "description": "Complete user registration with name, password, and avatar",
+        "tags": [
+          "User - Auth"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompleteRegistrationBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Registration completed successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/auth/register/send-code": {
+      "post": {
+        "operationId": "post-auth-register-send-code",
+        "summary": "Send verification code",
+        "description": "Send email verification code for user registration",
+        "tags": [
+          "User - Auth"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendVerificationCodeBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Verification code sent successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/auth/register/verify-code": {
+      "post": {
+        "operationId": "post-auth-register-verify-code",
+        "summary": "Verify verification code",
+        "description": "Verify email verification code and return temporary token",
+        "tags": [
+          "User - Auth"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyCodeBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Code verified successfully, returns token"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/user/orders": {
+      "get": {
+        "operationId": "get-user-orders",
+        "summary": "Get user orders",
+        "description": "Retrieve the current user's order history with pagination and filtering",
+        "tags": [
+          "User - Orders"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "number",
+              "description": "Page number (default: 1)"
+            },
+            "required": false,
+            "description": "Page number (default: 1)"
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "number",
+              "description": "Items per page (default: 10)"
+            },
+            "required": false,
+            "description": "Items per page (default: 10)"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "description": "Filter by order status"
+            },
+            "required": false,
+            "description": "Filter by order status"
+          },
+          {
+            "in": "query",
+            "name": "paymentProvider",
+            "schema": {
+              "type": "string",
+              "description": "Filter by payment provider"
+            },
+            "required": false,
+            "description": "Filter by payment provider"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string",
+              "description": "Search query"
+            },
+            "required": false,
+            "description": "Search query"
+          },
+          {
+            "in": "query",
+            "name": "export",
+            "schema": {
+              "type": "boolean",
+              "description": "Export all orders without pagination"
+            },
+            "required": false,
+            "description": "Export all orders without pagination"
+          }
+        ],
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Returns paginated list of user orders"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/user/me": {
+      "get": {
+        "operationId": "get-user-me",
+        "summary": "Get current user profile",
+        "description": "Retrieve the authenticated user's profile information including name, email, image, and linked accounts",
+        "tags": [
+          "User - Profile"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patch-user-me",
+        "summary": "Update user profile",
+        "description": "Update the authenticated user's profile information (name and/or image)",
+        "tags": [
+          "User - Profile"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserProfileBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Profile updated successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/user/password": {
+      "patch": {
+        "operationId": "patch-user-password",
+        "summary": "Change password",
+        "description": "Update the current user's password (requires current password if already set)",
+        "tags": [
+          "User - Profile"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePasswordBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Password updated successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    }
+  }
+}
