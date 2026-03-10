@@ -153,6 +153,87 @@ export class PostService {
   }
 
   /**
+   * List published posts for public display
+   * Includes: status=PUBLISHED + status=SCHEDULED with publishedAt <= now
+   */
+  async listPublicPosts(params: {
+    type?: PostType
+    categoryIds?: string[]
+    tagId?: string
+    search?: string
+    page?: number
+    pageSize?: number
+    orderBy?: 'createdAt' | 'publishedAt' | 'title'
+    orderDir?: 'asc' | 'desc'
+  }) {
+    const {
+      type,
+      categoryIds,
+      tagId,
+      search,
+      page = 1,
+      pageSize = 10,
+      orderBy = 'publishedAt',
+      orderDir = 'desc',
+    } = params
+
+    const now = new Date()
+
+    const where = {
+      ...(type ? { type } : {}),
+      ...(categoryIds && categoryIds.length > 0
+        ? { categories: { some: { categoryId: { in: categoryIds } } } }
+        : {}),
+      ...(tagId ? { tags: { some: { tagId } } } : {}),
+      AND: [
+        // Published: directly published OR scheduled with past publishedAt
+        {
+          OR: [
+            { status: PostStatus.PUBLISHED },
+            { status: PostStatus.SCHEDULED, publishedAt: { lte: now } },
+          ],
+        },
+        // Search filter
+        ...(search
+          ? [
+              {
+                OR: [
+                  { title: { contains: search, mode: 'insensitive' as const } },
+                  { content: { contains: search, mode: 'insensitive' as const } },
+                ],
+              },
+            ]
+          : []),
+      ],
+    }
+
+    const [total, items] = await Promise.all([
+      prisma.post.count({ where }),
+      prisma.post.findMany({
+        where,
+        include: {
+          author: {
+            select: { id: true, username: true, name: true, avatar: true },
+          },
+          categories: { include: { category: true } },
+          tags: { include: { tag: true } },
+        },
+        orderBy: { [orderBy]: orderDir },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+    ])
+
+    return {
+      items,
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize),
+    }
+  }
+
+  /**
    * Get stats for posts
    */
   async getPostStats(type: PostType) {
@@ -355,7 +436,8 @@ export class PostService {
       createdAt: Date
       updatedAt: Date
       _count?: { posts: number }
-    }>
+    }>,
+    postIdsByCategoryId?: Map<string, Set<string>>
   ): CategoryTree[] {
     const map = new Map<string, CategoryTree>()
     const roots: CategoryTree[] = []
@@ -370,21 +452,40 @@ export class PostService {
         roots.push(node)
       }
     }
-    // Aggregate child post counts into parent nodes (bottom-up)
-    const aggregateCount = (node: CategoryTree): number => {
-      const direct = node._count?.posts ?? 0
-      const childTotal = node.children.reduce((sum, child) => sum + aggregateCount(child), 0)
-      const total = direct + childTotal
-      if (node._count) {
-        node._count.posts = total
-      } else {
-        node._count = { posts: total }
+
+    if (postIdsByCategoryId) {
+      // 去重聚合：自底向上收集唯一 postId，避免同一篇文章被多个分类重复计数
+      const collectPostIds = (node: CategoryTree): Set<string> => {
+        const ids = new Set<string>(postIdsByCategoryId.get(node.id) ?? [])
+        for (const child of node.children) {
+          for (const id of collectPostIds(child)) {
+            ids.add(id)
+          }
+        }
+        node._count = { posts: ids.size }
+        return ids
       }
-      return total
+      for (const root of roots) {
+        collectPostIds(root)
+      }
+    } else {
+      // 简单数字累加（可能重复计数跨分类的文章）
+      const aggregateCount = (node: CategoryTree): number => {
+        const direct = node._count?.posts ?? 0
+        const childTotal = node.children.reduce((sum, child) => sum + aggregateCount(child), 0)
+        const total = direct + childTotal
+        if (node._count) {
+          node._count.posts = total
+        } else {
+          node._count = { posts: total }
+        }
+        return total
+      }
+      for (const root of roots) {
+        aggregateCount(root)
+      }
     }
-    for (const root of roots) {
-      aggregateCount(root)
-    }
+
     return roots
   }
 
@@ -397,36 +498,56 @@ export class PostService {
 
   async listCategoriesTree(): Promise<CategoryTree[]> {
     const flat = await prisma.category.findMany({
-      include: { _count: { select: { posts: true } } },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        description: true,
+        parentId: true,
+        createdAt: true,
+        updatedAt: true,
+        posts: { select: { postId: true } },
+      },
       orderBy: { name: 'asc' },
     })
-    return this.buildCategoryTree(flat)
+    const postIdsByCategoryId = new Map<string, Set<string>>(
+      flat.map((cat) => [cat.id, new Set(cat.posts.map((p) => p.postId))])
+    )
+    return this.buildCategoryTree(flat, postIdsByCategoryId)
   }
 
   /**
    * List categories as a tree for public display
    * Only counts published posts (status=PUBLISHED with publishedAt <= now)
+   * unique postId
    */
   async listPublicCategoriesTree(): Promise<CategoryTree[]> {
     const now = new Date()
     const flat = await prisma.category.findMany({
-      include: {
-        _count: {
-          select: {
-            posts: {
-              where: {
-                post: {
-                  status: PostStatus.PUBLISHED,
-                  OR: [{ publishedAt: null }, { publishedAt: { lte: now } }],
-                },
-              },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        description: true,
+        parentId: true,
+        createdAt: true,
+        updatedAt: true,
+        posts: {
+          select: { postId: true },
+          where: {
+            post: {
+              status: PostStatus.PUBLISHED,
+              OR: [{ publishedAt: null }, { publishedAt: { lte: now } }],
             },
           },
         },
       },
       orderBy: { name: 'asc' },
     })
-    return this.buildCategoryTree(flat)
+    const postIdsByCategoryId = new Map<string, Set<string>>(
+      flat.map((cat) => [cat.id, new Set(cat.posts.map((p) => p.postId))])
+    )
+    return this.buildCategoryTree(flat, postIdsByCategoryId)
   }
 
   async createCategory(name: string, description?: string, parentId?: string) {

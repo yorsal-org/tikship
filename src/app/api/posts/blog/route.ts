@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { ApiResponse } from '@/lib/utils/api-response'
 import { postService } from '@/lib/post/service'
-import { PostStatus, PostType } from '@/types/post'
+import { PostType } from '@/types/post'
 
 
 /**
@@ -26,9 +26,8 @@ export async function GET(req: NextRequest) {
       ? await postService.getAllDescendantCategoryIds(categoryId)
       : undefined
 
-    const result = await postService.listPosts({
+    const result = await postService.listPublicPosts({
       type: PostType.ARTICLE,
-      status: PostStatus.PUBLISHED,
       categoryIds,
       tagId,
       page,

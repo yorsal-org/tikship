@@ -61,7 +61,7 @@ export function PostList({ type }: PostListProps) {
     'GET'
   )
   const { request: fetchCategories } = useApi<CategoriesListResponse>(
-    '/api/admin/categories',
+    '/api/admin/categories?flat=true',
     'GET'
   )
   const { request: deletePost, loading: loadingDelete } = useApi('/api/admin/posts', 'DELETE')
