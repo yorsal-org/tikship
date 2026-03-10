@@ -4,7 +4,7 @@ import { ApiResponse } from '@/lib/utils/api-response'
 import { postService } from '@/lib/post/service'
 import { PERMISSIONS } from '@/config/permissions'
 import { logAudit } from '@/lib/audit/service'
-import { PostType, PostStatus } from '@/types/post'
+import { PostType, PostInput } from '@/types/post'
 import type { UpdatePostBody } from '@/types/api'
 
 /**
@@ -67,11 +67,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const updateData = {
       ...body,
       status: body.status
-        ? body.status === 'draft'
-          ? PostStatus.DRAFT
-          : PostStatus.PUBLISHED
-        : undefined,
-    }
+    } as Partial<PostInput>
 
     const post = await postService.updatePost(id, updateData)
 

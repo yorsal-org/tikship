@@ -176,7 +176,7 @@ export default function UserOrdersPage() {
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-3">
                     <div className="min-w-0">
                       <h3 className="text-lg font-semibold mb-1 truncate">{order.product.name}</h3>
-                      <p className="text-xs text-base-content/50 font-mono">Order ID: {order.id}</p>
+                      <p className="text-xs text-base-content/50">Order ID: {order.id}</p>
                     </div>
                     <div className="flex gap-2 flex-wrap">
                       {/* Payment Provider Badge */}

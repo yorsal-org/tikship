@@ -117,7 +117,7 @@ export default function AuditLogsPage() {
       label: t('action'),
       render: log => (
         <span
-          className={`badge badge-sm font-mono ${getBadgeClassName(getAuditActionVariant(log.action))}`}
+          className={`badge badge-sm ${getBadgeClassName(getAuditActionVariant(log.action))}`}
         >
           {log.action}
         </span>
@@ -130,7 +130,7 @@ export default function AuditLogsPage() {
         <div className="flex flex-col">
           <span className="text-sm">{log.resource}</span>
           {log.resourceId && (
-            <span className="text-xs text-base-content/60 font-mono">
+            <span className="text-xs text-base-content/60">
               ID: {truncateId(log.resourceId)}
             </span>
           )}
@@ -140,7 +140,7 @@ export default function AuditLogsPage() {
     {
       key: 'ipAddress',
       label: t('ip_address'),
-      render: log => <span className="text-sm font-mono">{log.ipAddress || '-'}</span>,
+      render: log => <span className="text-sm">{log.ipAddress || '-'}</span>,
     },
     {
       key: 'details',

@@ -5,6 +5,9 @@ export const siteConfig = {
   supportEmail: 'support@tikship.top',
   favicon: '/favicon.svg',
 
+  // API docs is enabled or disabled
+  enable_api_docs: true,
+
   // Theme configuration
   theme: {
     // Default theme mode: 'light', 'dark', or 'system'

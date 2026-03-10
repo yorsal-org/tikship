@@ -4,7 +4,7 @@ import { ApiResponse } from '@/lib/utils/api-response'
 import { postService } from '@/lib/post/service'
 import { PERMISSIONS } from '@/config/permissions'
 import { logAudit, AUDIT_ACTIONS } from '@/lib/audit/service'
-import { PostStatus, PostType } from '@/types/post'
+import { PostStatus, PostType, PostInput } from '@/types/post'
 import type { CreatePostBody } from '@/types/api'
 
 /**
@@ -64,8 +64,8 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = (await req.json()) as CreatePostBody
-    const typeString = body.type || 'article'
-    const type = typeString === 'page' ? PostType.PAGE : PostType.ARTICLE
+    const typeString = body.type || 'ARTICLE'
+    const type = typeString === 'PAGE' ? PostType.PAGE : PostType.ARTICLE
 
     const permission = type === PostType.PAGE ? PERMISSIONS.PAGE_CREATE : PERMISSIONS.ARTICLE_CREATE
     const { adminUserId, error } = await requireAdminAuth(req, permission)
@@ -80,10 +80,11 @@ export async function POST(req: NextRequest) {
       excerpt: body.excerpt,
       featuredImage: body.featuredImage,
       type,
-      status: body.status === 'published' ? PostStatus.PUBLISHED : PostStatus.DRAFT,
+      status: body.status,
+      publishedAt: body.publishedAt,
       categoryIds: body.categoryId ? [body.categoryId] : undefined,
       tagNames: body.tagIds,
-    }
+    } as PostInput
 
     const post = await postService.createPost(adminUserId, postInput)
 

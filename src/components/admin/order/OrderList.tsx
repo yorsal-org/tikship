@@ -163,7 +163,7 @@ export function OrderList() {
     {
       key: 'id',
       label: t('order_id'),
-      render: order => <code className="text-xs">{truncateId(order.id)}</code>,
+      render: order => <code className="text-xs" title={order.id}>{truncateId(order.id)}</code>,
     },
     {
       key: 'product',

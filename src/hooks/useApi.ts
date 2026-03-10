@@ -12,7 +12,7 @@ export function useApi<T = unknown, Body = unknown>(
   const [data, setData] = useState<T | null>(null)
 
   const request = useCallback(
-    async (body?: Body, options: UseApiOptions<T, Body> = {}) => {
+    async (body?: Body, options: UseApiOptions<T> = {}) => {
       setLoading(true)
       setError(null)
 

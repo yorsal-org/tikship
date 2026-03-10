@@ -1,6 +1,18 @@
 import { prisma } from '@/lib/db/prisma'
 import { PostInput, PostStatus, PostType } from '@/types/post'
 
+export interface CategoryTree {
+  id: string
+  name: string
+  slug: string
+  description: string | null
+  parentId: string | null
+  createdAt: Date
+  updatedAt: Date
+  _count?: { posts: number }
+  children: CategoryTree[]
+}
+
 export class PostService {
   /**
    * Get a single post by ID or Slug
@@ -42,6 +54,7 @@ export class PostService {
     type?: PostType
     status?: PostStatus
     categoryId?: string
+    categoryIds?: string[]
     tagId?: string
     authorId?: string
     search?: string
@@ -54,6 +67,7 @@ export class PostService {
       type,
       status,
       categoryId,
+      categoryIds,
       tagId,
       authorId,
       search,
@@ -68,7 +82,7 @@ export class PostService {
     const where: {
       type?: PostType
       authorId?: string
-      categories?: { some: { categoryId: string } }
+      categories?: { some: { categoryId: string | { in: string[] } } }
       tags?: { some: { tagId: string } }
       OR?: Array<
         | { title: { contains: string; mode: 'insensitive' } }
@@ -80,7 +94,11 @@ export class PostService {
     } = {
       ...(type ? { type } : {}),
       ...(authorId ? { authorId } : {}),
-      ...(categoryId ? { categories: { some: { categoryId } } } : {}),
+      ...(categoryIds && categoryIds.length > 0
+        ? { categories: { some: { categoryId: { in: categoryIds } } } }
+        : categoryId
+          ? { categories: { some: { categoryId } } }
+          : {}),
       ...(tagId ? { tags: { some: { tagId } } } : {}),
       ...(search
         ? {
@@ -312,6 +330,64 @@ export class PostService {
 
   // --- Category and Tag Helpers ---
 
+  private async getCategoryDepth(categoryId: string): Promise<number> {
+    let depth = 1
+    let currentId: string | null = categoryId
+    while (currentId) {
+      const cat: { parentId: string | null } | null = await prisma.category.findUnique({
+        where: { id: currentId },
+        select: { parentId: true },
+      })
+      if (!cat || !cat.parentId) break
+      depth++
+      currentId = cat.parentId
+    }
+    return depth
+  }
+
+  private buildCategoryTree(
+    flatList: Array<{
+      id: string
+      name: string
+      slug: string
+      description: string | null
+      parentId: string | null
+      createdAt: Date
+      updatedAt: Date
+      _count?: { posts: number }
+    }>
+  ): CategoryTree[] {
+    const map = new Map<string, CategoryTree>()
+    const roots: CategoryTree[] = []
+    for (const cat of flatList) {
+      map.set(cat.id, { ...cat, children: [] })
+    }
+    for (const cat of flatList) {
+      const node = map.get(cat.id)!
+      if (cat.parentId && map.has(cat.parentId)) {
+        map.get(cat.parentId)!.children.push(node)
+      } else {
+        roots.push(node)
+      }
+    }
+    // Aggregate child post counts into parent nodes (bottom-up)
+    const aggregateCount = (node: CategoryTree): number => {
+      const direct = node._count?.posts ?? 0
+      const childTotal = node.children.reduce((sum, child) => sum + aggregateCount(child), 0)
+      const total = direct + childTotal
+      if (node._count) {
+        node._count.posts = total
+      } else {
+        node._count = { posts: total }
+      }
+      return total
+    }
+    for (const root of roots) {
+      aggregateCount(root)
+    }
+    return roots
+  }
+
   async listCategories() {
     return await prisma.category.findMany({
       include: { _count: { select: { posts: true } } },
@@ -319,16 +395,65 @@ export class PostService {
     })
   }
 
-  async createCategory(name: string, description?: string) {
-    const slug = name
+  async listCategoriesTree(): Promise<CategoryTree[]> {
+    const flat = await prisma.category.findMany({
+      include: { _count: { select: { posts: true } } },
+      orderBy: { name: 'asc' },
+    })
+    return this.buildCategoryTree(flat)
+  }
+
+  /**
+   * List categories as a tree for public display
+   * Only counts published posts (status=PUBLISHED with publishedAt <= now)
+   */
+  async listPublicCategoriesTree(): Promise<CategoryTree[]> {
+    const now = new Date()
+    const flat = await prisma.category.findMany({
+      include: {
+        _count: {
+          select: {
+            posts: {
+              where: {
+                post: {
+                  status: PostStatus.PUBLISHED,
+                  OR: [{ publishedAt: null }, { publishedAt: { lte: now } }],
+                },
+              },
+            },
+          },
+        },
+      },
+      orderBy: { name: 'asc' },
+    })
+    return this.buildCategoryTree(flat)
+  }
+
+  async createCategory(name: string, description?: string, parentId?: string) {
+    if (parentId) {
+      const parentDepth = await this.getCategoryDepth(parentId)
+      if (parentDepth >= 3) throw new Error('MAX_DEPTH_EXCEEDED')
+    }
+
+    const baseSlug = name
       .toLowerCase()
       .trim()
       .replace(/\s+/g, '-')
       .replace(/[^\p{L}\p{N}\-]/gu, '')
       .replace(/-{2,}/g, '-')
       .replace(/^-+|-+$/g, '')
+
+    let slug = baseSlug
+    let counter = 1
+    while (true) {
+      const existing = await prisma.category.findUnique({ where: { slug }, select: { id: true } })
+      if (!existing) break
+      counter++
+      slug = `${baseSlug}-${counter}`
+    }
+
     return await prisma.category.create({
-      data: { name, slug, description },
+      data: { name, slug, description, parentId: parentId || null },
     })
   }
 
@@ -336,6 +461,28 @@ export class PostService {
     return await prisma.category.delete({
       where: { id },
     })
+  }
+
+  /**
+   * Get all descendant category IDs (inclusive of the given id)
+   * Recursively collects children and grandchildren from the flat category list
+   */
+  async getAllDescendantCategoryIds(categoryId: string): Promise<string[]> {
+    const all = await prisma.category.findMany({
+      select: { id: true, parentId: true },
+    })
+    const result: string[] = []
+    const queue: string[] = [categoryId]
+    while (queue.length > 0) {
+      const current = queue.shift()!
+      result.push(current)
+      for (const cat of all) {
+        if (cat.parentId === current) {
+          queue.push(cat.id)
+        }
+      }
+    }
+    return result
   }
 
   async listTags() {

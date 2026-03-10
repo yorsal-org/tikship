@@ -1,13 +1,8 @@
 {
   "common": {
-    "language": "Language",
-    "english": "English",
-    "chinese": "中文",
     "pagination": {
       "showing_results": "Showing {from} to {to} of {total} results"
-    }
-  },
-  "site": {
+    },
     "tagline": "Turn Ideas into Products, Launches into Cash. \n The Rapid-Start Platform for One-Person Company."
   },
   "header": {
@@ -287,7 +282,8 @@
       "cannot_edit_system_permission": "Cannot edit system permission",
       "cannot_delete_system_permission": "Cannot delete system permission",
       "permission_in_use": "This permission is being used by roles and cannot be deleted",
-      "operation_failed": "Operation failed"
+      "operation_failed": "Operation failed",
+      "category_max_depth_exceeded": "Categories can only be nested up to 3 levels deep."
     }
   },
   "admin": {
@@ -498,13 +494,24 @@
         "title": "Categories",
         "add_new": "Add New Category",
         "name": "Name",
+        "slug": "Slug",
         "description": "Description",
         "count": "Count",
+        "parent": "Parent Category",
+        "parent_none": "None (Top Level)",
+        "level": "Level",
+        "level_1": "Level 1",
+        "level_2": "Level 2",
+        "level_3": "Level 3",
         "actions": "Actions",
         "add_btn": "Add Category",
         "no_found": "No categories found",
         "delete": "Delete Category",
-        "delete_confirm": "Delete category? Posts will be unassigned but not deleted."
+        "delete_confirm": "Delete category? Posts will be unassigned but not deleted.",
+        "max_depth_exceeded": "Categories can only be nested up to 3 levels deep.",
+        "has_children_warning": "This category has subcategories. Deleting it will also delete all subcategories.",
+        "depth_label": "Nesting Depth",
+        "subcategories": "Subcategories"
       }
     },
     "roles": {
@@ -689,9 +696,6 @@
       "no_payment_methods": "No payment methods configured",
       "provider": "Payment Provider",
       "price_id": "Price/Plan ID",
-      "payment_method_stripe": "Stripe Only",
-      "payment_method_paypal": "PayPal Only",
-      "payment_method_both": "Stripe & PayPal",
       "stripe_price_id": "Stripe Price ID",
       "stripe_product_id": "Stripe Product ID",
       "paypal_plan_id": "PayPal Plan ID",

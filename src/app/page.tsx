@@ -422,7 +422,7 @@ function ScriptCard({
         <div className="text-primary">{icon}</div>
         <h4 className="font-bold text-sm">{title}</h4>
       </div>
-      <code className="block text-xs bg-base-200 px-2 py-1 rounded mb-2 text-primary font-mono">
+      <code className="block text-xs bg-base-200 px-2 py-1 rounded mb-2 text-primary">
         {command}
       </code>
       <p className="text-xs text-base-content/60">{description}</p>
@@ -509,11 +509,11 @@ function StepItem({
         )}
       </div>
       <div className="pt-1 flex-1">
-        <div className="text-primary font-mono font-bold text-sm mb-2">{number}</div>
+        <div className="text-primary font-bold text-sm mb-2">{number}</div>
         <h3 className="text-2xl font-bold mb-3">{title}</h3>
         <p className="text-base-content/60 text-lg leading-relaxed mb-4">{description}</p>
         {code && (
-          <div className="bg-base-200 rounded-lg p-4 font-mono text-sm overflow-x-auto border border-base-300">
+          <div className="bg-base-200 rounded-lg p-4 text-sm overflow-x-auto border border-base-300">
             <code className="text-primary flex flex-col gap-1">{code}</code>
           </div>
         )}

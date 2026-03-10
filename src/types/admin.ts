@@ -1,6 +1,7 @@
 /**
  * Admin-related type definitions
  */
+import { Category } from './post'
 
 /**
  * Base admin user interface
@@ -185,10 +186,27 @@ export interface RoleDetailResponse {
 }
 
 /**
- * Categories list API response
+ * Categories list API response (flat list)
  */
 export interface CategoriesListResponse {
   categories: Array<Category & { _count?: { posts: number } }>
+}
+
+/**
+ * Categories tree API response (hierarchical)
+ */
+export interface CategoriesTreeResponse {
+  categories: Array<
+    Category & {
+      _count?: { posts: number }
+      children: Array<
+        Category & {
+          _count?: { posts: number }
+          children: Array<Category & { _count?: { posts: number }; children: [] }>
+        }
+      >
+    }
+  >
 }
 
 /**
@@ -198,8 +216,7 @@ export interface MemberDetailResponse {
   user: MemberDetails
 }
 
-// Import Category from post types
-import { Category } from './post'
+
 
 /**
  * Permission definition from config
@@ -217,20 +234,6 @@ export interface PermissionGroup {
   name: string
   description?: string
   permissions: PermissionDefinition[]
-}
-
-/**
- * Props for content editor components
- */
-export interface EditorProps {
-  content: string
-  onChange: (content: string) => void
-  placeholder?: string
-}
-
-export interface PostEditorProps {
-  initialData?: unknown // Will be narrowed after Post type is refined
-  type: string
 }
 
 /**

@@ -130,8 +130,8 @@ export type UpdateAdminUserBody = {
 
 // Post Types
 export type PostQueryParams = {
-  type?: 'article' | 'page' // Post type
-  status?: 'draft' | 'published' | 'archived' // Post status
+  type?: 'ARTICLE' | 'PAGE' // Post type
+  status?: 'DRAFT' | 'PUBLISHED' | 'SCHEDULED' | 'TRASH' // Post status
   categoryId?: string // Category ID
   tagId?: string // Tag ID
   search?: string // Search query
@@ -142,11 +142,12 @@ export type PostQueryParams = {
 export type CreatePostBody = {
   title: string // Post title
   slug: string // URL slug
-  type?: 'article' | 'page' // Post type
+  type?: 'ARTICLE' | 'PAGE' // Post type
   content?: string // Post content
   excerpt?: string // Post excerpt
   featuredImage?: string // Featured image URL
-  status?: 'draft' | 'published' // Post status
+  status?: 'DRAFT' | 'PUBLISHED' | 'SCHEDULED' | 'TRASH' // Post status
+  publishedAt?: Date | string | null
   categoryId?: string // Category ID
   tagIds?: string[] // Tag IDs
 }
@@ -155,6 +156,7 @@ export type CreatePostBody = {
 export type CreateCategoryBody = {
   name: string // Category name
   description?: string // Category description
+  parentId?: string // Parent category ID (optional, max 3 levels deep)
 }
 
 // Payment Types
@@ -224,7 +226,7 @@ export type UpdatePostBody = {
   content?: string // Post content
   excerpt?: string // Post excerpt
   featuredImage?: string // Featured image URL
-  status?: 'draft' | 'published' // Post status
+  status?: 'DRAFT' | 'PUBLISHED' | 'SCHEDULED' | 'TRASH' // Post status
   categoryId?: string // Category ID
   tagIds?: string[] // Tag IDs
 }

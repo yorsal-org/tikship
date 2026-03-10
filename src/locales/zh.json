@@ -1,13 +1,8 @@
 {
   "common": {
-    "language": "语言",
-    "english": "English",
-    "chinese": "中文",
     "pagination": {
       "showing_results": "显示第 {from} 至 {to} 条，共 {total} 条结果"
-    }
-  },
-  "site": {
+    },
     "tagline": "想法即产品，启动即交付 \n 为一人初创公司打造的快速成交平台"
   },
   "header": {
@@ -287,7 +282,8 @@
       "cannot_edit_system_permission": "不能编辑系统权限",
       "cannot_delete_system_permission": "不能删除系统权限",
       "permission_in_use": "此权限正在被角色使用，无法删除",
-      "operation_failed": "操作失败"
+      "operation_failed": "操作失败",
+      "category_max_depth_exceeded": "分类最多只能嵌套 3 层"
     }
   },
   "admin": {
@@ -498,13 +494,24 @@
         "title": "分类目录",
         "add_new": "添加新分类",
         "name": "名称",
+        "slug": "别名",
         "description": "描述",
         "count": "内容数",
+        "parent": "上级分类",
+        "parent_none": "无（顶级分类）",
+        "level": "层级",
+        "level_1": "一级分类",
+        "level_2": "二级分类",
+        "level_3": "三级分类",
         "actions": "操作",
         "add_btn": "添加分类",
         "no_found": "未找到分类目录",
         "delete": "删除分类",
-        "delete_confirm": "确定删除该分类吗？关联的内容将变为未分类状态。"
+        "delete_confirm": "确定删除该分类吗？关联的内容将变为未分类状态。",
+        "max_depth_exceeded": "分类最多只能嵌套 3 层。",
+        "has_children_warning": "该分类包含子分类，删除后其所有子分类也将被删除。",
+        "depth_label": "嵌套层级",
+        "subcategories": "子分类"
       }
     },
     "roles": {
@@ -689,9 +696,6 @@
       "no_payment_methods": "未配置支付方式",
       "provider": "支付提供商",
       "price_id": "价格/计划 ID",
-      "payment_method_stripe": "仅 Stripe",
-      "payment_method_paypal": "仅 PayPal",
-      "payment_method_both": "Stripe 和 PayPal",
       "stripe_price_id": "Stripe Price ID",
       "stripe_product_id": "Stripe Product ID",
       "paypal_plan_id": "PayPal Plan ID",

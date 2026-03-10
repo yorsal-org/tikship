@@ -138,7 +138,6 @@ tikship/
 │   ├── migrations-*/         # Database migrations
 │   └── data/                 # Seed data
 ├── scripts/                   # Script tools
-├── docs/                      # Project documentation
 └── public/                    # Static assets
 ```
 
@@ -146,7 +145,7 @@ tikship/
 
 ### Requirements
 
-- Node.js >= 20
+- Node.js >= 20.9.0
 - npm / pnpm / yarn
 - PostgreSQL / MySQL / SQLite
 
@@ -155,7 +154,7 @@ tikship/
 1. **Clone the project**
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/yorsal-org/tikship
 cd tikship
 ```
 
@@ -175,32 +174,7 @@ DATABASE_URL="postgresql://user:password@localhost:5432/tikship"
 # NextAuth
 NEXTAUTH_SECRET="your-secret-key"
 NEXTAUTH_URL="http://localhost:3000"
-
-# Google OAuth
-GOOGLE_CLIENT_ID="your-google-client-id"
-GOOGLE_CLIENT_SECRET="your-google-client-secret"
-
-# Stripe
-STRIPE_SECRET_KEY="sk_test_xxx"
-STRIPE_PUBLISHABLE_KEY="pk_test_xxx"
-STRIPE_WEBHOOK_SECRET="whsec_xxx"
-
-# PayPal
-PAYPAL_MODE="sandbox"
-PAYPAL_CLIENT_ID="your-paypal-client-id"
-PAYPAL_CLIENT_SECRET="your-paypal-client-secret"
-PAYPAL_WEBHOOK_ID="your-webhook-id"
-
-# Email Service
-RESEND_API_KEY="re_xxx"
-RESEND_FROM_EMAIL="noreply@yourdomain.com"
-
-# File Upload
-UPLOAD_TYPE="local"  # local or imgbb
-IMGBB_API_KEY="your-imgbb-key"  # if using imgbb
-
-# Application Configuration
-NEXT_PUBLIC_APP_URL="http://localhost:3000"
+...
 ```
 
 2.2. **Initialize seed data (automatically executed)**
@@ -211,9 +185,11 @@ npm run db:seed
 
 This creates:
 
-- Default admin account: `admin` / `Admin123!`
-- Basic permissions and roles
-- Sample categories and tags
+- All system permissions
+- Default `Admin` role with 30 basic permissions
+- Superuser account (username/email/password printed to console after seeding)
+
+> The superuser credentials are configured via environment variables (`ADMIN_USERNAME`, `ADMIN_EMAIL`, `ADMIN_NAME`) with defaults `tikship` / `tikship@example.com`. A random 8-character password is generated on first run — **save it from the console output**.
 
 3. **(Optional) Generate test data**
 
@@ -270,11 +246,9 @@ export async function GET(req: NextRequest) {
 
 Support for both Stripe and PayPal payment methods:
 
-**Product Configuration**:
+**Payment Provider Management**:
 
-- `stripe` - Stripe only
-- `paypal` - PayPal only
-- `both` - User can choose payment method
+Payment providers (Stripe, PayPal) are managed dynamically via the admin panel. You can add, edit, and delete providers without any code changes to control which payment methods are available.
 
 **Payment Modes**:
 
@@ -561,12 +535,18 @@ npm run init
 
 ## 🔐 Default Accounts
 
-### Admin Account
+### Admin Account (Superuser)
 
-```
-Username: admin
-Password: Admin123!
-```
+The superuser account is created by `npm run db:seed`. Credentials are controlled by environment variables:
+
+| Variable | Default |
+|---|---|
+| `ADMIN_USERNAME` | `tikship` |
+| `ADMIN_EMAIL` | `tikship@example.com` |
+| `ADMIN_NAME` | `Super Administrator` |
+| Password | Random 8-char (printed to console on first seed) |
+
+> If the account already exists, seeding is skipped and the existing password is kept. Use `npm run db:reset-admin-password` to reset.
 
 ### Test Users
 

@@ -1,13 +1,8 @@
 {
   "common": {
-    "language": "Idioma",
-    "english": "English",
-    "chinese": "中文",
     "pagination": {
       "showing_results": "Mostrando {from} a {to} de {total} resultados"
-    }
-  },
-  "site": {
+    },
     "tagline": "Turn Ideas into Products, Launches into Cash. \n The Rapid-Start Platform for One-Person Company."
   },
   "header": {
@@ -661,9 +656,6 @@
       "interval_count": "Cantidad de Intervalos",
       "payment_methods": "Métodos de Pago",
       "payment_methods_hint": "Selecciona los métodos de pago admitidos por este producto",
-      "payment_method_stripe": "Solo Stripe",
-      "payment_method_paypal": "Solo PayPal",
-      "payment_method_both": "Stripe y PayPal",
       "stripe_price_id": "ID de Precio de Stripe",
       "stripe_product_id": "ID de Producto de Stripe",
       "paypal_plan_id": "ID de Plan de PayPal",

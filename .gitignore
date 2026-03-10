@@ -44,17 +44,22 @@ next-env.d.ts
 *storybook.log
 storybook-static
 
+
 # database
 /prisma/generated
+
+
+# docs
+/docs
+/.source/
+
+# upload files
+/public/upload
 
 # AI
 /.agent
 /.cursor
 
-
-
-/docs
-/public/upload
 
 
 

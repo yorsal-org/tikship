@@ -1,13 +1,16 @@
-import { useEffect, useState, useRef } from 'react'
-import { Save, Image as ImageIcon } from 'lucide-react'
+import { useState } from 'react'
+import { Save, Image as ImageIcon, ChevronRight, ChevronDown } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
-import { PostStatus, Category } from '@/types/post'
+import { PostStatus } from '@/types/post'
 import { useTranslations } from 'next-intl'
 import { ImageUpload } from '@/components/ui/ImageUpload'
 import { DateTimePicker } from '@/components/ui/DateTimePicker'
 import { Trash2 } from 'lucide-react'
 import { validationConfig } from '@/config/validation'
+import type { CategoriesTreeResponse } from '@/types/admin'
+
+type CategoryTreeNode = CategoriesTreeResponse['categories'][number]
 
 interface PublishCardProps {
   status: PostStatus
@@ -38,22 +41,12 @@ export function PublishCard({
     publishedAt ? new Date(publishedAt) : new Date()
   )
 
-  // Update selectedDate when publishedAt changes externally
-  const prevPublishedAtRef = useRef(publishedAt)
-  useEffect(() => {
-    if (publishedAt && publishedAt !== prevPublishedAtRef.current) {
-      prevPublishedAtRef.current = publishedAt
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSelectedDate(new Date(publishedAt))
-    }
-  }, [publishedAt])
-
   // Handle date change from DateTimePicker
   const handleDateChange = (date: Date | null) => {
     setSelectedDate(date)
     if (date) {
       // Convert to ISO string format for datetime-local compatibility
-      onPublishedAtChange(date.toISOString().slice(0, 16))
+      onPublishedAtChange(date.toISOString())
     }
   }
 
@@ -167,8 +160,61 @@ export function FeaturedImageCard({ image, onImageChange }: FeaturedImageCardPro
   )
 }
 
+interface CategoryTreeNodeRowProps {
+  node: CategoryTreeNode
+  selectedIds: string[]
+  onToggle: (id: string) => void
+  depth?: number
+}
+
+function CategoryTreeNodeRow({ node, selectedIds, onToggle, depth = 0 }: CategoryTreeNodeRowProps) {
+  const hasChildren = 'children' in node && Array.isArray(node.children) && node.children.length > 0
+  const [open, setOpen] = useState(true)
+  const pl = depth === 0 ? 'pl-1' : depth === 1 ? 'pl-5' : 'pl-9'
+
+  return (
+    <div>
+      <div className={`flex items-center gap-1.5 rounded-lg group transition-colors hover:bg-base-200/50 ${pl}`}>
+        <button
+          type="button"
+          onClick={() => setOpen(o => !o)}
+          className={`shrink-0 p-0.5 transition-transform ${
+            hasChildren ? 'opacity-40 hover:opacity-100' : 'opacity-0 pointer-events-none'
+          }`}
+        >
+          {open ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+        </button>
+        <label className="flex items-center gap-2 cursor-pointer flex-1 py-1.5 pr-2">
+          <input
+            type="checkbox"
+            className="checkbox checkbox-xs checkbox-primary"
+            checked={selectedIds.includes(node.id)}
+            onChange={() => onToggle(node.id)}
+          />
+          <span className={`label-text text-xs ${depth === 0 ? 'font-semibold' : 'font-medium'}`}>
+            {node.name}
+          </span>
+        </label>
+      </div>
+      {hasChildren && open && (
+        <div>
+          {(node.children as CategoryTreeNode[]).map(child => (
+            <CategoryTreeNodeRow
+              key={child.id}
+              node={child}
+              selectedIds={selectedIds}
+              onToggle={onToggle}
+              depth={depth + 1}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 interface CategoryCardProps {
-  categories: Category[]
+  categories: CategoryTreeNode[]
   selectedIds: string[]
   onToggle: (id: string) => void
 }
@@ -180,20 +226,15 @@ export function CategoryCard({ categories, selectedIds, onToggle }: CategoryCard
       <h3 className="font-bold mb-4 flex items-center gap-2 text-sm uppercase opacity-70">
         {t('editor.categories')}
       </h3>
-      <div className="max-h-60 overflow-y-auto space-y-1 p-1">
+      <div className="max-h-72 overflow-y-auto space-y-0.5 p-1">
         {categories.map(cat => (
-          <label
+          <CategoryTreeNodeRow
             key={cat.id}
-            className="label cursor-pointer justify-start gap-3 py-1.5 hover:bg-base-200/50 rounded-lg px-2 transition-colors"
-          >
-            <input
-              type="checkbox"
-              className="checkbox checkbox-xs checkbox-primary"
-              checked={selectedIds.includes(cat.id)}
-              onChange={() => onToggle(cat.id)}
-            />
-            <span className="label-text text-xs font-medium">{cat.name}</span>
-          </label>
+            node={cat}
+            selectedIds={selectedIds}
+            onToggle={onToggle}
+            depth={0}
+          />
         ))}
         {categories.length === 0 && (
           <p className="text-xs opacity-50 italic text-center py-4">{t('editor.no_categories')}</p>

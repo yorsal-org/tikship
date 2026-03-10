@@ -3,8 +3,10 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { RichTextEditor } from '@/components/admin/post/RichTextEditor'
-import { Post, PostInput, PostStatus, PostType, Category } from '@/types/post'
-import { CategoriesListResponse } from '@/types/admin'
+import { Post, PostInput, PostStatus, PostType } from '@/types/post'
+import { CategoriesTreeResponse } from '@/types/admin'
+
+type CategoryTreeNode = CategoriesTreeResponse['categories'][number]
 import { ApiResponse } from '@/types/api'
 import { useApi } from '@/hooks/useApi'
 import { Globe, History } from 'lucide-react'
@@ -51,8 +53,8 @@ export function PostEditor({ initialData, type }: PostEditorProps) {
   const [seoDescription, setSeoDescription] = useState(initialData?.seoDescription || '')
   const [publishedAt, setPublishedAt] = useState<string>(
     initialData?.publishedAt
-      ? new Date(initialData.publishedAt).toISOString().slice(0, 16)
-      : new Date().toISOString().slice(0, 16)
+      ? new Date(initialData.publishedAt).toISOString()
+      : new Date().toISOString()
   )
 
   // For categories and tags (ARTICLE only)
@@ -62,14 +64,14 @@ export function PostEditor({ initialData, type }: PostEditorProps) {
   const [tagInput, setTagInput] = useState('')
   const [tags, setTags] = useState<string[]>(initialData?.tags?.map(t => t.tag.name) || [])
 
-  const [allCategories, setAllCategories] = useState<Category[]>([])
+  const [allCategories, setAllCategories] = useState<CategoryTreeNode[]>([])
 
   // API Hooks
   const { request: savePost, loading: saving } = useApi<Post>(
     '/api/admin/posts',
     isEditing ? 'PUT' : 'POST'
   )
-  const { request: fetchCategories } = useApi<CategoriesListResponse>(
+  const { request: fetchCategories } = useApi<CategoriesTreeResponse>(
     '/api/admin/categories',
     'GET'
   )
@@ -77,7 +79,7 @@ export function PostEditor({ initialData, type }: PostEditorProps) {
   useEffect(() => {
     if (type === PostType.ARTICLE) {
       fetchCategories(undefined, {
-        onSuccess: (res: ApiResponse<CategoriesListResponse>) => {
+        onSuccess: (res: ApiResponse<CategoriesTreeResponse>) => {
           if (res.data?.categories) {
             setAllCategories(res.data.categories)
           }
@@ -110,7 +112,7 @@ export function PostEditor({ initialData, type }: PostEditorProps) {
     }
 
     const finalStatus = overriddenStatus || status
-    
+
     const data: PostInput = {
       title,
       content,
@@ -174,7 +176,7 @@ export function PostEditor({ initialData, type }: PostEditorProps) {
           <span>/{type === PostType.ARTICLE ? 'blog' : 'p'}/</span>
           <input
             type="text"
-            className="input input-xs input-bordered w-auto font-mono"
+            className="input input-xs input-bordered w-auto"
             value={slug}
             onChange={e => setSlug(e.target.value)}
             minLength={validationConfig.post.slug.minLength}
@@ -252,7 +254,7 @@ export function PostEditor({ initialData, type }: PostEditorProps) {
                     {t('editor.seo_title')}
                   </label>
                   <span
-                    className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${
+                    className={`text-[10px] px-1.5 py-0.5 rounded ${
                       seoTitle.length > validationConfig.post.seoTitle.maxLength
                         ? 'bg-error/20 text-error'
                         : seoTitle.length > 50
@@ -279,7 +281,7 @@ export function PostEditor({ initialData, type }: PostEditorProps) {
                     {t('editor.seo_description')}
                   </label>
                   <span
-                    className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${
+                    className={`text-[10px] px-1.5 py-0.5 rounded ${
                       seoDescription.length > validationConfig.post.seoDescription.maxLength
                         ? 'bg-error/20 text-error'
                         : seoDescription.length > 140

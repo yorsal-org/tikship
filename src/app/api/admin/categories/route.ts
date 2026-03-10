@@ -7,11 +7,11 @@ import { logAudit } from '@/lib/audit/service'
 import type { CreateCategoryBody } from '@/types/api'
 
 /**
- * Get categories
- * @description Retrieve all post categories
+ * Get categories (hierarchical tree)
+ * @description Retrieve all post categories as a tree (up to 3 levels)
  * @tag Admin - Posts
  * @auth bearerAuth
- * @response 200:Returns list of categories
+ * @response 200:Returns hierarchical category tree
  * @responseSet auth
  * @openapi
  */
@@ -20,7 +20,13 @@ export async function GET(req: NextRequest) {
   if (error) return error
 
   try {
-    const categories = await postService.listCategories()
+    const { searchParams } = new URL(req.url)
+    const flat = searchParams.get('flat') === 'true'
+    if (flat) {
+      const categories = await postService.listCategories()
+      return ApiResponse.success({ categories })
+    }
+    const categories = await postService.listCategoriesTree()
     return ApiResponse.success({ categories })
   } catch {
     return ApiResponse.adminError('server_error', 500)
@@ -29,7 +35,7 @@ export async function GET(req: NextRequest) {
 
 /**
  * Create category
- * @description Create a new post category
+ * @description Create a new post category (max 3 levels deep)
  * @tag Admin - Posts
  * @auth bearerAuth
  * @body CreateCategoryBody
@@ -42,21 +48,24 @@ export async function POST(req: NextRequest) {
   if (!adminUserId) return ApiResponse.adminError('unauthorized', 401)
 
   try {
-    const { name, description } = (await req.json()) as CreateCategoryBody
+    const { name, description, parentId } = (await req.json()) as CreateCategoryBody
     if (!name) return ApiResponse.adminError('name_required', 400)
 
-    const category = await postService.createCategory(name, description)
+    const category = await postService.createCategory(name, description, parentId)
 
     await logAudit({
       adminUserId: adminUserId!,
       action: 'category:create',
       resource: 'category',
       resourceId: category.id,
-      details: { name, description },
+      details: { name, description, parentId },
     })
 
     return ApiResponse.success({ category })
-  } catch {
+  } catch (err) {
+    if (err instanceof Error && err.message === 'MAX_DEPTH_EXCEEDED') {
+      return ApiResponse.adminError('category_max_depth_exceeded', 400)
+    }
     return ApiResponse.adminError('server_error', 500)
   }
 }

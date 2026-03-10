@@ -78,7 +78,7 @@ function AuthErrorContent() {
 
         {process.env.NODE_ENV === 'development' && (
           <div className="mt-8 pt-6 border-t border-base-200 w-full text-left">
-            <div className="badge badge-outline badge-sm gap-1.5 opacity-50 font-mono py-3 px-3">
+            <div className="badge badge-outline badge-sm gap-1.5 opacity-50 py-3 px-3">
               <span className="font-bold">{t('error_code')}:</span>
               {error}
             </div>

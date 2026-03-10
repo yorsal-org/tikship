@@ -125,3 +125,28 @@ export interface PostStatsData {
   draft: number
   trash: number
 }
+
+/**
+ * Posts list API response
+ */
+export interface PostsListResponse {
+  items: Post[]
+  page: number
+  pageSize: number
+  total: number
+  totalPages: number
+}
+
+/**
+ * Props for content editor components
+ */
+export interface EditorProps {
+  content: string
+  onChange: (content: string) => void
+  placeholder?: string
+}
+
+export interface PostEditorProps {
+  initialData?: unknown
+  type: string
+}

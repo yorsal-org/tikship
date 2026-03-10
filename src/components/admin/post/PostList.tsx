@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Post, PostStatus, PostType, Category } from '@/types/post'
-import { PostsListResponse } from '@/types/order'
+import { PostsListResponse } from '@/types/post'
 import { CategoriesListResponse } from '@/types/admin'
 import { ApiResponse } from '@/types/api'
 import { Plus, Search, ExternalLink, Edit, Trash2, RotateCcw } from 'lucide-react'
@@ -188,7 +188,7 @@ export function PostList({ type }: PostListProps) {
       render: post => (
         <div>
           <div className="font-bold text-sm">{post.title}</div>
-          <div className="text-[10px] opacity-40 font-mono truncate max-w-xs">/{post.slug}</div>
+          <div className="text-[10px] opacity-40 truncate max-w-xs">/{post.slug}</div>
         </div>
       ),
     },
@@ -241,7 +241,7 @@ export function PostList({ type }: PostListProps) {
           effectiveStatus === PostStatus.PUBLISHED && post.publishedAt
             ? post.publishedAt
             : post.updatedAt
-        return <span className="text-xs opacity-60 font-mono">{formatters.dateShort(date)}</span>
+        return <span className="w-20 block text-xs opacity-60">{formatters.dateShort(date)}</span>
       },
     },
     {

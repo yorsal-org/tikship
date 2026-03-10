@@ -5,7 +5,7 @@ import { Logo } from '@/components/ui/Logo'
 import { siteConfig } from '@/config/site'
 
 export function Footer() {
-  const t = useTranslations('site')
+  const t = useTranslations('common')
   const currentYear = new Date().getFullYear()
 
   return (

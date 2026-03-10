@@ -138,7 +138,6 @@ tikship/
 │   ├── migrations-*/         # 数据库迁移
 │   └── data/                 # 种子数据
 ├── scripts/                   # 脚本工具
-├── docs/                      # 项目文档
 └── public/                    # 静态资源
 ```
 
@@ -146,7 +145,7 @@ tikship/
 
 ### 环境要求
 
-- Node.js >= 20
+- Node.js >= 20.9.0
 - npm / pnpm / yarn
 - PostgreSQL / MySQL / SQLite
 
@@ -155,13 +154,14 @@ tikship/
 1. **克隆项目**
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/yorsal-org/tikship
 cd tikship
 ```
 
 2. **初始化安装**
 
 ```bash
+npm ci
 npm run init
 ```
 
@@ -174,32 +174,7 @@ DATABASE_URL="postgresql://user:password@localhost:5432/tikship"
 # NextAuth
 NEXTAUTH_SECRET="your-secret-key"
 NEXTAUTH_URL="http://localhost:3000"
-
-# Google OAuth
-GOOGLE_CLIENT_ID="your-google-client-id"
-GOOGLE_CLIENT_SECRET="your-google-client-secret"
-
-# Stripe
-STRIPE_SECRET_KEY="sk_test_xxx"
-STRIPE_PUBLISHABLE_KEY="pk_test_xxx"
-STRIPE_WEBHOOK_SECRET="whsec_xxx"
-
-# PayPal
-PAYPAL_MODE="sandbox"
-PAYPAL_CLIENT_ID="your-paypal-client-id"
-PAYPAL_CLIENT_SECRET="your-paypal-client-secret"
-PAYPAL_WEBHOOK_ID="your-webhook-id"
-
-# 邮件服务
-RESEND_API_KEY="re_xxx"
-RESEND_FROM_EMAIL="noreply@yourdomain.com"
-
-# 文件上传
-UPLOAD_TYPE="local"  # local 或 imgbb
-IMGBB_API_KEY="your-imgbb-key"  # 如果使用 imgbb
-
-# 应用配置
-NEXT_PUBLIC_APP_URL="http://localhost:3000"
+...
 ```
 
 2.2. **初始化种子数据（自动执行）**
@@ -210,9 +185,11 @@ npm run db:seed
 
 这会创建：
 
-- 默认管理员账号：`admin` / `Admin123!`
-- 基础权限和角色
-- 示例分类和标签
+- 所有系统权限
+- 默认 `Admin` 角色（含 30 个基础权限）
+- 超级管理员账号（用户名/邮箱/密码在 seed 完成后打印到控制台）
+
+> 超级管理员信息通过环境变量配置（`ADMIN_USERNAME`、`ADMIN_EMAIL`、`ADMIN_NAME`），默认值为 `tikship` / `tikship@example.com`。密码为首次运行时随机生成的 8 位字符串，**请务必保存控制台输出中的密码**。
 
 3. **（可选）生成测试数据**
 
@@ -269,11 +246,9 @@ export async function GET(req: NextRequest) {
 
 支持 Stripe 和 PayPal 双支付方式：
 
-**产品配置**：
+**支付渠道管理**：
 
-- `stripe` - 仅支持 Stripe
-- `paypal` - 仅支持 PayPal
-- `both` - 用户可选择支付方式
+支付渠道（Stripe、PayPal）通过管理后台动态管理，支持新增、编辑和删除，无需修改代码即可控制启用的支付方式。
 
 **支付模式**：
 
@@ -560,12 +535,18 @@ npm run init
 
 ## 🔐 默认账号
 
-### 管理员账号
+### 管理员账号（超级管理员）
 
-```
-用户名：admin
-密码：Admin123!
-```
+超级管理员账号由 `npm run db:seed` 创建，凭证通过环境变量控制：
+
+| 变量 | 默认值 |
+|---|---|
+| `ADMIN_USERNAME` | `tikship` |
+| `ADMIN_EMAIL` | `tikship@example.com` |
+| `ADMIN_NAME` | `Super Administrator` |
+| 密码 | 随机 8 位字符（首次 seed 时打印到控制台） |
+
+> 如果账号已存在，seed 会跳过创建，现有密码保持不变。可使用 `npm run db:reset-admin-password` 重置密码。
 
 ### 测试用户
 

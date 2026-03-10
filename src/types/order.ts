@@ -88,16 +88,4 @@ export interface OrdersListResponse {
   }
 }
 
-/**
- * Posts list API response
- */
-export interface PostsListResponse {
-  items: Post[]
-  page: number
-  pageSize: number
-  total: number
-  totalPages: number
-}
 
-// Import Post from post types
-import { Post } from './post'

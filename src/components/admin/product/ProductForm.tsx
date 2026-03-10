@@ -80,7 +80,7 @@ export function ProductForm({ product }: ProductFormProps) {
         })
 
         if (success && data?.paymentMethods) {
-          data.paymentMethods.forEach(m => {
+          data.paymentMethods.forEach((m) => {
             const method: PaymentMethodForm = {
               id: m.id,
               provider: m.provider,
@@ -487,7 +487,7 @@ export function ProductForm({ product }: ProductFormProps) {
           <span>/products/</span>
           <input
             type="text"
-            className="input input-xs input-bordered w-auto font-mono"
+            className="input input-xs input-bordered w-auto"
             value={slug}
             onChange={e => setSlug(e.target.value)}
             minLength={validationConfig.product.slug?.minLength || 1}

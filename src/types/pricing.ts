@@ -18,7 +18,4 @@ export interface PricingPlan {
   stripePriceId: string
 }
 
-export interface StripeCheckoutRequest {
-  priceId: string
-  mode: 'payment' | 'subscription'
-}
+

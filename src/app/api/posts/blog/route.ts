@@ -21,10 +21,15 @@ export async function GET(req: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1')
     const pageSize = parseInt(searchParams.get('pageSize') || '12')
 
+    // Expand category to include all descendant categories
+    const categoryIds = categoryId
+      ? await postService.getAllDescendantCategoryIds(categoryId)
+      : undefined
+
     const result = await postService.listPosts({
       type: PostType.ARTICLE,
       status: PostStatus.PUBLISHED,
-      categoryId,
+      categoryIds,
       tagId,
       page,
       pageSize,

@@ -2,8 +2,14 @@
 
 import { ApiReferenceReact } from '@scalar/api-reference-react'
 import '@scalar/api-reference-react/style.css'
+import { siteConfig } from '@/config/site'
+import { redirect } from 'next/navigation'
 
 export default function ApiDocsPage() {
+  if (!siteConfig.enable_api_docs) {
+    redirect('/')
+  }
+
   return (
     <div className="min-h-screen bg-base-100">
       <style jsx global>{`

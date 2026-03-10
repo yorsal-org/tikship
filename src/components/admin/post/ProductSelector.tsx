@@ -11,13 +11,14 @@ import Image from 'next/image'
 interface ProductSelectorProps {
   onSelect: (product: Product) => void
   onClose: () => void
+  selectedProductIds?: string[]
 }
 
 export function ProductSelector({ onSelect, onClose }: ProductSelectorProps) {
   const t = useTranslations('admin.posts')
   const [search, setSearch] = useState('')
   const [products, setProducts] = useState<Product[]>([])
-  
+
   const { request: fetchProducts, loading } = useApi<ProductsListResponse>(
     '/api/admin/products',
     'GET'

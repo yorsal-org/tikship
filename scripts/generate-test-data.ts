@@ -225,25 +225,83 @@ const ARTICLE_CONTENT_TEMPLATES = [
   `<h2>Getting Started</h2><p>Welcome to this tutorial where we'll walk through everything you need to know step by step.</p><h2>Prerequisites</h2><p>Make sure you have the necessary tools and knowledge before proceeding with the implementation.</p><h2>Step-by-Step Guide</h2><p>Follow these detailed instructions to achieve the desired results in your development workflow.</p><h2>Troubleshooting</h2><p>Common issues and their solutions are covered here to help you overcome potential obstacles.</p><h2>Next Steps</h2><p>Continue your learning journey with these recommended resources and advanced topics.</p>`,
 ]
 
-const CATEGORY_NAMES = [
+// Hierarchical category definitions (max 3 levels)
+const CATEGORY_TREE = [
   {
     name: 'Technology',
     description: 'Latest technology trends and innovations',
+    children: [
+      {
+        name: 'Cloud Computing',
+        description: 'Cloud platforms and infrastructure',
+        children: [
+          { name: 'AWS', description: 'Amazon Web Services tutorials' },
+          { name: 'Azure', description: 'Microsoft Azure guides' },
+          { name: 'GCP', description: 'Google Cloud Platform' },
+        ],
+      },
+      {
+        name: 'AI & ML',
+        description: 'Artificial Intelligence and Machine Learning',
+        children: [
+          { name: 'Deep Learning', description: 'Neural networks and deep learning' },
+          { name: 'NLP', description: 'Natural language processing' },
+        ],
+      },
+    ],
   },
   {
     name: 'Development',
     description: 'Software development tutorials and guides',
+    children: [
+      {
+        name: 'Frontend',
+        description: 'Frontend development and UI frameworks',
+        children: [
+          { name: 'React', description: 'React.js development' },
+          { name: 'Vue', description: 'Vue.js development' },
+          { name: 'CSS & Design', description: 'Styling and design systems' },
+        ],
+      },
+      {
+        name: 'Backend',
+        description: 'Server-side development and APIs',
+        children: [
+          { name: 'Node.js', description: 'Node.js and Express' },
+          { name: 'Databases', description: 'SQL and NoSQL databases' },
+        ],
+      },
+      {
+        name: 'DevOps',
+        description: 'DevOps practices and automation',
+        children: [
+          { name: 'CI/CD', description: 'Continuous integration and delivery' },
+          { name: 'Containers', description: 'Docker and Kubernetes' },
+        ],
+      },
+    ],
   },
-  { name: 'Design', description: 'UI/UX design principles and best practices' },
-  { name: 'Business', description: 'Business strategies and entrepreneurship' },
-  { name: 'Marketing', description: 'Digital marketing and growth strategies' },
-  { name: 'DevOps', description: 'DevOps practices and automation' },
-  { name: 'Security', description: 'Cybersecurity and data protection' },
-  { name: 'Cloud', description: 'Cloud computing and infrastructure' },
-  { name: 'Mobile', description: 'Mobile app development' },
   {
-    name: 'AI & ML',
-    description: 'Artificial Intelligence and Machine Learning',
+    name: 'Business',
+    description: 'Business strategies and entrepreneurship',
+    children: [
+      {
+        name: 'Marketing',
+        description: 'Digital marketing and growth strategies',
+        children: [
+          { name: 'SEO', description: 'Search engine optimization' },
+          { name: 'Content Marketing', description: 'Content strategy and creation' },
+        ],
+      },
+      {
+        name: 'Security',
+        description: 'Cybersecurity and data protection',
+        children: [
+          { name: 'Web Security', description: 'Web application security' },
+          { name: 'Compliance', description: 'Security standards and compliance' },
+        ],
+      },
+    ],
   },
 ]
 
@@ -520,30 +578,36 @@ async function generateTestData() {
     }
     console.log(`✅ Created ${roleAssignments} role assignments\n`)
 
-    // 5. Generate Categories
-    console.log('📁 Generating categories...')
-    const categories = []
-    for (const catData of CATEGORY_NAMES) {
-      const slug = generateSlug(catData.name)
-      const category = await prisma.category.upsert({
-        where: { slug },
-        update: {},
-        create: {
+    // 5. Generate Hierarchical Categories (max 3 levels)
+    console.log('📁 Generating hierarchical categories...')
+    interface CategoryNode { name: string; description: string; children?: CategoryNode[] }
+    const categories: { id: string; name: string; slug: string; description: string | null; parentId: string | null }[] = []
+
+    const createCategoryNode = async (catData: CategoryNode, parentId?: string): Promise<void> => {
+      const slug = generateSlug(catData.name) + '-' + Math.random().toString(36).substring(2, 6)
+      const category = await prisma.category.create({
+        data: {
           name: catData.name.substring(0, validationConfig.category.name.maxLength),
           slug,
-          description: catData.description.substring(
-            0,
-            validationConfig.category.description.maxLength
-          ),
+          description: catData.description.substring(0, validationConfig.category.description.maxLength),
+          parentId: parentId || null,
         },
       })
       categories.push(category)
+      if (catData.children) {
+        for (const child of catData.children) {
+          await createCategoryNode(child, category.id)
+        }
+      }
     }
-    console.log(`✅ Created/found ${categories.length} categories\n`)
 
+    for (const rootCat of CATEGORY_TREE) {
+      await createCategoryNode(rootCat)
+    }
+    console.log(`✅ Created ${categories.length} categories (3-level hierarchy)\n`)
     // 6. Generate Tags
     console.log('🏷️  Generating tags...')
-    const tags = []
+    const tags: { id: string; name: string; slug: string }[] = []
     for (const tagName of TAG_NAMES) {
       const slug = generateSlug(tagName)
       const tag = await prisma.tag.upsert({

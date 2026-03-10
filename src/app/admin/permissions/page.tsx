@@ -179,7 +179,7 @@ export default function PermissionsPage() {
             )}
 
             <div className="flex items-center gap-2 flex-wrap">
-              <code className="text-xs bg-base-200 px-2 py-1 rounded font-mono text-base-content/80">
+              <code className="text-xs bg-base-200 px-2 py-1 rounded text-base-content/80">
                 {permission.code}
               </code>
               <span className={`badge badge-xs ${getActionBadgeColor(action)}`}>{action}</span>
@@ -241,7 +241,7 @@ export default function PermissionsPage() {
         const [, action] = permission.code.split(':')
         return (
           <div className="flex flex-col gap-1">
-            <code className="text-xs bg-base-200 px-2 py-1 rounded font-mono text-base-content/80 inline-block">
+            <code className="text-xs bg-base-200 px-2 py-1 rounded text-base-content/80 inline-block">
               {permission.code}
             </code>
             <span className={`badge badge-xs ${getActionBadgeColor(action)} w-fit`}>{action}</span>
