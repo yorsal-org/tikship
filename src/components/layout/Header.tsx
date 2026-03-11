@@ -10,6 +10,8 @@ import { useTranslations } from 'next-intl'
 import { Logo } from '@/components/ui/Logo'
 import { cn } from '@/lib/utils/common'
 import { siteConfig } from '@/config/site'
+import { useState, useEffect } from 'react'
+import { Menu, X } from 'lucide-react'
 
 interface NavItem {
   href: string
@@ -24,6 +26,14 @@ export function Header() {
   const pathname = usePathname()
   const isLoginPage = pathname === '/login'
   const isRegisterPage = pathname === '/register'
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    Promise.resolve().then(() => {
+      setIsMobileMenuOpen(false)
+    })
+  }, [pathname])
 
   const navItems: NavItem[] = [
     {
@@ -63,11 +73,21 @@ export function Header() {
       <div className="container mx-auto px-4">
         <div className="navbar min-h-16 p-0">
           <div className="navbar-start">
-            <Link href="/" className="flex items-center transition-opacity hover:opacity-80">
+            {/* Mobile hamburger */}
+            <button
+              className="btn btn-square btn-ghost lg:hidden mr-1"
+              onClick={() => setIsMobileMenuOpen(true)}
+              aria-label="Open menu"
+            >
+              <Menu size={22} />
+            </button>
+
+            <Link href="/" className="hidden lg:flex items-center transition-opacity hover:opacity-80">
               <Logo className="h-12 w-auto text-primary" />
             </Link>
 
-            <nav className="ml-8 hidden md:flex items-center gap-6 font-medium">
+            {/* Desktop nav */}
+            <nav className="ml-8 hidden lg:flex items-center gap-6 font-medium">
               {navItems.map((item) => {
                 const isActive = item.matchPath?.(pathname) || false
                 const linkProps = item.external
@@ -113,7 +133,10 @@ export function Header() {
                   </Link>
                   <Link
                     href="/register"
-                    className={cn('btn btn-sm', isRegisterPage ? 'btn-primary' : 'btn-ghost')}
+                    className={cn(
+                      'btn btn-sm hidden sm:inline-flex',
+                      isRegisterPage ? 'btn-primary' : 'btn-ghost'
+                    )}
                   >
                     {t('register')}
                   </Link>
@@ -122,6 +145,100 @@ export function Header() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Mobile Drawer */}
+      <div
+        className={cn(
+          'fixed inset-0 lg:hidden',
+          isMobileMenuOpen ? '' : 'pointer-events-none'
+        )}
+      >
+        {/* Overlay */}
+        <div
+          className={cn(
+            'absolute inset-0 bg-black transition-opacity duration-300',
+            isMobileMenuOpen ? 'opacity-50' : 'opacity-0'
+          )}
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+
+        {/* Drawer panel */}
+        <aside
+          className={cn(
+            'fixed left-0 top-0 h-screen w-72 bg-base-100 shadow-xl flex flex-col transform transition-transform duration-300',
+            isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+          )}
+        >
+          {/* Drawer header */}
+          <div className="flex items-center justify-between px-4 py-4 border-b border-base-200">
+            <Link
+              href="/"
+              className="flex items-center hover:opacity-80"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              {siteConfig.name}
+            </Link>
+            <button
+              className="btn btn-square btn-ghost btn-sm"
+              onClick={() => setIsMobileMenuOpen(false)}
+              aria-label="Close menu"
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          {/* Drawer nav links */}
+          <nav className="flex-1 overflow-y-auto px-4 py-4">
+            <ul className="menu menu-md p-0 gap-1">
+              {navItems.map((item) => {
+                const isActive = item.matchPath?.(pathname) || false
+                const linkProps = item.external
+                  ? { target: '_blank', rel: 'noopener noreferrer' }
+                  : {}
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      {...linkProps}
+                      className={cn(
+                        isActive
+                          ? 'bg-primary text-primary-content font-bold shadow-md'
+                          : 'hover:bg-base-200'
+                      )}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      {t(item.labelKey)}
+                    </Link>
+                  </li>
+                )
+              })}
+            </ul>
+          </nav>
+
+          {/* Drawer footer: auth actions */}
+          {!session && (
+            <div className="px-4 py-4 border-t border-base-200 flex flex-col gap-2">
+              <Link
+                href="/login"
+                className={cn('btn btn-sm w-full', isLoginPage ? 'btn-primary' : 'btn-outline')}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {t('login')}
+              </Link>
+              <Link
+                href="/register"
+                className={cn(
+                  'btn btn-sm w-full',
+                  isRegisterPage ? 'btn-primary' : 'btn-outline'
+                )}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {t('register')}
+              </Link>
+            </div>
+          )}
+        </aside>
       </div>
     </header>
   )

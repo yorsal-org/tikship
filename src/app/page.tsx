@@ -513,7 +513,7 @@ function StepItem({
         <h3 className="text-2xl font-bold mb-3">{title}</h3>
         <p className="text-base-content/60 text-lg leading-relaxed mb-4">{description}</p>
         {code && (
-          <div className="bg-base-200 rounded-lg p-4 text-sm overflow-x-auto border border-base-300">
+          <div className="-ml-20 lg:ml-auto bg-base-200 rounded-lg p-4 text-sm overflow-x-auto border border-base-300">
             <code className="text-primary flex flex-col gap-1">{code}</code>
           </div>
         )}
