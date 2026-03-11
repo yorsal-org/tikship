@@ -867,48 +867,5 @@
     "category": "所属分类",
     "tags": "相关标签",
     "published_on": "发布于"
-  },
-  "pricing": {
-    "plans": {
-      "starter": {
-        "name": "入门版",
-        "description": "适合个人开发者和小项目"
-      },
-      "pro": {
-        "name": "进阶版",
-        "description": "适合快速成长的初创企业"
-      },
-      "ultimate": {
-        "name": "终极版",
-        "description": "包含所有功能和高级支持"
-      }
-    },
-    "features": {
-      "core_framework": "Next.js 核心脚手架",
-      "seo_blog": "SEO 优化 & 博客系统",
-      "email_integration": "邮件推送集成",
-      "stripe_integration": "Stripe / 支付集成",
-      "database_setup": "数据库 & ORM 配置",
-      "auth_system": "全栈认证系统",
-      "ui_components": "高级 UI 组件 & 动画",
-      "terms_privacy": "通用条款 & 隐私模板",
-      "community_access": "社区访问 & 排行榜",
-      "discount_bundle": "折扣大礼包",
-      "lifetime_updates": "终身免费更新",
-      "everything_in_pro": "包含进阶版所有功能",
-      "advanced_module": "高级功能模块",
-      "priority_support": "优先技术支持",
-      "exclusive_content": "专属教程内容"
-    },
-    "tags": {
-      "updated": "2周前更新",
-      "value": "价值 $299"
-    },
-    "buttons": {
-      "get_started": "立即购买"
-    },
-    "footer": {
-      "pay_once": "一次性付费，构建无限项目！"
-    }
   }
 }

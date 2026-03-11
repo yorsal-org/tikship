@@ -820,48 +820,5 @@
     "category": "Categoría",
     "tags": "Etiquetas",
     "published_on": "Publicado el"
-  },
-  "pricing": {
-    "plans": {
-      "starter": {
-        "name": "Inicial",
-        "description": "Perfecto para desarrolladores individuales y proyectos pequeños"
-      },
-      "pro": {
-        "name": "Pro",
-        "description": "Mejor para startups en crecimiento"
-      },
-      "ultimate": {
-        "name": "Ultimate",
-        "description": "Todo lo que necesitas con soporte prioritario"
-      }
-    },
-    "features": {
-      "core_framework": "Plantilla Next.js",
-      "seo_blog": "Sistema de SEO y Blog",
-      "email_integration": "Integración de correo electrónico",
-      "stripe_integration": "Integración de Stripe / Pagos",
-      "database_setup": "Configuración de base de datos y ORM",
-      "auth_system": "Sistema de autenticación completo",
-      "ui_components": "Componentes UI y animaciones",
-      "terms_privacy": "Plantillas de términos y privacidad",
-      "community_access": "Acceso a comunidad y tabla de clasificación",
-      "discount_bundle": "Valor en descuentos",
-      "lifetime_updates": "Actualizaciones de por vida",
-      "everything_in_pro": "Todo en Pro, y...",
-      "advanced_module": "Módulos avanzados",
-      "priority_support": "Soporte prioritario",
-      "exclusive_content": "Tutoriales exclusivos"
-    },
-    "tags": {
-      "updated": "Actualizado hace 2 semanas",
-      "value": "Valor de $299"
-    },
-    "buttons": {
-      "get_started": "Comenzar"
-    },
-    "footer": {
-      "pay_once": "¡Paga una vez. Construye proyectos ilimitados!"
-    }
   }
 }

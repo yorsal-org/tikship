@@ -867,48 +867,5 @@
     "category": "Category",
     "tags": "Tags",
     "published_on": "Published on"
-  },
-  "pricing": {
-    "plans": {
-      "starter": {
-        "name": "Starter",
-        "description": "Perfect for solo developers and small projects"
-      },
-      "pro": {
-        "name": "Pro",
-        "description": "Best for growing startups"
-      },
-      "ultimate": {
-        "name": "Ultimate",
-        "description": "Everything you need with priority support"
-      }
-    },
-    "features": {
-      "core_framework": "Next.js boilerplate",
-      "seo_blog": "SEO & Blog system",
-      "email_integration": "Email integration",
-      "stripe_integration": "Stripe / Payment integration",
-      "database_setup": "Database & ORM setup",
-      "auth_system": "Full-stack auth system",
-      "ui_components": "UI components & animations",
-      "terms_privacy": "Terms & Privacy templates",
-      "community_access": "Community & Leaderboard",
-      "discount_bundle": "Worth of discounts",
-      "lifetime_updates": "Lifetime updates",
-      "everything_in_pro": "Everything in Pro, and...",
-      "advanced_module": "Advanced modules",
-      "priority_support": "Priority support",
-      "exclusive_content": "Exclusive tutorials"
-    },
-    "tags": {
-      "updated": "Updated 2 weeks ago",
-      "value": "$299 value"
-    },
-    "buttons": {
-      "get_started": "Get started"
-    },
-    "footer": {
-      "pay_once": "Pay once. Build unlimited projects!"
-    }
   }
 }
