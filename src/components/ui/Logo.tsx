@@ -25,42 +25,6 @@ export function Logo({
       preserveAspectRatio="xMidYMid"
       {...props}
     >
-      <defs>
-        <filter
-          id="editing-stripe-bk"
-          filterUnits="userSpaceOnUse"
-          x="-100%"
-          y="-100%"
-          width="300%"
-          height="300%"
-        >
-          <feFlood
-            floodColor={color === 'currentColor' ? 'inherit' : color}
-            floodOpacity="0.3"
-            result="flood1"
-          />
-          <feFlood floodColor="#fff" floodOpacity="0.5" result="flood2" />
-          <feImage
-            xlinkHref="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAwcHgiIGhlaWdodD0iMTAwMHB4Ij48ZGVmcz48cGF0dGVybiBpZD0icGF0dGVybiIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeD0iMCIgeT0iMCIgd2lkdGg9IjQiIGhlaWdodD0iNCI+PHBhdGggZD0iTSAtNCAtNCBMIDggOCBNIC04IC00IEwgNCA4IE0gLTQgLTggTCA4IDQiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI3BhdHRlcm4pIi8+PC9zdmc+"
-            x="0"
-            y="0"
-            width="2000"
-            height="1000"
-            result="image"
-          />
-          <feTile in="image" result="tile" />
-          <feComposite operator="in" in="flood1" in2="tile" result="tile2" />
-          <feGaussianBlur in="SourceAlpha" stdDeviation="10" result="blur" />
-          <feComposite operator="in" in="tile2" in2="blur" result="cloud" />
-          <feMorphology operator="dilate" radius="2" in="SourceAlpha" result="dilate" />
-          <feComposite operator="in" in="flood2" in2="dilate" result="base" />
-          <feMerge>
-            <feMergeNode in="cloud" />
-            <feMergeNode in="base" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
-      </defs>
       <g filter="url(#editing-stripe-bk)">
         <g transform="translate(147.85498714447021, 103.44499969482422)">
           <path
