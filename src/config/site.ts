@@ -59,7 +59,7 @@ export const siteConfig = {
   // Admin configuration
   admin: {
     // Admin path prefix
-    path: 'admin',
+    path: '/admin',
     pageSize: 10,
     password: {
       // Minimum password strength level required: 'weak', 'medium', or 'strong'

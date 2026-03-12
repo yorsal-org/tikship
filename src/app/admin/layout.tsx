@@ -11,6 +11,7 @@ import { LanguageSwitcher } from '@/components/locale/LanguageSwitcher'
 import { SidebarMenu } from '@/components/admin/common/SidebarMenu'
 import { LogOut, Menu, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Logo } from '@/components/ui/Logo'
+import { siteConfig } from '@/config/site'
 
 function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -35,11 +36,11 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   }, [isSidebarCollapsed])
 
   // Check if current page is login page
-  const isLoginPage = pathname === '/admin/login'
+  const isLoginPage = pathname === siteConfig.admin.path + '/login'
 
   useEffect(() => {
     if (!isLoading && !adminUser && !isLoginPage) {
-      router.push('/admin/login')
+      router.push(`${siteConfig.admin.path}/login`)
     }
   }, [adminUser, isLoading, router, isLoginPage])
 
@@ -54,7 +55,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   // Helper to check if a route is active
   const isActive = (path: string) => {
     if (!pathname) return false
-    if (path === '/admin') return pathname === '/admin'
+    if (path === siteConfig.admin.path) return pathname === siteConfig.admin.path
     return pathname.startsWith(path)
   }
 
@@ -86,7 +87,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
         }`}
       >
         <div className={`p-6 ${isSidebarCollapsed ? 'px-4' : ''}`}>
-          <Link href="/admin" className="flex items-center">
+          <Link href={siteConfig.admin.path} className="flex items-center">
             <Logo />
             {!isSidebarCollapsed && (
               <h1 className="text-base font-extrabold tracking-tight whitespace-nowrap overflow-hidden">

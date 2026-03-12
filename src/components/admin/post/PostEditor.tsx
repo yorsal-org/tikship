@@ -20,6 +20,7 @@ import {
   TagCard,
 } from '@/components/admin/post/PostSidebar'
 import { validationConfig } from '@/config/validation'
+import { siteConfig } from '@/config/site'
 
 interface PostEditorProps {
   initialData?: Post
@@ -135,7 +136,7 @@ export function PostEditor({ initialData, type }: PostEditorProps) {
         toast.success(isEditing ? t('save_success') : t('created_success'))
         router.refresh()
         if (!isEditing) {
-          router.push(`/admin/${type.toLowerCase()}s`)
+          router.push(`${siteConfig.admin.path}/${type.toLowerCase()}s`)
         }
       },
       onError: (error: string) => {

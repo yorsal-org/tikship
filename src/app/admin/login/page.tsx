@@ -7,6 +7,7 @@ import { useAdminAuth } from '@/components/providers/AdminAuthProvider'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { toast } from '@/lib/utils/toast'
+import { siteConfig } from '@/config/site'
 
 export default function AdminLoginPage() {
   const router = useRouter()
@@ -22,7 +23,7 @@ export default function AdminLoginPage() {
 
     try {
       await login(username, password)
-      router.push('/admin')
+      router.push(siteConfig.admin.path)
     } catch (err) {
       // Error message is already translated from API
       toast.error(err instanceof Error ? err.message : 'Login failed')

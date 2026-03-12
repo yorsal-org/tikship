@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl'
 import { Logo } from '@/components/ui/Logo'
 import { siteConfig } from '@/config/site'
+import Link from 'next/link'
 
 export function Footer() {
   const t = useTranslations('common')
@@ -25,19 +26,19 @@ export function Footer() {
             </h3>
             <ul className="flex flex-col gap-2 text-sm text-base-content/70">
               <li>
-                <a href="#" className="hover:text-primary transition-colors">
+                <Link href="#" className="hover:text-primary transition-colors">
                   Documentation
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-primary transition-colors">
+                <Link href="#" className="hover:text-primary transition-colors">
                   Components
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-primary transition-colors">
+                <Link href="#" className="hover:text-primary transition-colors">
                   Blog
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -48,14 +49,14 @@ export function Footer() {
             </h3>
             <ul className="flex flex-col gap-2 text-sm text-base-content/70">
               <li>
-                <a href="#" className="hover:text-primary transition-colors">
+                <Link href="#" className="hover:text-primary transition-colors">
                   Privacy Policy
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-primary transition-colors">
+                <Link href="#" className="hover:text-primary transition-colors">
                   Terms of Service
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

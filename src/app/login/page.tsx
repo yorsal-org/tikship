@@ -8,6 +8,7 @@ import { GithubSignInButton } from '@/components/auth/login/GithubSignInButton'
 import { signIn } from 'next-auth/react'
 import { Loader2, Mail, Lock, Eye, EyeOff } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import Link from 'next/link'
 import { Logo } from '@/components/ui/Logo'
 
 export default function LoginPage() {
@@ -167,21 +168,21 @@ export default function LoginPage() {
           <div className="mt-6 text-center">
             <p className="text-sm text-base-content/70">
               {t('no_account')}{' '}
-              <a href="/register" className="link link-primary">
+              <Link href="/register" className="link link-primary">
                 {t('register_now')}
-              </a>
+              </Link>
             </p>
           </div>
 
           <p className="mt-4 text-center text-xs text-base-content/70">
             {t('terms_privacy')}{' '}
-            <a href="#" className="link link-primary">
+            <Link href="#" className="link link-primary">
               {t('terms')}
-            </a>{' '}
+            </Link>{' '}
             {t('and')}{' '}
-            <a href="#" className="link link-primary">
+            <Link href="#" className="link link-primary">
               {t('privacy')}
-            </a>
+            </Link>
           </p>
         </div>
       </div>

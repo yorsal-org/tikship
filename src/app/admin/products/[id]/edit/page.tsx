@@ -7,6 +7,7 @@ import { useApi } from '@/hooks/useApi'
 import { toast } from '@/lib/utils/toast'
 import type { Product } from '@/types/product'
 import { Loader2 } from 'lucide-react'
+import { siteConfig } from '@/config/site'
 
 export default function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
@@ -19,7 +20,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       const { success, data } = await productApi.request(undefined, {
         onError: (err: string) => {
           toast.error(err)
-          router.push('/admin/products')
+          router.push(`${siteConfig.admin.path}/products`)
         },
       })
 

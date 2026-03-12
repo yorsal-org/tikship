@@ -385,7 +385,7 @@ export function ProductForm({ product }: ProductFormProps) {
 
       console.log('All payment methods saved successfully')
       toast.success(t(isEditing ? 'update_success' : 'create_success'))
-      router.push('/admin/products')
+      router.push(`${siteConfig.admin.path}/products`)
       router.refresh()
     } catch (error) {
       console.error('Save payment methods error:', error)

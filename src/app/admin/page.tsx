@@ -29,6 +29,8 @@ import {
 } from 'recharts'
 import { useApi } from '@/hooks/useApi'
 import type { DashboardStats } from '@/types/admin'
+import Link from 'next/link'
+import { siteConfig } from '@/config/site'
 
 export default function AdminDashboard() {
   const t = useTranslations('admin.dashboard')
@@ -37,6 +39,8 @@ export default function AdminDashboard() {
   const [error, setError] = useState(false)
 
   const statsApi = useApi<DashboardStats>('/api/admin/dashboard/stats', 'GET')
+
+  const adminPath = siteConfig.admin.path
 
   useEffect(() => {
     fetchStats()
@@ -388,30 +392,30 @@ export default function AdminDashboard() {
         <div className="card-body p-4 lg:p-6">
           <h2 className="card-title text-base lg:text-lg mb-4">{t('quick_actions')}</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:flex lg:flex-wrap gap-2 lg:gap-4">
-            <a href="/admin/users" className="btn btn-primary btn-sm lg:btn-md">
+            <Link href={`${adminPath}/users`} className="btn btn-primary btn-sm lg:btn-md">
               <Users className="w-4 h-4" />
               <span className="hidden sm:inline">{t('manage_users')}</span>
-            </a>
-            <a href="/admin/roles" className="btn btn-secondary btn-sm lg:btn-md">
+            </Link>
+            <Link href={`${adminPath}/roles`} className="btn btn-secondary btn-sm lg:btn-md">
               <Shield className="w-4 h-4" />
               <span className="hidden sm:inline">{t('manage_roles')}</span>
-            </a>
-            <a href="/admin/audit-logs" className="btn btn-accent btn-sm lg:btn-md">
+            </Link>
+            <Link href={`${adminPath}/audit-logs`} className="btn btn-accent btn-sm lg:btn-md">
               <FileText className="w-4 h-4" />
               <span className="hidden sm:inline">{t('view_logs')}</span>
-            </a>
-            <a href="/admin/members" className="btn btn-info btn-sm lg:btn-md">
+            </Link>
+            <Link href={`${adminPath}/members`} className="btn btn-info btn-sm lg:btn-md">
               <UserPlus className="w-4 h-4" />
               <span className="hidden sm:inline">{t('member_management')}</span>
-            </a>
-            <a href="/admin/products" className="btn btn-success btn-sm lg:btn-md">
+            </Link>
+            <Link href={`${adminPath}/products`} className="btn btn-success btn-sm lg:btn-md">
               <Package className="w-4 h-4" />
               <span className="hidden sm:inline">{t('product_management')}</span>
-            </a>
-            <a href="/admin/orders" className="btn btn-warning btn-sm lg:btn-md">
+            </Link>
+            <Link href={`${adminPath}/orders`} className="btn btn-warning btn-sm lg:btn-md">
               <ShoppingCart className="w-4 h-4" />
               <span className="hidden sm:inline">{t('order_management')}</span>
-            </a>
+            </Link>
           </div>
         </div>
       </div>

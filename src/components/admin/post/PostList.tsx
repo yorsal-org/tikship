@@ -272,7 +272,7 @@ export function PostList({ type }: PostListProps) {
             <>
               <button
                 className="btn btn-ghost btn-sm btn-square"
-                onClick={() => router.push(`/admin/${type.toLowerCase()}s/edit/${post.id}`)}
+                onClick={() => router.push(`${siteConfig.admin.path}/${type.toLowerCase()}s/edit/${post.id}`)}
                 title={t('edit')}
               >
                 <Edit className="w-4 h-4" />
@@ -307,7 +307,7 @@ export function PostList({ type }: PostListProps) {
           {type === PostType.ARTICLE ? t('articles') : t('pages')}
         </h1>
         <button
-          onClick={() => router.push(`/admin/${type.toLowerCase()}s/new`)}
+          onClick={() => router.push(`${siteConfig.admin.path}/${type.toLowerCase()}s/new`)}
           className="btn btn-primary btn-sm gap-2"
         >
           <Plus size={18} /> {t('new')}

@@ -96,7 +96,7 @@ export function ProductList() {
   }, [currentPage, pageSize, searchParam, statusParam])
 
   const handleEdit = (product: Product) => {
-    router.push(`/admin/products/${product.id}/edit`)
+    router.push(`${siteConfig.admin.path}/products/${product.id}/edit`)
   }
 
   const handleToggleActive = async (product: Product) => {
@@ -215,7 +215,7 @@ export function ProductList() {
           <p className="mt-2 text-base-content/70">{t('subtitle')}</p>
         </div>
         <button
-          onClick={() => router.push('/admin/products/new')}
+          onClick={() => router.push(`${siteConfig.admin.path}/products/new`)}
           className="btn btn-primary gap-2"
         >
           <Plus className="w-4 h-4" />

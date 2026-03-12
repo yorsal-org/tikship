@@ -28,9 +28,9 @@ export function SidebarMenu({ isActive, isCollapsed = false }: SidebarMenuProps)
     <ul className="menu menu-md p-0 gap-1">
       <li>
         <Link
-          href={`/${adminPath}`}
+          href={adminPath}
           className={
-            isActive(`/${adminPath}`)
+            isActive(adminPath)
               ? 'bg-primary text-primary-content font-bold shadow-md'
               : 'hover:bg-base-200'
           }
@@ -50,9 +50,9 @@ export function SidebarMenu({ isActive, isCollapsed = false }: SidebarMenuProps)
 
       <li>
         <Link
-          href={`/${adminPath}/articles`}
+          href={`${adminPath}/articles`}
           className={
-            isActive(`/${adminPath}/articles`)
+            isActive(`${adminPath}/articles`)
               ? 'bg-primary text-primary-content font-bold shadow-md'
               : 'hover:bg-base-200'
           }
@@ -64,9 +64,9 @@ export function SidebarMenu({ isActive, isCollapsed = false }: SidebarMenuProps)
       </li>
       <li>
         <Link
-          href={`/${adminPath}/categories`}
+          href={`${adminPath}/categories`}
           className={
-            isActive(`/${adminPath}/categories`)
+            isActive(`${adminPath}/categories`)
               ? 'bg-primary text-primary-content font-bold shadow-md'
               : 'hover:bg-base-200'
           }
@@ -78,9 +78,9 @@ export function SidebarMenu({ isActive, isCollapsed = false }: SidebarMenuProps)
       </li>
       <li>
         <Link
-          href={`/${adminPath}/pages`}
+          href={`${adminPath}/pages`}
           className={
-            isActive(`/${adminPath}/pages`)
+            isActive(`${adminPath}/pages`)
               ? 'bg-primary text-primary-content font-bold shadow-md'
               : 'hover:bg-base-200'
           }
@@ -100,9 +100,9 @@ export function SidebarMenu({ isActive, isCollapsed = false }: SidebarMenuProps)
 
       <li>
         <Link
-          href={`/${adminPath}/products`}
+          href={`${adminPath}/products`}
           className={
-            isActive(`/${adminPath}/products`)
+            isActive(`${adminPath}/products`)
               ? 'bg-primary text-primary-content font-bold shadow-md'
               : 'hover:bg-base-200'
           }
@@ -114,9 +114,9 @@ export function SidebarMenu({ isActive, isCollapsed = false }: SidebarMenuProps)
       </li>
       <li>
         <Link
-          href={`/${adminPath}/orders`}
+          href={`${adminPath}/orders`}
           className={
-            isActive(`/${adminPath}/orders`)
+            isActive(`${adminPath}/orders`)
               ? 'bg-primary text-primary-content font-bold shadow-md'
               : 'hover:bg-base-200'
           }
@@ -136,9 +136,9 @@ export function SidebarMenu({ isActive, isCollapsed = false }: SidebarMenuProps)
 
       <li>
         <Link
-          href={`/${adminPath}/members`}
+          href={`${adminPath}/members`}
           className={
-            isActive(`/${adminPath}/members`)
+            isActive(`${adminPath}/members`)
               ? 'bg-primary text-primary-content font-bold shadow-md'
               : 'hover:bg-base-200'
           }
@@ -158,9 +158,9 @@ export function SidebarMenu({ isActive, isCollapsed = false }: SidebarMenuProps)
 
       <li>
         <Link
-          href={`/${adminPath}/users`}
+          href={`${adminPath}/users`}
           className={
-            isActive(`/${adminPath}/users`)
+            isActive(`${adminPath}/users`)
               ? 'bg-primary text-primary-content font-bold shadow-md'
               : 'hover:bg-base-200'
           }
@@ -172,9 +172,9 @@ export function SidebarMenu({ isActive, isCollapsed = false }: SidebarMenuProps)
       </li>
       <li>
         <Link
-          href={`/${adminPath}/roles`}
+          href={`${adminPath}/roles`}
           className={
-            isActive(`/${adminPath}/roles`)
+            isActive(`${adminPath}/roles`)
               ? 'bg-primary text-primary-content font-bold shadow-md'
               : 'hover:bg-base-200'
           }
@@ -186,9 +186,9 @@ export function SidebarMenu({ isActive, isCollapsed = false }: SidebarMenuProps)
       </li>
       <li>
         <Link
-          href={`/${adminPath}/permissions`}
+          href={`${adminPath}/permissions`}
           className={
-            isActive(`/${adminPath}/permissions`)
+            isActive(`${adminPath}/permissions`)
               ? 'bg-primary text-primary-content font-bold shadow-md'
               : 'hover:bg-base-200'
           }
@@ -200,9 +200,9 @@ export function SidebarMenu({ isActive, isCollapsed = false }: SidebarMenuProps)
       </li>
       <li>
         <Link
-          href={`/${adminPath}/audit-logs`}
+          href={`${adminPath}/audit-logs`}
           className={
-            isActive(`/${adminPath}/audit-logs`)
+            isActive(`${adminPath}/audit-logs`)
               ? 'bg-primary text-primary-content font-bold shadow-md'
               : 'hover:bg-base-200'
           }

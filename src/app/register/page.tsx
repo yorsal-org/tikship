@@ -5,6 +5,7 @@ import StepEmailVerification from '@/components/auth/register/StepEmailVerificat
 import StepUserInfo from '@/components/auth/register/StepUserInfo'
 import StepSuccess from '@/components/auth/register/StepSuccess'
 import { useTranslations } from 'next-intl'
+import Link from 'next/link'
 
 export default function RegisterPage() {
   const [currentStep, setCurrentStep] = useState(1)
@@ -50,9 +51,9 @@ export default function RegisterPage() {
       <div className="mt-8 text-center">
         <p className="text-sm text-base-content/60">
           {t('has_account')}{' '}
-          <a href="/login" className="link link-primary">
+          <Link href="/login" className="link link-primary">
             {t('login_now')}
-          </a>
+          </Link>
         </p>
       </div>
     </div>
