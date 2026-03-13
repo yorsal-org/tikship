@@ -6,7 +6,7 @@ const getAdapter = async () => {
   if (DATABASE_URL.startsWith('postgresql://') || DATABASE_URL.startsWith('postgres://')) {
     const [{ PrismaPg }, { Pool }] = await Promise.all([import('@prisma/adapter-pg'), import('pg')])
     const pool = new Pool({ connectionString: DATABASE_URL })
-    return new PrismaPg(pool)
+    return new PrismaPg(pool as never)
   }
 
   if (DATABASE_URL.startsWith('mysql://')) {
