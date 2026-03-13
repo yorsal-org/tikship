@@ -45,9 +45,12 @@ export async function POST(req: NextRequest) {
 
     // Set cookie
     const cookieStore = await cookies()
+    // secure: only set to true when served over HTTPS
+    // If NEXTAUTH_URL starts with https://, enable secure flag
+    const isHttps = (process.env.NEXTAUTH_URL || '').startsWith('https://')
     cookieStore.set('admin-token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isHttps,
       sameSite: 'lax',
       path: '/',
     })
