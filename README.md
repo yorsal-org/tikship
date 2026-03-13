@@ -145,7 +145,7 @@ tikship/
 
 ### Requirements
 
-- Node.js >= 20.9.0
+- Node.js >= 20.9.0 (recommend 24.14.0)
 - npm / pnpm / yarn
 - PostgreSQL / MySQL / SQLite
 
@@ -161,7 +161,7 @@ cd tikship
 2. **Initialize installation**
 
 ```bash
-npm ci
+npm ci # please use `npm install` if package-lock.json has sync error 
 npm run init
 ```
 

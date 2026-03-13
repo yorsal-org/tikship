@@ -57,6 +57,7 @@
     "recharts": "^3.7.0",
     "resend": "^6.8.0",
     "stripe": "^20.3.0",
+    "@tailwindcss/postcss": "^4",
     "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
@@ -66,7 +67,6 @@
     "@storybook/addon-onboarding": "^10.2.14",
     "@storybook/addon-vitest": "^10.2.14",
     "@storybook/nextjs-vite": "^10.2.14",
-    "@tailwindcss/postcss": "^4",
     "@types/bcrypt": "^6.0.0",
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^20",

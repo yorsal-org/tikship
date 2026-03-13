@@ -145,7 +145,7 @@ tikship/
 
 ### 环境要求
 
-- Node.js >= 20.9.0
+- Node.js >= 20.9.0 (recommend 24.14.0)
 - npm / pnpm / yarn
 - PostgreSQL / MySQL / SQLite
 
@@ -161,7 +161,7 @@ cd tikship
 2. **初始化安装**
 
 ```bash
-npm ci
+npm ci # please use `npm install` if package-lock.json has sync error
 npm run init
 ```
 
