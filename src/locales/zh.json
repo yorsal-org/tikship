@@ -3,7 +3,18 @@
     "pagination": {
       "showing_results": "显示第 {from} 至 {to} 条，共 {total} 条结果"
     },
-    "tagline": "想法即产品，启动即交付 \n 为一人初创公司打造的快速成交平台"
+    "tagline": "想法即产品，启动即交付 \n 为一人初创公司打造的快速成交平台",
+    "footer": {
+      "resources": "资源",
+      "documentation": "文档",
+      "components": "组件",
+      "blog": "博客",
+      "legal": "法律",
+      "privacy_policy": "隐私政策",
+      "terms_of_service": "服务条款",
+      "license": "开源许可",
+      "all_rights_reserved": "版权所有"
+    }
   },
   "header": {
     "login": "登录",

@@ -3,7 +3,18 @@
     "pagination": {
       "showing_results": "Showing {from} to {to} of {total} results"
     },
-    "tagline": "Turn Ideas into Products, Launches into Cash. \n The Rapid-Start Platform for One-Person Company."
+    "tagline": "Turn Ideas into Products, Launches into Cash. \n The Rapid-Start Platform for One-Person Company.",
+    "footer": {
+      "resources": "Resources",
+      "documentation": "Documentation",
+      "components": "Components",
+      "blog": "Blog",
+      "legal": "Legal",
+      "privacy_policy": "Privacy Policy",
+      "terms_of_service": "Terms of Service",
+      "license": "License",
+      "all_rights_reserved": "All rights reserved."
+    }
   },
   "header": {
     "login": "Sign in",

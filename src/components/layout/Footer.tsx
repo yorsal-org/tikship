@@ -22,22 +22,22 @@ export function Footer() {
 
           <div className="flex flex-col gap-4">
             <h3 className="font-bold underline decoration-primary decoration-2 underline-offset-4">
-              Resources
+              {t('footer.resources')}
             </h3>
             <ul className="flex flex-col gap-2 text-sm text-base-content/70">
               <li>
                 <Link href="#" className="hover:text-primary transition-colors">
-                  Documentation
+                  {t('footer.documentation')}
                 </Link>
               </li>
               <li>
                 <Link href="#" className="hover:text-primary transition-colors">
-                  Components
+                  {t('footer.components')}
                 </Link>
               </li>
               <li>
-                <Link href="#" className="hover:text-primary transition-colors">
-                  Blog
+                <Link href="/blog" className="hover:text-primary transition-colors">
+                  {t('footer.blog')}
                 </Link>
               </li>
             </ul>
@@ -45,17 +45,22 @@ export function Footer() {
 
           <div className="flex flex-col gap-4">
             <h3 className="font-bold underline decoration-secondary decoration-2 underline-offset-4">
-              Legal
+              {t('footer.legal')}
             </h3>
             <ul className="flex flex-col gap-2 text-sm text-base-content/70">
               <li>
                 <Link href="#" className="hover:text-primary transition-colors">
-                  Privacy Policy
+                  {t('footer.privacy_policy')}
                 </Link>
               </li>
               <li>
                 <Link href="#" className="hover:text-primary transition-colors">
-                  Terms of Service
+                  {t('footer.terms_of_service')}
+                </Link>
+              </li>
+              <li>
+                <Link href="#" className="hover:text-primary transition-colors">
+                  {t('footer.license')}
                 </Link>
               </li>
             </ul>
@@ -66,7 +71,7 @@ export function Footer() {
 
         <div className="flex flex-col items-center justify-between gap-4 sm:flex-row text-sm text-base-content/50">
           <p>
-            © {currentYear} {siteConfig.name}. All rights reserved.
+            © {currentYear} {siteConfig.name}. {t('footer.all_rights_reserved')}
           </p>
           <div className="flex gap-4">{/* Social links could go here */}</div>
         </div>
