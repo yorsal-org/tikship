@@ -868,6 +868,41 @@
       "processing": "支付处理中..."
     }
   },
+  "blog": {
+    "title": "博客",
+    "subtitle": "最新文章与动态",
+    "all_categories": "全部分类",
+    "category_label": "分类：",
+    "articles_count": "{count} 篇文章",
+    "articles_count_plural": "{count} 篇文章",
+    "read_more": "阅读全文 →",
+    "pages": "翻页",
+    "load_more": "加载更多",
+    "infinite": "无限滚动"
+  },
+  "products": {
+    "title": "我们的产品",
+    "subtitle": "选择最适合您的方案",
+    "traditional": "翻页",
+    "load_more": "加载更多",
+    "infinite_scroll": "无限滚动",
+    "in_stock": "库存 {count} 件",
+    "out_of_stock": "已售罄",
+    "unlimited": "无限制",
+    "view_details": "查看详情",
+    "load_more_products": "加载更多产品",
+    "loading_products": "加载产品中...",
+    "no_more_products": "没有更多产品了",
+    "back_to_products": "返回产品列表",
+    "choose_payment_method": "选择支付方式",
+    "subscribe_now": "立即订阅",
+    "buy_now": "立即购买",
+    "no_payment_methods": "该产品暂无可用支付方式",
+    "one_time": "一次性",
+    "unlimited_stock": "无限库存",
+    "select_payment_method": "请选择支付方式",
+    "checkout_failed": "创建结账会话失败"
+  },
   "posts_public": {
     "blog_title": "我们的博客",
     "blog_subtitle": "来自 {siteName} 团队的最新资讯、教程和见解。",

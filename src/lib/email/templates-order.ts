@@ -21,7 +21,7 @@ Order Details:
 - Product: ${productName}
 ${amount ? `- Amount Paid: ${amount}` : ''}
 
-View your order details at: ${process.env.NEXT_PUBLIC_APP_URL}/user/orders
+View your order details at: ${process.env.NEXTAUTH_URL}/user/orders
 
 If you have any questions about your order, please don't hesitate to contact our support team.
 
@@ -54,7 +54,7 @@ What you can do:
 - Contact your bank if the issue persists
 - Reach out to our support team for assistance
 
-Try again at: ${process.env.NEXT_PUBLIC_APP_URL}/products
+Try again at: ${process.env.NEXTAUTH_URL}/products
 
 © 2026 ${siteConfig.name}. All rights reserved.
   `.trim()
@@ -81,7 +81,7 @@ Order Details:
 
 Don't worry! You can start a new checkout session anytime. The product is still available for purchase.
 
-Start a new checkout at: ${process.env.NEXT_PUBLIC_APP_URL}/products
+Start a new checkout at: ${process.env.NEXTAUTH_URL}/products
 
 © 2026 ${siteConfig.name}. All rights reserved.
   `.trim()

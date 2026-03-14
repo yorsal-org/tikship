@@ -5,12 +5,56 @@ import { themeInitScript } from '@/lib/utils/theme'
 import { siteConfig } from '@/config/site'
 import { getLocale } from 'next-intl/server'
 
+const BASE_URL = process.env.NEXTAUTH_URL || ''
+
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: siteConfig.name,
+    metadataBase: new URL(BASE_URL),
+    title: {
+      default: siteConfig.name,
+      template: `%s | ${siteConfig.name}`,
+    },
     description: siteConfig.description,
+    keywords: [
+      'SaaS boilerplate',
+      'Next.js starter',
+      'Next.js SaaS template',
+      'Stripe integration',
+      'PayPal integration',
+      'authentication boilerplate',
+      'admin dashboard',
+      'i18n Next.js',
+    ],
+    authors: [{ name: siteConfig.name, url: BASE_URL }],
+    creator: siteConfig.name,
+    openGraph: {
+      type: 'website',
+      locale: 'en_US',
+      url: BASE_URL,
+      siteName: siteConfig.name,
+      title: siteConfig.name,
+      description: siteConfig.description,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: siteConfig.name,
+      description: siteConfig.description,
+      creator: `@${siteConfig.name.toLowerCase()}`,
+    },
     icons: {
       icon: siteConfig.favicon,
+      shortcut: siteConfig.favicon,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
     },
   }
 }

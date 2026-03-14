@@ -7,17 +7,40 @@ import { ChevronLeft, Calendar, User, Hash } from 'lucide-react'
 import { getPostBySlug } from '@/lib/auth/utils'
 import Image from 'next/image'
 import { PostContent } from '@/components/post/PostContent'
+import { siteConfig } from '@/config/site'
+
+const BASE_URL = process.env.NEXTAUTH_URL || ''
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
   const post = await getPostBySlug(slug, PostType.ARTICLE)
   if (!post) return {}
+
+  const title = post.seoTitle || post.title
+  const description = post.seoDescription || post.excerpt || ''
+  const images = post.featuredImage ? [{ url: post.featuredImage, alt: title }] : []
+
   return {
-    title: post.seoTitle || post.title,
-    description: post.seoDescription || post.excerpt,
+    title,
+    description,
+    alternates: {
+      canonical: `/blog/${slug}`,
+    },
     openGraph: {
-      title: post.seoTitle || post.title,
-      description: post.seoDescription || post.excerpt,
+      type: 'article',
+      title,
+      description,
+      url: `/blog/${slug}`,
+      images,
+      publishedTime: post.publishedAt ? new Date(post.publishedAt).toISOString() : undefined,
+      modifiedTime: post.updatedAt ? new Date(post.updatedAt).toISOString() : undefined,
+      authors: post.author?.name ? [post.author.name] : undefined,
+      siteName: siteConfig.name,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
       images: post.featuredImage ? [post.featuredImage] : [],
     },
   }
@@ -32,8 +55,38 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     notFound()
   }
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: post.seoTitle || post.title,
+    description: post.seoDescription || post.excerpt || undefined,
+    image: post.featuredImage || undefined,
+    datePublished: post.publishedAt ? new Date(post.publishedAt).toISOString() : undefined,
+    dateModified: post.updatedAt ? new Date(post.updatedAt).toISOString() : undefined,
+    author: post.author
+      ? {
+          '@type': 'Person',
+          name: post.author.name || post.author.username,
+        }
+      : undefined,
+    publisher: {
+      '@type': 'Organization',
+      name: siteConfig.name,
+      url: BASE_URL,
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `${BASE_URL}/blog/${slug}`,
+    },
+  }
+
   return (
-    <article className="bg-base-100 grow pb-20">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <article className="bg-base-100 grow pb-20">
       {/* Hero Section */}
       <div className="w-full bg-base-200/50 py-12 md:py-20 border-b border-base-200">
         <div className="container mx-auto px-4 max-w-4xl">
@@ -105,5 +158,6 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         </div>
       </div>
     </article>
+    </>
   )
 }

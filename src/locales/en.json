@@ -868,6 +868,41 @@
       "processing": "Processing payment..."
     }
   },
+  "blog": {
+    "title": "Blog",
+    "subtitle": "Latest articles and updates",
+    "all_categories": "All Categories",
+    "category_label": "Category:",
+    "articles_count": "{count} article",
+    "articles_count_plural": "{count} articles",
+    "read_more": "Read More →",
+    "pages": "Pages",
+    "load_more": "Load More",
+    "infinite": "Infinite"
+  },
+  "products": {
+    "title": "Our Products",
+    "subtitle": "Choose the perfect plan for your needs",
+    "traditional": "Traditional",
+    "load_more": "Load More",
+    "infinite_scroll": "Infinite Scroll",
+    "in_stock": "{count} in stock",
+    "out_of_stock": "Out of stock",
+    "unlimited": "Unlimited",
+    "view_details": "View Details",
+    "load_more_products": "Load More Products",
+    "loading_products": "Loading Products...",
+    "no_more_products": "No more products to load",
+    "back_to_products": "Back to Products",
+    "choose_payment_method": "Choose Payment Method",
+    "subscribe_now": "Subscribe Now",
+    "buy_now": "Buy Now",
+    "no_payment_methods": "No payment methods available for this product",
+    "one_time": "One-time",
+    "unlimited_stock": "Unlimited stock",
+    "select_payment_method": "Please select a payment method",
+    "checkout_failed": "Failed to create checkout session"
+  },
   "posts_public": {
     "blog_title": "Our Blog",
     "blog_subtitle": "Latest news, tutorials, and insights from the {siteName} team.",

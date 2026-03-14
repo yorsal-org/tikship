@@ -3,7 +3,18 @@
     "pagination": {
       "showing_results": "Mostrando {from} a {to} de {total} resultados"
     },
-    "tagline": "Turn Ideas into Products, Launches into Cash. \n The Rapid-Start Platform for One-Person Company."
+    "tagline": "Turn Ideas into Products, Launches into Cash. \n The Rapid-Start Platform for One-Person Company.",
+    "footer": {
+      "resources": "Recursos",
+      "documentation": "Documentación",
+      "components": "Componentes",
+      "blog": "Blog",
+      "legal": "Legal",
+      "privacy_policy": "Política de Privacidad",
+      "terms_of_service": "Términos de Servicio",
+      "license": "Licencia",
+      "all_rights_reserved": "Todos los derechos reservados."
+    }
   },
   "header": {
     "login": "Iniciar sesión",
@@ -282,7 +293,8 @@
       "cannot_edit_system_permission": "No se puede editar el permiso del sistema",
       "cannot_delete_system_permission": "No se puede eliminar el permiso del sistema",
       "permission_in_use": "Este permiso está siendo utilizado por roles y no se puede eliminar",
-      "operation_failed": "Operación fallida"
+      "operation_failed": "Operación fallida",
+      "category_max_depth_exceeded": "Las categorías solo pueden anidarse hasta 3 niveles de profundidad."
     }
   },
   "admin": {
@@ -478,7 +490,16 @@
         "upload_failed": "Error al Subir",
         "drag_drop_hint": "Arrastra y suelta la imagen aquí o haz clic para subir",
         "upload_invalid_type": "Solo se admiten formatos {formats}",
-        "upload_size_error": "El tamaño de la imagen no puede exceder 5MB"
+        "upload_size_error": "El tamaño de la imagen no puede exceder 5MB",
+        "products": "Productos Relacionados",
+        "add_product": "Agregar Producto",
+        "no_products_added": "Aún no se han agregado productos",
+        "select_product": "Seleccionar Producto",
+        "search_products": "Buscar productos...",
+        "no_products_found": "No se encontraron productos",
+        "already_added": "Ya agregado",
+        "remove_product": "Eliminar producto",
+        "view_product": "Ver"
       },
       "categories": {
         "title": "Categorías",
@@ -490,7 +511,18 @@
         "add_btn": "Agregar Categoría",
         "no_found": "No se encontraron categorías",
         "delete": "Eliminar Categoría",
-        "delete_confirm": "¿Eliminar categoría? Las publicaciones se desasignarán pero no se eliminarán."
+        "slug": "Slug",
+        "delete_confirm": "¿Eliminar categoría? Las publicaciones se desasignarán pero no se eliminarán.",
+        "parent": "Categoría Padre",
+        "parent_none": "Ninguna (Nivel Superior)",
+        "level": "Nivel",
+        "level_1": "Nivel 1",
+        "level_2": "Nivel 2",
+        "level_3": "Nivel 3",
+        "max_depth_exceeded": "Las categorías solo pueden anidarse hasta 3 niveles de profundidad.",
+        "has_children_warning": "Esta categoría tiene subcategorías. Eliminarla también eliminará todas las subcategorías.",
+        "depth_label": "Profundidad de Anidamiento",
+        "subcategories": "Subcategorías"
       }
     },
     "roles": {
@@ -637,12 +669,20 @@
     },
     "products": {
       "title": "Gestión de Productos",
-      "subtitle": "Gestionar productos de Stripe y PayPal",
+      "subtitle": "Gestionar productos y métodos de pago",
       "create_product": "Crear Producto",
       "edit_product": "Editar Producto",
       "delete_product": "Eliminar Producto",
       "name": "Nombre del Producto",
       "description": "Descripción",
+      "content": "Contenido del Producto",
+      "slug": "Slug de URL",
+      "slug_hint": "Usado en la URL del producto, auto-generado desde el nombre",
+      "slug_placeholder": "ej: mi-increible-producto",
+      "slug_required": "El slug de URL es requerido",
+      "content_placeholder": "Ingresa información detallada del producto...",
+      "product_content": "Detalles del Producto",
+      "featured_image": "Imagen Destacada",
       "price": "Precio",
       "currency": "Moneda",
       "mode": "Modo de Pago",
@@ -655,7 +695,18 @@
       "interval_year": "Año",
       "interval_count": "Cantidad de Intervalos",
       "payment_methods": "Métodos de Pago",
-      "payment_methods_hint": "Selecciona los métodos de pago admitidos por este producto",
+      "payment_methods_hint": "Gestionar opciones de pago para este producto",
+      "manage_payment_methods": "Gestionar Métodos de Pago",
+      "add_payment_method": "Agregar Método de Pago",
+      "edit_payment_method": "Editar Método de Pago",
+      "delete_payment_method": "Eliminar Método de Pago",
+      "delete_payment_method_confirm": "¿Estás seguro de que quieres eliminar este método de pago?",
+      "delete_payment_method_success": "Método de pago eliminado exitosamente",
+      "create_payment_method_success": "Método de pago creado exitosamente",
+      "update_payment_method_success": "Método de pago actualizado exitosamente",
+      "no_payment_methods": "No hay métodos de pago configurados",
+      "provider": "Proveedor de Pago",
+      "price_id": "ID de Precio/Plan",
       "stripe_price_id": "ID de Precio de Stripe",
       "stripe_product_id": "ID de Producto de Stripe",
       "paypal_plan_id": "ID de Plan de PayPal",
@@ -679,6 +730,7 @@
       "save": "Guardar",
       "create": "Crear",
       "cancel": "Cancelar",
+      "back_to_list": "Volver a la Lista",
       "no_products": "No se encontraron productos",
       "delete_confirm": "¿Estás seguro de que quieres eliminar el producto \"{name}\"?",
       "delete_warning": "Esta acción no se puede deshacer.",
@@ -695,6 +747,7 @@
       "max_price": "Precio Máximo",
       "apply": "Aplicar",
       "clear": "Limpiar",
+      "fix_errors_first": "Por favor corrige los errores antes de enviar",
       "name_required": "El nombre del producto es requerido",
       "price_required": "El precio es requerido",
       "stripe_price_id_required": "El ID de Precio de Stripe es requerido",
@@ -719,7 +772,12 @@
       "basic_info": "Información Básica",
       "pricing_info": "Información de Precios",
       "payment_config": "Configuración de Pago",
-      "additional_settings": "Configuración Adicional"
+      "additional_settings": "Configuración Adicional",
+      "price_inventory": "Precio e Inventario",
+      "price_hint": "Precio en centavos (ej., 1000 = $10.00)",
+      "quantity": "Cantidad en Stock",
+      "quantity_placeholder": "Dejar vacío para stock ilimitado",
+      "quantity_hint": "Dejar vacío para stock ilimitado"
     },
     "orders": {
       "title": "Gestión de Pedidos",
@@ -809,6 +867,41 @@
       "cancel": "Pago cancelado",
       "processing": "Procesando pago..."
     }
+  },
+  "blog": {
+    "title": "Blog",
+    "subtitle": "Últimos artículos y actualizaciones",
+    "all_categories": "Todas las Categorías",
+    "category_label": "Categoría:",
+    "articles_count": "{count} artículo",
+    "articles_count_plural": "{count} artículos",
+    "read_more": "Leer Más →",
+    "pages": "Páginas",
+    "load_more": "Cargar Más",
+    "infinite": "Infinito"
+  },
+  "products": {
+    "title": "Nuestros Productos",
+    "subtitle": "Elige el plan perfecto para tus necesidades",
+    "traditional": "Tradicional",
+    "load_more": "Cargar Más",
+    "infinite_scroll": "Desplazamiento Infinito",
+    "in_stock": "{count} en stock",
+    "out_of_stock": "Sin stock",
+    "unlimited": "Ilimitado",
+    "view_details": "Ver Detalles",
+    "load_more_products": "Cargar Más Productos",
+    "loading_products": "Cargando Productos...",
+    "no_more_products": "No hay más productos para cargar",
+    "back_to_products": "Volver a Productos",
+    "choose_payment_method": "Elegir Método de Pago",
+    "subscribe_now": "Suscribirse Ahora",
+    "buy_now": "Comprar Ahora",
+    "no_payment_methods": "No hay métodos de pago disponibles para este producto",
+    "one_time": "Único",
+    "unlimited_stock": "Stock ilimitado",
+    "select_payment_method": "Por favor selecciona un método de pago",
+    "checkout_failed": "Error al crear la sesión de pago"
   },
   "posts_public": {
     "blog_title": "Nuestro Blog",

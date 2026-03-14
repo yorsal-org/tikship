@@ -6,7 +6,7 @@ import { IUploadProvider, UploadResult } from '@/types/upload'
  * Get upload provider based on environment configuration
  */
 function getDefaultProvider(): IUploadProvider {
-  const uploadType = process.env.UPLOAD_TYPE || 'local'
+  const uploadType = process.env.UPLOAD_PROVIDER || 'local'
 
   switch (uploadType.toLowerCase()) {
     case 'imgbb':

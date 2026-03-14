@@ -112,7 +112,7 @@ export class PayPalService {
         },
       ],
       application_context: {
-        brand_name: process.env.NEXT_PUBLIC_SITE_NAME || siteConfig.name,
+        brand_name: siteConfig.name,
         return_url: successUrl || `${process.env.NEXTAUTH_URL}/payment/success`,
         cancel_url: cancelUrl || `${process.env.NEXTAUTH_URL}/payment/cancel`,
       },
@@ -206,7 +206,7 @@ export class PayPalService {
     const subscriptionData = {
       plan_id: planId,
       application_context: {
-        brand_name: process.env.NEXT_PUBLIC_SITE_NAME || siteConfig.name,
+        brand_name: siteConfig.name,
         user_action: 'SUBSCRIBE_NOW',
         return_url: successUrl || `${process.env.NEXTAUTH_URL}/payment/success`,
         cancel_url: cancelUrl || `${process.env.NEXTAUTH_URL}/payment/cancel`,

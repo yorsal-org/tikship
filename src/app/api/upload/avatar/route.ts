@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
       return ApiResponse.error(t('upload.max_size'))
     }
 
-    // Upload using configured provider (local or ImgBB based on UPLOAD_TYPE env)
+    // Upload using configured provider (local or ImgBB based on UPLOAD_PROVIDER env)
     const uploadResult = await uploadService.uploadImage(file)
 
     if (uploadResult.success && uploadResult.url) {
