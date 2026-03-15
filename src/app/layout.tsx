@@ -15,16 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
       template: `%s | ${siteConfig.name}`,
     },
     description: siteConfig.description,
-    keywords: [
-      'SaaS boilerplate',
-      'Next.js starter',
-      'Next.js SaaS template',
-      'Stripe integration',
-      'PayPal integration',
-      'authentication boilerplate',
-      'admin dashboard',
-      'i18n Next.js',
-    ],
+    keywords: siteConfig.keywords,
     authors: [{ name: siteConfig.name, url: BASE_URL }],
     creator: siteConfig.name,
     openGraph: {

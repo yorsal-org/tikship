@@ -2,6 +2,16 @@ export const siteConfig = {
   // Basic site information
   name: 'Tikship',
   description: 'A SaaS boilerplate for startup',
+  keywords: [
+    'SaaS boilerplate',
+    'Next.js starter',
+    'Next.js SaaS template',
+    'Stripe integration',
+    'PayPal integration',
+    'authentication boilerplate',
+    'admin dashboard',
+    'i18n Next.js',
+  ] as string[],
   supportEmail: 'support@tikship.top',
   favicon: '/favicon.svg',
 
