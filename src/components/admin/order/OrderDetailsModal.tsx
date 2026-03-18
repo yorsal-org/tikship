@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import { Package, User, CreditCard, Calendar, FileText } from 'lucide-react'
@@ -24,6 +24,10 @@ export function OrderDetailsModal({
   const t = useTranslations('admin.orders')
   const [updating, setUpdating] = useState(false)
   const [newStatus, setNewStatus] = useState(order.status)
+
+  useEffect(() => {
+    setNewStatus(order.status)
+  }, [order.status])
 
   const handleUpdateStatus = async () => {
     if (newStatus === order.status) {

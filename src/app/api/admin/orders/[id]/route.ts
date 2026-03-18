@@ -5,6 +5,7 @@ import { ApiResponse } from '@/lib/utils/api-response'
 import { PERMISSIONS } from '@/config/permissions'
 import { logAudit } from '@/lib/audit/service'
 import type { UpdateOrderStatusBody } from '@/types/api'
+import { OrderStatus } from '@/types/order'
 
 /**
  * Get order details
@@ -49,7 +50,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
 /**
  * Update order status
- * @description Update order status (pending, completed, failed, refunded)
+ * @description Update order status (pending, completed, failed, refunded, expired)
  * @tag Admin - Orders
  * @auth bearerAuth
  * @body UpdateOrderStatusBody
@@ -67,7 +68,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const { status } = (await req.json()) as UpdateOrderStatusBody
 
     // Validate status
-    const validStatuses = ['pending', 'completed', 'failed', 'refunded']
+    const validStatuses = Object.values(OrderStatus) as string[]
     if (!status || !validStatuses.includes(status)) {
       return await ApiResponse.adminError('invalid_params', 400)
     }
