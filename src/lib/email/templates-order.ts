@@ -1,5 +1,6 @@
 import { siteConfig } from '@/config/site'
 
+const currentYear = new Date().getFullYear()
 /**
  * Order success plain text
  */
@@ -25,7 +26,7 @@ View your order details at: ${process.env.NEXTAUTH_URL}/user/orders
 
 If you have any questions about your order, please don't hesitate to contact our support team.
 
-© 2026 ${siteConfig.name}. All rights reserved.
+© ${currentYear} ${siteConfig.name}. All rights reserved.
   `.trim()
 }
 
@@ -56,7 +57,7 @@ What you can do:
 
 Try again at: ${process.env.NEXTAUTH_URL}/products
 
-© 2026 ${siteConfig.name}. All rights reserved.
+© ${currentYear} ${siteConfig.name}. All rights reserved.
   `.trim()
 }
 
@@ -83,6 +84,6 @@ Don't worry! You can start a new checkout session anytime. The product is still 
 
 Start a new checkout at: ${process.env.NEXTAUTH_URL}/products
 
-© 2026 ${siteConfig.name}. All rights reserved.
+© ${currentYear} ${siteConfig.name}. All rights reserved.
   `.trim()
 }

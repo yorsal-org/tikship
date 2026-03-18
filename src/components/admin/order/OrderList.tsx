@@ -218,7 +218,7 @@ export function OrderList() {
       label: t('payment_provider'),
       render: order => (
         <StatusBadge
-          status={order.paymentProvider === 'stripe' ? 'Stripe' : 'PayPal'}
+          status={order.paymentProvider}
           variant={order.paymentProvider === 'stripe' ? 'info' : 'warning'}
         />
       ),

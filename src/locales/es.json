@@ -109,7 +109,6 @@
     "auth_status": "Estado de Autenticación",
     "verified": "Verificado",
     "login_prompt": "Por favor inicia sesión para acceder a todas las funciones",
-    "footer": "© 2026 {siteName}. Construido con Next.js 16 y NextAuth.js",
     "login_now": "Iniciar Sesión Ahora",
     "profile_section_title": "Configuración de Perfil",
     "profile_section_desc": "Actualiza tu información pública y personaliza tu experiencia."

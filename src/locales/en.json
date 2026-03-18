@@ -109,7 +109,6 @@
     "auth_status": "Auth Status",
     "verified": "Verified",
     "login_prompt": "Please login to access full features",
-    "footer": "© 2026 {siteName}. Built with Next.js 16 and NextAuth.js",
     "login_now": "Login Now",
     "profile_section_title": "Profile Settings",
     "profile_section_desc": "Update your public information and personalize your experience."

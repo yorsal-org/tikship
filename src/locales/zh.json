@@ -109,7 +109,6 @@
     "auth_status": "认证状态",
     "verified": "已认证",
     "login_prompt": "请先登录以访问完整功能",
-    "footer": "© 2026 {siteName}. 使用 Next.js 16 和 NextAuth.js 构建",
     "login_now": "立即登录",
     "profile_section_title": "个人资料设置",
     "profile_section_desc": "更改您的公开信息和个性化设置。"

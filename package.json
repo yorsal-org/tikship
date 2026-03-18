@@ -12,6 +12,7 @@
     "db:generate-test-data": "tsx scripts/generate-test-data.ts",
     "db:update-provider": "tsx scripts/update-db-provider.ts",
     "db:generate": "npm run db:update-provider && npx prisma generate",
+    "db:deploy": "npx prisma migrate deploy && npx prisma generate",
     "db:reset-admin-password": "tsx scripts/reset-admin-password.ts",
     "db:studio": "prisma studio",
     "setup:env": "tsx scripts/setup-env.ts",

@@ -4,6 +4,7 @@ import { siteConfig } from '@/config/site'
  * Generate plain text version of verification code email
  */
 export function verificationCodePlainText(code: string): string {
+  const currentYear = new Date().getFullYear()
   return `
 ${siteConfig.name} - Email Verification
 
@@ -20,6 +21,6 @@ Important Notice:
 
 This email was sent automatically, please do not reply
 
-© 2026 ${siteConfig.name}. All rights reserved.
+© ${currentYear} ${siteConfig.name}. All rights reserved.
   `.trim()
 }
