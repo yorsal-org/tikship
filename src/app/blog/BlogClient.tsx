@@ -105,9 +105,7 @@ function CategorySidebar({ tree, selectedId, onSelect }: CategorySidebarProps) {
       <div
         onClick={() => onSelect(undefined)}
         className={`flex items-center gap-2 px-3 py-1.5 rounded-lg cursor-pointer text-sm transition-all ${
-          !selectedId
-            ? 'bg-primary text-primary-content font-semibold'
-            : 'hover:bg-base-200'
+          !selectedId ? 'bg-primary text-primary-content font-semibold' : 'hover:bg-base-200'
         }`}
       >
         <span className="flex-1">{t('all_categories')}</span>
@@ -174,8 +172,19 @@ export default function BlogPage() {
     [selectedCategory]
   )
 
-  const { items: posts, currentPage, totalCount, pageSize, loading, hasMore, goToPage, loadMore, type, setType, observerTarget } =
-    usePagination<Post>({ fetchFunction: fetchPosts, pageSize: 12, type: 'traditional' })
+  const {
+    items: posts,
+    currentPage,
+    totalCount,
+    pageSize,
+    loading,
+    hasMore,
+    goToPage,
+    loadMore,
+    type,
+    setType,
+    observerTarget,
+  } = usePagination<Post>({ fetchFunction: fetchPosts, pageSize: 12, type: 'traditional' })
 
   const selectedCategoryName = selectedCategory
     ? findCategoryName(categoryTree, selectedCategory)
@@ -193,7 +202,12 @@ export default function BlogPage() {
           >
             <figure className="aspect-video overflow-hidden relative bg-base-200 flex items-center justify-center">
               {post.featuredImage ? (
-                <Image src={post.featuredImage} alt={post.title} fill className="object-cover transition-transform group-hover:scale-105" />
+                <Image
+                  src={post.featuredImage}
+                  alt={post.title}
+                  fill
+                  className="object-cover transition-transform group-hover:scale-105"
+                />
               ) : (
                 <FileText className="w-16 h-16 text-base-content/20" />
               )}
@@ -213,7 +227,12 @@ export default function BlogPage() {
                 {post.title}
               </h2>
               <p className="text-sm opacity-60 line-clamp-3">
-                {post.excerpt || post.content?.substring(0, 140)}
+                {post.excerpt ||
+                  post.content
+                    ?.replace(/<[^>]*>/g, '')
+                    .replace(/&[a-z]+;/gi, ' ')
+                    .trim()
+                    .substring(0, 140)}
               </p>
               <div className="mt-3 pt-3 border-t border-base-200">
                 <span className="text-primary text-xs font-semibold">{t('read_more')}</span>
@@ -240,8 +259,14 @@ export default function BlogPage() {
           <aside className="hidden lg:block w-56 shrink-0">
             <div className="sticky top-6">
               <div className="bg-base-100 rounded-2xl border border-base-content/8 p-4 shadow-sm">
-                <p className="text-xs font-bold uppercase tracking-widest opacity-40 mb-3 px-1">{t('all_categories')}</p>
-                <CategorySidebar tree={categoryTree} selectedId={selectedCategory} onSelect={handleCategorySelect} />
+                <p className="text-xs font-bold uppercase tracking-widest opacity-40 mb-3 px-1">
+                  {t('all_categories')}
+                </p>
+                <CategorySidebar
+                  tree={categoryTree}
+                  selectedId={selectedCategory}
+                  onSelect={handleCategorySelect}
+                />
               </div>
             </div>
           </aside>
@@ -253,12 +278,19 @@ export default function BlogPage() {
                 className="btn btn-sm btn-outline gap-2"
                 onClick={() => setSidebarOpen(o => !o)}
               >
-                <ChevronRight size={14} className={`transition-transform ${sidebarOpen ? 'rotate-90' : ''}`} />
+                <ChevronRight
+                  size={14}
+                  className={`transition-transform ${sidebarOpen ? 'rotate-90' : ''}`}
+                />
                 {selectedCategoryName || t('all_categories')}
               </button>
               {sidebarOpen && (
                 <div className="absolute z-30 mt-2 w-56 bg-base-100 rounded-2xl border border-base-content/10 shadow-lg p-3">
-                  <CategorySidebar tree={categoryTree} selectedId={selectedCategory} onSelect={handleCategorySelect} />
+                  <CategorySidebar
+                    tree={categoryTree}
+                    selectedId={selectedCategory}
+                    onSelect={handleCategorySelect}
+                  />
                 </div>
               )}
             </div>
@@ -270,20 +302,38 @@ export default function BlogPage() {
                   <div className="flex items-center gap-2">
                     <span className="text-sm opacity-50">{t('category_label')}</span>
                     <span className="badge badge-primary">{selectedCategoryName}</span>
-                    <button className="btn btn-ghost btn-xs" onClick={() => handleCategorySelect(undefined)}>✕</button>
+                    <button
+                      className="btn btn-ghost btn-xs"
+                      onClick={() => handleCategorySelect(undefined)}
+                    >
+                      ✕
+                    </button>
                   </div>
                 ) : (
-                  <span className="text-sm opacity-50">{t(totalCount !== 1 ? 'articles_count_plural' : 'articles_count', { count: totalCount })}</span>
+                  <span className="text-sm opacity-50">
+                    {t(totalCount !== 1 ? 'articles_count_plural' : 'articles_count', {
+                      count: totalCount,
+                    })}
+                  </span>
                 )}
               </div>
               <div className="join">
-                <button className={`btn btn-xs join-item gap-1.5 ${type === 'traditional' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setType('traditional')}>
+                <button
+                  className={`btn btn-xs join-item gap-1.5 ${type === 'traditional' ? 'btn-primary' : 'btn-ghost'}`}
+                  onClick={() => setType('traditional')}
+                >
                   <Grid3x3 className="w-3 h-3" /> {t('pages')}
                 </button>
-                <button className={`btn btn-xs join-item gap-1.5 ${type === 'loadMore' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setType('loadMore')}>
+                <button
+                  className={`btn btn-xs join-item gap-1.5 ${type === 'loadMore' ? 'btn-primary' : 'btn-ghost'}`}
+                  onClick={() => setType('loadMore')}
+                >
                   <List className="w-3 h-3" /> {t('load_more')}
                 </button>
-                <button className={`btn btn-xs join-item gap-1.5 ${type === 'infinite' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setType('infinite')}>
+                <button
+                  className={`btn btn-xs join-item gap-1.5 ${type === 'infinite' ? 'btn-primary' : 'btn-ghost'}`}
+                  onClick={() => setType('infinite')}
+                >
                   <Layers className="w-3 h-3" /> {t('infinite')}
                 </button>
               </div>
