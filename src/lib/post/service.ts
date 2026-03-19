@@ -504,11 +504,12 @@ export class PostService {
         slug: true,
         description: true,
         parentId: true,
+        order: true,
         createdAt: true,
         updatedAt: true,
         posts: { select: { postId: true } },
       },
-      orderBy: { name: 'asc' },
+      orderBy: [{ order: 'asc' }, { name: 'asc' }],
     })
     const postIdsByCategoryId = new Map<string, Set<string>>(
       flat.map((cat) => [cat.id, new Set(cat.posts.map((p) => p.postId))])
@@ -542,7 +543,7 @@ export class PostService {
           },
         },
       },
-      orderBy: { name: 'asc' },
+      orderBy: [{ order: 'asc' }, { name: 'asc' }],
     })
     const postIdsByCategoryId = new Map<string, Set<string>>(
       flat.map((cat) => [cat.id, new Set(cat.posts.map((p) => p.postId))])
@@ -575,6 +576,28 @@ export class PostService {
 
     return await prisma.category.create({
       data: { name, slug, description, parentId: parentId || null },
+    })
+  }
+
+  async reorderCategories(orders: { id: string; order: number }[]) {
+    await prisma.$transaction(
+      orders.map(({ id, order }) =>
+        prisma.category.update({ where: { id }, data: { order } })
+      )
+    )
+  }
+
+  async updateCategory(id: string, name: string, description?: string, parentId?: string | null) {
+    if (parentId) {
+      // Ensure we don't create circular reference
+      if (parentId === id) throw new Error('CIRCULAR_REFERENCE')
+      const parentDepth = await this.getCategoryDepth(parentId)
+      if (parentDepth >= 3) throw new Error('MAX_DEPTH_EXCEEDED')
+    }
+
+    return await prisma.category.update({
+      where: { id },
+      data: { name, description, parentId: parentId ?? null },
     })
   }
 

@@ -521,7 +521,14 @@
         "max_depth_exceeded": "Categories can only be nested up to 3 levels deep.",
         "has_children_warning": "This category has subcategories. Deleting it will also delete all subcategories.",
         "depth_label": "Nesting Depth",
-        "subcategories": "Subcategories"
+        "subcategories": "Subcategories",
+        "edit": "Edit Category",
+        "edit_btn": "Save Changes",
+        "edit_title": "Edit Category",
+        "update_success": "Category updated successfully",
+        "reorder_success": "Order saved",
+        "reorder_hint": "Drag to reorder, then save",
+        "reorder_save": "Save Order"
       }
     },
     "roles": {

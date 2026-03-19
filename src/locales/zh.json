@@ -521,7 +521,14 @@
         "max_depth_exceeded": "分类最多只能嵌套 3 层。",
         "has_children_warning": "该分类包含子分类，删除后其所有子分类也将被删除。",
         "depth_label": "嵌套层级",
-        "subcategories": "子分类"
+        "subcategories": "子分类",
+        "edit": "编辑分类",
+        "edit_btn": "保存修改",
+        "edit_title": "编辑分类",
+        "update_success": "分类更新成功",
+        "reorder_success": "排序已保存",
+        "reorder_hint": "拖拽调整顺序后点击保存",
+        "reorder_save": "保存排序"
       }
     },
     "roles": {

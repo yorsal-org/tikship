@@ -43,6 +43,7 @@ model User {
   password           String?
   isActive           Boolean                   @default(true)
   lastLoginAt        DateTime?
+  metadata           String?                   @db.Text // JSON string for extra user info (e.g. discordUsername)
   accounts           Account[]
   sessions           Session[]
   loginAttempts      LoginAttempt[]
@@ -220,6 +221,7 @@ model Category {
   slug        String         @unique
   description String?
   parentId    String?
+  order       Int            @default(0)
   parent      Category?      @relation("CategoryToCategory", fields: [parentId], references: [id])
   children    Category[]     @relation("CategoryToCategory")
   posts       PostCategory[]
@@ -227,6 +229,7 @@ model Category {
   updatedAt   DateTime       @updatedAt
 
   @@index([parentId])
+  @@index([order])
 }
 
 model Tag {

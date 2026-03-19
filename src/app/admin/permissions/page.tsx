@@ -18,7 +18,7 @@ export default function PermissionsPage() {
   const [editingPermission, setEditingPermission] = useState<Permission | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const [sortMode, setSortMode] = useState<SortMode>('group')
+  const [sortMode, setSortMode] = useState<SortMode>('time')
 
   useEffect(() => {
     fetchPermissions()

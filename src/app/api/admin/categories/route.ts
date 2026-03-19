@@ -71,6 +71,49 @@ export async function POST(req: NextRequest) {
 }
 
 /**
+ * Update category
+ * @description Update an existing post category
+ * @tag Admin - Posts
+ * @auth bearerAuth
+ * @body {name: string, description?: string, parentId?: string}
+ * @params {id: string}
+ * @response 200:Category updated successfully
+ * @responseSet auth
+ * @openapi
+ */
+export async function PATCH(req: NextRequest) {
+  const { adminUserId } = await requireAdminAuth(req, PERMISSIONS.ARTICLE_EDIT)
+  if (!adminUserId) return ApiResponse.adminError('unauthorized', 401)
+
+  try {
+    const { searchParams } = new URL(req.url)
+    const id = searchParams.get('id')
+    if (!id) return ApiResponse.adminError('required_fields_missing', 400)
+
+    const { name, description, parentId } = await req.json()
+    if (!name) return ApiResponse.adminError('name_required', 400)
+
+    const category = await postService.updateCategory(id, name, description, parentId)
+
+    await logAudit({
+      adminUserId: adminUserId!,
+      action: 'category:update',
+      resource: 'category',
+      resourceId: id,
+      details: { name, description, parentId },
+    })
+
+    return ApiResponse.success({ category })
+  } catch (err) {
+    if (err instanceof Error) {
+      if (err.message === 'MAX_DEPTH_EXCEEDED') return ApiResponse.adminError('category_max_depth_exceeded', 400)
+      if (err.message === 'CIRCULAR_REFERENCE') return ApiResponse.adminError('category_circular_reference', 400)
+    }
+    return ApiResponse.adminError('server_error', 500)
+  }
+}
+
+/**
  * Delete category
  * @description Delete a post category by ID
  * @tag Admin - Posts
