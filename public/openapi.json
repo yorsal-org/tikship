@@ -91,6 +91,11 @@
             "type": "string",
             "description": "Category description",
             "nullable": true
+          },
+          "parentId": {
+            "type": "string",
+            "description": "Parent category ID (optional, max 3 levels deep)",
+            "nullable": true
           }
         }
       },
@@ -264,8 +269,10 @@
           "status": {
             "type": "string",
             "enum": [
-              "draft",
-              "published"
+              "DRAFT",
+              "PUBLISHED",
+              "SCHEDULED",
+              "TRASH"
             ],
             "description": "Post status",
             "nullable": true
@@ -291,17 +298,18 @@
           "type": {
             "type": "string",
             "enum": [
-              "article",
-              "page"
+              "ARTICLE",
+              "PAGE"
             ],
             "description": "Post type"
           },
           "status": {
             "type": "string",
             "enum": [
-              "draft",
-              "published",
-              "archived"
+              "DRAFT",
+              "PUBLISHED",
+              "SCHEDULED",
+              "TRASH"
             ],
             "description": "Post status"
           },
@@ -343,8 +351,8 @@
           "type": {
             "type": "string",
             "enum": [
-              "article",
-              "page"
+              "ARTICLE",
+              "PAGE"
             ],
             "description": "Post type",
             "nullable": true
@@ -367,10 +375,24 @@
           "status": {
             "type": "string",
             "enum": [
-              "draft",
-              "published"
+              "DRAFT",
+              "PUBLISHED",
+              "SCHEDULED",
+              "TRASH"
             ],
             "description": "Post status",
+            "nullable": true
+          },
+          "publishedAt": {
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "string"
+              }
+            ],
             "nullable": true
           },
           "categoryId": {
@@ -1787,7 +1809,7 @@
       "patch": {
         "operationId": "patch-admin-orders-{id}",
         "summary": "Update order status",
-        "description": "Update order status (pending, completed, failed, refunded)",
+        "description": "Update order status (pending, completed, failed, refunded, expired)",
         "tags": [
           "Admin - Orders"
         ],
@@ -1878,8 +1900,8 @@
     "/admin/categories": {
       "get": {
         "operationId": "get-admin-categories",
-        "summary": "Get categories",
-        "description": "Retrieve all post categories",
+        "summary": "Get categories (hierarchical tree)",
+        "description": "Retrieve all post categories as a tree (up to 3 levels)",
         "tags": [
           "Admin - Posts"
         ],
@@ -1895,7 +1917,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Returns list of categories"
+                  "$ref": "#/components/schemas/Returns hierarchical category tree"
                 }
               }
             }
@@ -1917,7 +1939,7 @@
       "post": {
         "operationId": "post-admin-categories",
         "summary": "Create category",
-        "description": "Create a new post category",
+        "description": "Create a new post category (max 3 levels deep)",
         "tags": [
           "Admin - Posts"
         ],
@@ -1943,6 +1965,44 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Category created successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patch-admin-categories",
+        "summary": "Update category",
+        "description": "Update an existing post category",
+        "tags": [
+          "Admin - Posts"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Category updated successfully"
                 }
               }
             }
@@ -2015,8 +2075,8 @@
             "schema": {
               "type": "string",
               "enum": [
-                "article",
-                "page"
+                "ARTICLE",
+                "PAGE"
               ],
               "description": "Post type"
             },
@@ -2029,9 +2089,10 @@
             "schema": {
               "type": "string",
               "enum": [
-                "draft",
-                "published",
-                "archived"
+                "DRAFT",
+                "PUBLISHED",
+                "SCHEDULED",
+                "TRASH"
               ],
               "description": "Post status"
             },
@@ -2188,6 +2249,46 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Returns list of tags"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/admin/categories/reorder": {
+      "put": {
+        "operationId": "put-admin-categories-reorder",
+        "summary": "Reorder categories",
+        "description": "Update sort order for a list of categories",
+        "tags": [
+          "Admin - Posts"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Categories reordered successfully"
                 }
               }
             }
@@ -4009,8 +4110,8 @@
     "/posts/categories": {
       "get": {
         "operationId": "get-posts-categories",
-        "summary": "Get categories",
-        "description": "Retrieve all post categories for public viewing",
+        "summary": "Get categories (hierarchical tree)",
+        "description": "Retrieve all post categories as a hierarchical tree for public viewing",
         "tags": [
           "Public - Posts"
         ],
@@ -4021,7 +4122,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Returns list of categories"
+                  "$ref": "#/components/schemas/Returns hierarchical category tree"
                 }
               }
             }
@@ -4137,11 +4238,6 @@
           "Upload"
         ],
         "parameters": [],
-        "security": [
-          {
-            "sessionAuth": []
-          }
-        ],
         "responses": {
           "200": {
             "description": "Successful response",
