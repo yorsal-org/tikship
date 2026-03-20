@@ -6,7 +6,7 @@
  * via dynamic import() so Next.js edge-runtime static analysis never scans it.
  */
 export async function register() {
-
+  if (process.env.NEXT_RUNTIME !== 'nodejs') return
   if (process.env.NODE_ENV !== 'development') return
 
   const { checkEnv } = await import('./instrumentation.node')
