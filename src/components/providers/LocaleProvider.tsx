@@ -1,8 +1,8 @@
 'use client'
 
 import { NextIntlClientProvider } from 'next-intl'
-import { ReactNode, useState, useEffect, createContext, useContext } from 'react'
-import { detectBrowserLocale } from '@/lib/i18n/detector'
+import { ReactNode, useState, createContext, useContext } from 'react'
+import { setLocale as setLocaleCookie } from '@/lib/i18n/locale-cookie'
 import { defaultLocale } from '@/config/site'
 
 interface LocaleContextType {
@@ -22,47 +22,34 @@ export function useLocaleContext() {
 
 interface LocaleProviderProps {
   children: ReactNode
+  initialLocale?: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  initialMessages?: Record<string, any>
 }
 
-export function LocaleProvider({ children }: LocaleProviderProps) {
-  const [locale, setLocaleState] = useState<string>(defaultLocale)
-  const [messages, setMessages] = useState({})
-  const [isLoading, setIsLoading] = useState(true)
+export function LocaleProvider({
+  children,
+  initialLocale = defaultLocale,
+  initialMessages = {},
+}: LocaleProviderProps) {
+  const [locale, setLocaleState] = useState<string>(initialLocale)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [messages, setMessages] = useState<Record<string, any>>(initialMessages)
 
-  const loadMessages = async (newLocale: string) => {
+  const setLocale = async (newLocale: string) => {
     try {
       const localeModule = await import(`@/locales/${newLocale}.json`)
       setMessages(localeModule.default)
-      return true
     } catch {
-      // Fallback to default locale
-      const defaultModule = await import(`@/locales/${defaultLocale}.json`)
-      setMessages(defaultModule.default)
-      return false
+      // keep current messages on error
     }
-  }
-
-  useEffect(() => {
-    const detectedLocale = detectBrowserLocale() as string
-    setLocaleState(detectedLocale)
-    loadMessages(detectedLocale).then(() => setIsLoading(false))
-  }, [])
-
-  const setLocale = async (newLocale: string) => {
     setLocaleState(newLocale)
-    // Use the utility function which sets cookie
-    const { setLocale: setLocaleUtil } = await import('@/lib/i18n/detector')
-    setLocaleUtil(newLocale)
-    await loadMessages(newLocale)
-  }
-
-  if (isLoading) {
-    return null
+    setLocaleCookie(newLocale)
   }
 
   return (
     <LocaleContext.Provider value={{ locale, setLocale }}>
-      <NextIntlClientProvider locale={locale} messages={messages}>
+      <NextIntlClientProvider locale={locale} messages={messages} timeZone="UTC">
         {children}
       </NextIntlClientProvider>
     </LocaleContext.Provider>

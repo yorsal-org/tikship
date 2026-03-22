@@ -1,7 +1,7 @@
 'use client'
 
 import { useLocale } from 'next-intl'
-import { setLocale } from '@/lib/i18n/detector'
+import { setLocale } from '@/lib/i18n/locale-cookie'
 import { Languages } from 'lucide-react'
 import { siteConfig } from '@/config/site'
 

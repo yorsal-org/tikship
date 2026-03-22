@@ -3,7 +3,7 @@ import '@/app/globals.css'
 import '@/styles/datepicker.css'
 import { themeInitScript } from '@/lib/utils/theme'
 import { siteConfig } from '@/config/site'
-import { getLocale } from 'next-intl/server'
+import { getLocale } from '@/lib/i18n/config'
 
 const BASE_URL = process.env.NEXTAUTH_URL || ''
 
@@ -60,6 +60,8 @@ export default async function RootLayout({
   children: React.ReactNode
 }>) {
   const locale = await getLocale()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const messages: Record<string, any> = (await import(`../locales/${locale}.json`)).default
 
   return (
     <html lang={locale} suppressHydrationWarning>
@@ -67,7 +69,7 @@ export default async function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body className="antialiased min-h-screen flex flex-col bg-base-100">
-        <Providers>
+        <Providers initialLocale={locale} initialMessages={messages}>
           <ConditionalLayout>{children}</ConditionalLayout>
           <ToastContainer />
         </Providers>
