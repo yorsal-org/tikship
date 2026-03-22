@@ -82,8 +82,8 @@ export async function POST(req: NextRequest) {
       type,
       status: body.status,
       publishedAt: body.publishedAt,
-      categoryIds: body.categoryId ? [body.categoryId] : undefined,
-      tagNames: body.tagIds,
+      categoryIds: body.categoryIds,
+      tagNames: body.tagNames,
     } as PostInput
 
     const post = await postService.createPost(adminUserId, postInput)

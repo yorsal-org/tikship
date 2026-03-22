@@ -148,8 +148,8 @@ export type CreatePostBody = {
   featuredImage?: string // Featured image URL
   status?: 'DRAFT' | 'PUBLISHED' | 'SCHEDULED' | 'TRASH' // Post status
   publishedAt?: Date | string | null
-  categoryId?: string // Category ID
-  tagIds?: string[] // Tag IDs
+  categoryIds?: string[] // Category IDs
+  tagNames?: string[] // Tag names
 }
 
 // Category Types
@@ -227,8 +227,8 @@ export type UpdatePostBody = {
   excerpt?: string // Post excerpt
   featuredImage?: string // Featured image URL
   status?: 'DRAFT' | 'PUBLISHED' | 'SCHEDULED' | 'TRASH' // Post status
-  categoryId?: string // Category ID
-  tagIds?: string[] // Tag IDs
+  categoryIds?: string[] // Category IDs
+  tagNames?: string[] // Tag names
 }
 
 // Role Permission Types

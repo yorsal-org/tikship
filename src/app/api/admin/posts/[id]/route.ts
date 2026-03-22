@@ -63,10 +63,12 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     if (error) return error
     if (!adminUserId) return await ApiResponse.adminError('unauthorized', 401)
 
-    // Convert status string to PostStatus enum if provided
+    // Convert body fields to PostInput format
     const updateData = {
       ...body,
-      status: body.status
+      status: body.status,
+      categoryIds: body.categoryIds,
+      tagNames: body.tagNames,
     } as Partial<PostInput>
 
     const post = await postService.updatePost(id, updateData)
