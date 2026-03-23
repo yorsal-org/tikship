@@ -279,6 +279,30 @@ export class PostService {
   async createPost(authorId: string, data: PostInput) {
     const slug = await this.generateUniqueSlug(data.slug || data.title)
 
+    // Upsert tags and collect their IDs
+    let tagConnects: { tagId: string }[] = []
+    if (data.tagNames && data.tagNames.length > 0) {
+      const tagIds = await Promise.all(
+        data.tagNames.map(async (name) => {
+          const tagSlug = name
+            .toLowerCase()
+            .trim()
+            .replace(/\s+/g, '-')
+            .replace(/[^\p{L}\p{N}\-]/gu, '')
+            .replace(/-{2,}/g, '-')
+            .replace(/^-+|-+$/g, '')
+          const tag = await prisma.tag.upsert({
+            where: { name },
+            update: {},
+            create: { name, slug: tagSlug },
+            select: { id: true },
+          })
+          return tag.id
+        })
+      )
+      tagConnects = tagIds.map((tagId) => ({ tagId }))
+    }
+
     return await prisma.post.create({
       data: {
         title: data.title,
@@ -299,6 +323,9 @@ export class PostService {
                 category: { connect: { id } },
               })),
             }
+          : undefined,
+        tags: tagConnects.length > 0
+          ? { create: tagConnects }
           : undefined,
         metas: data.metas
           ? {

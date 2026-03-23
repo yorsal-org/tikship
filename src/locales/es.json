@@ -293,7 +293,8 @@
       "cannot_delete_system_permission": "No se puede eliminar el permiso del sistema",
       "permission_in_use": "Este permiso está siendo utilizado por roles y no se puede eliminar",
       "operation_failed": "Operación fallida",
-      "category_max_depth_exceeded": "Las categorías solo pueden anidarse hasta 3 niveles de profundidad."
+      "category_max_depth_exceeded": "Las categorías solo pueden anidarse hasta 3 niveles de profundidad.",
+      "import_limit_exceeded": "Se excedió el límite de importación"
     }
   },
   "admin": {
@@ -521,8 +522,26 @@
         "max_depth_exceeded": "Las categorías solo pueden anidarse hasta 3 niveles de profundidad.",
         "has_children_warning": "Esta categoría tiene subcategorías. Eliminarla también eliminará todas las subcategorías.",
         "depth_label": "Profundidad de Anidamiento",
-        "subcategories": "Subcategorías"
-      }
+        "subcategories": "Subcategorías",
+        "edit": "Editar categoría",
+        "edit_btn": "Guardar cambios",
+        "edit_title": "Editar categoría",
+        "update_success": "Categoría actualizada correctamente",
+        "reorder_success": "Orden guardado correctamente",
+        "reorder_hint": "Arrastra para reordenar y luego guarda",
+        "reorder_save": "Guardar orden"
+      },
+      "import": "Importar",
+      "import_title": "Importación masiva de artículos",
+      "import_placeholder": "Pega aquí el arreglo JSON...",
+      "import_hint": "Formato de arreglo JSON. Cada elemento requiere title y content_html. Las categorías se emparejan por nombre y las etiquetas se crean automáticamente.",
+      "import_limit": "Máximo {limit} elementos por importación",
+      "import_submit": "Importar",
+      "import_importing": "Importando...",
+      "import_success": "Importación completada: {success} correctos, {fail} fallidos",
+      "import_error_invalid_json": "Formato JSON no válido",
+      "import_error_not_array": "El JSON debe ser un arreglo",
+      "import_error_limit_exceeded": "Se excedió el límite de {limit} elementos"
     },
     "roles": {
       "title": "Roles",

@@ -293,7 +293,8 @@
       "cannot_delete_system_permission": "不能删除系统权限",
       "permission_in_use": "此权限正在被角色使用，无法删除",
       "operation_failed": "操作失败",
-      "category_max_depth_exceeded": "分类最多只能嵌套 3 层"
+      "category_max_depth_exceeded": "分类最多只能嵌套 3 层",
+      "import_limit_exceeded": "超过导入数量限制"
     }
   },
   "admin": {
@@ -441,6 +442,17 @@
       "status_updated": "操作成功",
       "save_success": "保存成功",
       "created_success": "创建成功",
+      "import": "批量导入",
+      "import_title": "批量导入文章",
+      "import_placeholder": "粘贴 JSON 数组内容...",
+      "import_hint": "JSON 数组格式，每条记录需包含 title 和 content_html 字段。categories 按名称匹配已有分类，tags 自动创建。",
+      "import_limit": "每次最多导入 {limit} 条",
+      "import_submit": "开始导入",
+      "import_importing": "导入中...",
+      "import_success": "导入完成：{success} 条成功，{fail} 条失败",
+      "import_error_invalid_json": "JSON 格式错误，请检查内容",
+      "import_error_not_array": "JSON 必须是数组格式",
+      "import_error_limit_exceeded": "超过限制，最多 {limit} 条",
       "stats": {
         "title": "概览记录",
         "total": "{type}总计",

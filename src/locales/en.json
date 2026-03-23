@@ -293,7 +293,8 @@
       "cannot_delete_system_permission": "Cannot delete system permission",
       "permission_in_use": "This permission is being used by roles and cannot be deleted",
       "operation_failed": "Operation failed",
-      "category_max_depth_exceeded": "Categories can only be nested up to 3 levels deep."
+      "category_max_depth_exceeded": "Categories can only be nested up to 3 levels deep.",
+      "import_limit_exceeded": "Import limit exceeded"
     }
   },
   "admin": {
@@ -441,6 +442,17 @@
       "status_updated": "Status updated successfully",
       "save_success": "Saved successfully",
       "created_success": "Created successfully",
+      "import": "Import",
+      "import_title": "Bulk Import Articles",
+      "import_placeholder": "Paste JSON array here...",
+      "import_hint": "JSON array format. Each item requires title and content_html. Categories matched by name, tags auto-created.",
+      "import_limit": "Max {limit} items per import",
+      "import_submit": "Import",
+      "import_importing": "Importing...",
+      "import_success": "Import complete: {success} succeeded, {fail} failed",
+      "import_error_invalid_json": "Invalid JSON format",
+      "import_error_not_array": "JSON must be an array",
+      "import_error_limit_exceeded": "Exceeds limit of {limit} items",
       "stats": {
         "title": "Overview",
         "total": "Total {type}",

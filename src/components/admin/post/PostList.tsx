@@ -6,9 +6,10 @@ import { Post, PostStatus, PostType, Category } from '@/types/post'
 import { PostsListResponse } from '@/types/post'
 import { CategoriesListResponse } from '@/types/admin'
 import { ApiResponse } from '@/types/api'
-import { Plus, Search, ExternalLink, Edit, Trash2, RotateCcw } from 'lucide-react'
+import { Plus, Search, ExternalLink, Edit, Trash2, RotateCcw, Upload } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { DeleteConfirmModal } from '@/components/admin/common/DeleteConfirmModal'
+import { ImportPostsModal } from '@/components/admin/post/ImportPostsModal'
 import { Table, Column } from '@/components/ui/Table'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { toast } from '@/lib/utils/toast'
@@ -54,6 +55,9 @@ export function PostList({ type }: PostListProps) {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [postToDelete, setPostToDelete] = useState<Post | null>(null)
   const [isPermanentDelete, setIsPermanentDelete] = useState(false)
+
+  // Import Modal State
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false)
 
   // API Hooks
   const { request: fetchPosts, loading: loadingPosts } = useApi<PostsListResponse>(
@@ -306,12 +310,22 @@ export function PostList({ type }: PostListProps) {
         <h1 className="text-3xl font-bold">
           {type === PostType.ARTICLE ? t('articles') : t('pages')}
         </h1>
-        <button
-          onClick={() => router.push(`${siteConfig.admin.path}/${type.toLowerCase()}s/new`)}
-          className="btn btn-primary btn-sm gap-2"
-        >
-          <Plus size={18} /> {t('new')}
-        </button>
+        <div className="flex items-center gap-2">
+          {type === PostType.ARTICLE && (
+            <button
+              onClick={() => setIsImportModalOpen(true)}
+              className="btn btn-ghost btn-sm gap-2"
+            >
+              <Upload size={16} /> {t('import')}
+            </button>
+          )}
+          <button
+            onClick={() => router.push(`${siteConfig.admin.path}/${type.toLowerCase()}s/new`)}
+            className="btn btn-primary btn-sm gap-2"
+          >
+            <Plus size={18} /> {t('new')}
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -379,6 +393,14 @@ export function PostList({ type }: PostListProps) {
         }
         warning={isPermanentDelete ? t('delete_warning') : undefined}
         confirmText={isPermanentDelete ? t('delete') : t('trash')}
+      />
+
+      <ImportPostsModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        onSuccess={() => {
+          void fetchData(currentPage)
+        }}
       />
     </>
   )

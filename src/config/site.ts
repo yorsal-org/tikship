@@ -75,6 +75,7 @@ export const siteConfig = {
       // Minimum password strength level required: 'weak', 'medium', or 'strong'
       minStrength: 'medium',
     },
+    articlesImportLimits: 10,
   },
 
   // Payment configuration
