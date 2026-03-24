@@ -150,6 +150,7 @@ export function ImportPostsModal({ isOpen, onClose, onSuccess }: ImportPostsModa
   {
     "title": "Article Title",
     "content_html": "<p>Content</p>",
+    "cover_image": "https://example.com/feature.jpg",
     "categories": ["Tech"],
     "tags": ["tag1", "tag2"]
   }

@@ -11,6 +11,7 @@ import { siteConfig } from '@/config/site'
 interface ImportPostItem {
   title: string
   content_html: string
+  cover_image?: string
   categories?: string[]
   tags?: string[]
 }
@@ -71,6 +72,7 @@ export async function POST(req: NextRequest) {
         const post = await postService.createPost(adminUserId, {
           title: item.title,
           content: item.content_html ?? '',
+          featuredImage: item.cover_image,
           status: PostStatus.DRAFT,
           type: PostType.ARTICLE,
           categoryIds: categoryIds.length > 0 ? categoryIds : undefined,

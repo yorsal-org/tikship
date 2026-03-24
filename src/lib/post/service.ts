@@ -358,6 +358,34 @@ export class PostService {
       // Don't auto-regenerate slug on title update unless explicitly requested or it's a new draft
     }
 
+    // Upsert tags and collect their IDs
+    let tagConnects: { tagId: string }[] | undefined
+    if (data.tagNames) {
+      if (data.tagNames.length > 0) {
+        const tagIds = await Promise.all(
+          data.tagNames.map(async name => {
+            const tagSlug = name
+              .toLowerCase()
+              .trim()
+              .replace(/\s+/g, '-')
+              .replace(/[^\p{L}\p{N}\-]/gu, '')
+              .replace(/-{2,}/g, '-')
+              .replace(/^-+|-+$/g, '')
+            const tag = await prisma.tag.upsert({
+              where: { name },
+              update: {},
+              create: { name, slug: tagSlug },
+              select: { id: true },
+            })
+            return tag.id
+          })
+        )
+        tagConnects = tagIds.map(tagId => ({ tagId }))
+      } else {
+        tagConnects = []
+      }
+    }
+
     // Perform updates
     return await prisma.post.update({
       where: { id },
@@ -379,6 +407,12 @@ export class PostService {
               create: data.categoryIds.map(cid => ({
                 category: { connect: { id: cid } },
               })),
+            }
+          : undefined,
+        tags: data.tagNames
+          ? {
+              deleteMany: {},
+              create: tagConnects,
             }
           : undefined,
         metas: data.metas

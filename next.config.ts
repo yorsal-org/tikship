@@ -51,6 +51,16 @@ const nextConfig: NextConfig = {
         hostname: 'i.ibb.co',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'cdn.hailuoai.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 's.coze.cn',
+        pathname: '/**',
+      },
     ],
   },
 }
