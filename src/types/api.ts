@@ -231,6 +231,12 @@ export type UpdatePostBody = {
   tagNames?: string[] // Tag names
 }
 
+export type BulkUpdatePostsBody = {
+  ids: string[]
+  action: 'publish' | 'trash' | 'delete' | 'restore'
+  type?: 'ARTICLE' | 'PAGE'
+}
+
 // Role Permission Types
 export type AssignRolePermissionsBody = {
   permissionIds: string[] // Permission IDs to assign

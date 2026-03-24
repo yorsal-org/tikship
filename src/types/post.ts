@@ -137,6 +137,8 @@ export interface PostsListResponse {
   totalPages: number
 }
 
+export type PostBulkAction = 'publish' | 'trash' | 'delete' | 'restore'
+
 /**
  * Props for content editor components
  */

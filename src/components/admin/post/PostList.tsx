@@ -1,11 +1,10 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { Post, PostStatus, PostType, Category } from '@/types/post'
-import { PostsListResponse } from '@/types/post'
+import { Post, PostStatus, PostType, Category, PostBulkAction, PostsListResponse } from '@/types/post'
 import { CategoriesListResponse } from '@/types/admin'
-import { ApiResponse } from '@/types/api'
+import { ApiResponse, BulkUpdatePostsBody } from '@/types/api'
 import { Plus, Search, ExternalLink, Edit, Trash2, RotateCcw, Upload } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { DeleteConfirmModal } from '@/components/admin/common/DeleteConfirmModal'
@@ -50,11 +49,14 @@ export function PostList({ type }: PostListProps) {
 
   const [allCategories, setAllCategories] = useState<Category[]>([])
   const [posts, setPosts] = useState<Post[]>([])
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
 
   // Delete Modal State
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [postToDelete, setPostToDelete] = useState<Post | null>(null)
   const [isPermanentDelete, setIsPermanentDelete] = useState(false)
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false)
+  const [pendingBulkAction, setPendingBulkAction] = useState<PostBulkAction | null>(null)
 
   // Import Modal State
   const [isImportModalOpen, setIsImportModalOpen] = useState(false)
@@ -70,6 +72,10 @@ export function PostList({ type }: PostListProps) {
   )
   const { request: deletePost, loading: loadingDelete } = useApi('/api/admin/posts', 'DELETE')
   const { request: updatePost, loading: loadingUpdate } = useApi('/api/admin/posts', 'PUT')
+  const { request: bulkUpdatePosts, loading: loadingBulkUpdate } = useApi<
+    { count: number },
+    BulkUpdatePostsBody
+  >('/api/admin/posts', 'PUT')
 
   const fetchData = useCallback(
     async (pageValue: number) => {
@@ -86,7 +92,9 @@ export function PostList({ type }: PostListProps) {
       })
 
       if (postsRes.success && postsRes.data) {
-        setPosts((postsRes.data.items || []) as Post[])
+        const nextPosts = (postsRes.data.items || []) as Post[]
+        setPosts(nextPosts)
+        setSelectedIds(current => current.filter(id => nextPosts.some(post => post.id === id)))
         setPagination({
           page: postsRes.data.page,
           pageSize: postsRes.data.pageSize,
@@ -121,6 +129,42 @@ export function PostList({ type }: PostListProps) {
     syncFilters({ [key]: value })
   }
 
+  const selectedPosts = useMemo(
+    () => posts.filter(post => selectedIds.includes(post.id)),
+    [posts, selectedIds]
+  )
+  const selectedCount = selectedIds.length
+  const allSelected = posts.length > 0 && selectedIds.length === posts.length
+  const allTrashSelection =
+    selectedPosts.length > 0 && selectedPosts.every(post => post.status === PostStatus.TRASH)
+  const allPublishableSelection =
+    selectedPosts.length > 0 &&
+    selectedPosts.every(
+      post => post.status === PostStatus.DRAFT || post.status === PostStatus.SCHEDULED
+    )
+  const hasNonTrashSelection = selectedPosts.some(post => post.status !== PostStatus.TRASH)
+
+  const handleToggleSelectAll = () => {
+    setSelectedIds(allSelected ? [] : posts.map(post => post.id))
+  }
+
+  const handleToggleSelect = (postId: string) => {
+    setSelectedIds(current =>
+      current.includes(postId) ? current.filter(id => id !== postId) : [...current, postId]
+    )
+  }
+
+  const resetBulkState = () => {
+    setPendingBulkAction(null)
+    setIsBulkDeleteModalOpen(false)
+  }
+
+  const refreshList = async () => {
+    setSelectedIds([])
+    router.refresh()
+    await fetchData(currentPage)
+  }
+
   const handleDelete = (post: Post, permanent: boolean = false) => {
     setPostToDelete(post)
     setIsPermanentDelete(permanent)
@@ -138,8 +182,7 @@ export function PostList({ type }: PostListProps) {
         toast.success(t('delete_success'))
         setIsDeleteModalOpen(false)
         setPostToDelete(null)
-        router.refresh()
-        await fetchData(currentPage)
+        await refreshList()
       }
     } else {
       const { success } = await updatePost(
@@ -152,8 +195,7 @@ export function PostList({ type }: PostListProps) {
         toast.success(t('status_updated'))
         setIsDeleteModalOpen(false)
         setPostToDelete(null)
-        router.refresh()
-        await fetchData(currentPage)
+        await refreshList()
       }
     }
   }
@@ -167,10 +209,58 @@ export function PostList({ type }: PostListProps) {
     )
     if (success) {
       toast.success(t('status_updated'))
-      router.refresh()
-      await fetchData(currentPage)
+      await refreshList()
     }
   }
+
+  const handleBulkAction = async (action: PostBulkAction) => {
+    if (selectedIds.length === 0) return
+
+    const { success, data } = await bulkUpdatePosts({
+      ids: selectedIds,
+      action,
+      type,
+    })
+
+    if (success) {
+      toast.success(
+        t(action === 'delete' ? 'bulk_delete_success' : 'bulk_status_updated', {
+          count: data?.count ?? selectedIds.length,
+        })
+      )
+      resetBulkState()
+      await refreshList()
+    }
+  }
+
+  const requestBulkAction = (action: PostBulkAction) => {
+    if (action === 'delete' || action === 'trash') {
+      setPendingBulkAction(action)
+      setIsBulkDeleteModalOpen(true)
+      return
+    }
+
+    void handleBulkAction(action)
+  }
+
+  const bulkActionOptions = useMemo(() => {
+    const options: { value: PostBulkAction; label: string }[] = []
+
+    if (allPublishableSelection) {
+      options.push({ value: 'publish', label: t('bulk_publish') })
+    }
+
+    if (hasNonTrashSelection) {
+      options.push({ value: 'trash', label: t('bulk_trash') })
+    }
+
+    if (allTrashSelection) {
+      options.push({ value: 'restore', label: t('bulk_restore') })
+      options.push({ value: 'delete', label: t('bulk_delete') })
+    }
+
+    return options
+  }, [allPublishableSelection, hasNonTrashSelection, allTrashSelection, t])
 
   const getStatusVariant = (
     status: PostStatus
@@ -186,8 +276,30 @@ export function PostList({ type }: PostListProps) {
 
   const columns: Column<Post>[] = [
     {
+      key: 'select',
+      label: (
+        <input
+          type="checkbox"
+          className="checkbox checkbox-sm"
+          checked={allSelected}
+          onChange={handleToggleSelectAll}
+          aria-label={t('select_all')}
+        />
+      ),
+      className: 'w-12',
+      render: post => (
+        <input
+          type="checkbox"
+          className="checkbox checkbox-sm"
+          checked={selectedIds.includes(post.id)}
+          onChange={() => handleToggleSelect(post.id)}
+          aria-label={t('select_item', { title: post.title })}
+        />
+      ),
+    },
+    {
       key: 'title',
-      label: 'Title',
+      label: t('table_title'),
       className: 'w-1/3',
       render: post => (
         <div>
@@ -198,14 +310,14 @@ export function PostList({ type }: PostListProps) {
     },
     {
       key: 'author',
-      label: 'Author',
+      label: t('table_author'),
       render: post => <span className="text-xs">{post.author?.name || post.author?.username}</span>,
     },
     ...(type === PostType.ARTICLE
       ? [
           {
             key: 'categories',
-            label: 'Category',
+            label: t('table_category'),
             render: (post: Post) => (
               <div className="flex flex-wrap gap-1">
                 {post.categories?.map(c => (
@@ -223,7 +335,7 @@ export function PostList({ type }: PostListProps) {
       : []),
     {
       key: 'status',
-      label: 'Status',
+      label: t('table_status'),
       render: post => {
         const effectiveStatus = getEffectivePostStatus(post)
         return (
@@ -238,7 +350,7 @@ export function PostList({ type }: PostListProps) {
     },
     {
       key: 'date',
-      label: 'Date',
+      label: t('table_date'),
       render: post => {
         const effectiveStatus = getEffectivePostStatus(post)
         const date =
@@ -250,7 +362,7 @@ export function PostList({ type }: PostListProps) {
     },
     {
       key: 'actions',
-      label: 'Actions',
+      label: t('table_actions'),
       className: 'text-right',
       render: post => (
         <div className="flex justify-end gap-1">
@@ -294,7 +406,7 @@ export function PostList({ type }: PostListProps) {
             href={`/${type === PostType.ARTICLE ? 'blog' : 'p'}/${post.slug}`}
             target="_blank"
             className="btn btn-ghost btn-sm btn-square"
-            title="View"
+            title={t('view')}
           >
             <ExternalLink className="w-4 h-4" />
           </a>
@@ -346,11 +458,11 @@ export function PostList({ type }: PostListProps) {
           value={statusParam || ''}
           onChange={e => handleFilterChange('status', e.target.value)}
         >
-          <option value="">All Status</option>
-          <option value={PostStatus.PUBLISHED}>Published</option>
-          <option value={PostStatus.DRAFT}>Draft</option>
-          <option value={PostStatus.SCHEDULED}>Scheduled</option>
-          <option value={PostStatus.TRASH}>Trash</option>
+          <option value="">{t('all_status')}</option>
+          <option value={PostStatus.PUBLISHED}>{t('status_published')}</option>
+          <option value={PostStatus.DRAFT}>{t('status_draft')}</option>
+          <option value={PostStatus.SCHEDULED}>{t('status_scheduled')}</option>
+          <option value={PostStatus.TRASH}>{t('status_trash')}</option>
         </select>
 
         {type === PostType.ARTICLE && (
@@ -359,7 +471,7 @@ export function PostList({ type }: PostListProps) {
             value={categoryParam || ''}
             onChange={e => handleFilterChange('categoryId', e.target.value)}
           >
-            <option value="">All Categories</option>
+            <option value="">{t('all_categories')}</option>
             {allCategories.map(cat => (
               <option key={cat.id} value={cat.id}>
                 {cat.name}
@@ -368,6 +480,27 @@ export function PostList({ type }: PostListProps) {
           </select>
         )}
       </div>
+
+      {selectedCount > 0 && (
+        <div className="alert bg-base-200 border border-base-300 flex flex-wrap items-center gap-3">
+          <span className="font-medium">{t('selected_count', { count: selectedCount })}</span>
+          <div className="flex flex-wrap items-center gap-2 ml-auto">
+            {bulkActionOptions.map(option => (
+              <button
+                key={option.value}
+                className="btn btn-sm"
+                onClick={() => requestBulkAction(option.value)}
+                disabled={loadingBulkUpdate}
+              >
+                {option.label}
+              </button>
+            ))}
+            <button className="btn btn-ghost btn-sm" onClick={() => setSelectedIds([])}>
+              {t('clear_selection')}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Content Table */}
       <Table
@@ -384,15 +517,34 @@ export function PostList({ type }: PostListProps) {
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleConfirmDelete}
-        loading={loadingDelete}
+        loading={loadingDelete || loadingUpdate}
         title={isPermanentDelete ? t('delete') : t('trash')}
         message={
           isPermanentDelete
             ? t('delete_confirm', { name: postToDelete?.title || '' })
-            : `Move "${postToDelete?.title}" to trash?`
+            : t('trash_confirm', { name: postToDelete?.title || '' })
         }
         warning={isPermanentDelete ? t('delete_warning') : undefined}
         confirmText={isPermanentDelete ? t('delete') : t('trash')}
+      />
+
+      <DeleteConfirmModal
+        isOpen={isBulkDeleteModalOpen}
+        onClose={resetBulkState}
+        onConfirm={() => {
+          if (pendingBulkAction) {
+            void handleBulkAction(pendingBulkAction)
+          }
+        }}
+        loading={loadingBulkUpdate}
+        title={pendingBulkAction === 'delete' ? t('bulk_delete') : t('bulk_trash')}
+        message={
+          pendingBulkAction === 'delete'
+            ? t('bulk_delete_confirm', { count: selectedCount })
+            : t('bulk_trash_confirm', { count: selectedCount })
+        }
+        warning={pendingBulkAction === 'delete' ? t('delete_warning') : undefined}
+        confirmText={pendingBulkAction === 'delete' ? t('bulk_delete') : t('bulk_trash')}
       />
 
       <ImportPostsModal

@@ -4,8 +4,8 @@ import { ApiResponse } from '@/lib/utils/api-response'
 import { postService } from '@/lib/post/service'
 import { PERMISSIONS } from '@/config/permissions'
 import { logAudit, AUDIT_ACTIONS } from '@/lib/audit/service'
-import { PostStatus, PostType, PostInput } from '@/types/post'
-import type { CreatePostBody } from '@/types/api'
+import { PostStatus, PostType, PostInput, PostBulkAction } from '@/types/post'
+import type { CreatePostBody, BulkUpdatePostsBody } from '@/types/api'
 
 /**
  * Get posts list
@@ -99,6 +99,64 @@ export async function POST(req: NextRequest) {
     return ApiResponse.success({ post }, 201)
   } catch (error) {
     console.error('Create post error:', error)
+    return await ApiResponse.adminError('server_error', 500)
+  }
+}
+
+export async function PUT(req: NextRequest) {
+  try {
+    const body = (await req.json()) as BulkUpdatePostsBody
+    const typeString = body.type || 'ARTICLE'
+    const type = typeString === 'PAGE' ? PostType.PAGE : PostType.ARTICLE
+
+    if (!Array.isArray(body.ids) || body.ids.length === 0 || !body.action) {
+      return await ApiResponse.adminError('required_fields_missing', 400)
+    }
+
+    const permissionMap: Record<PostBulkAction, string> = {
+      publish: type === PostType.PAGE ? PERMISSIONS.PAGE_EDIT : PERMISSIONS.ARTICLE_EDIT,
+      trash: type === PostType.PAGE ? PERMISSIONS.PAGE_DELETE : PERMISSIONS.ARTICLE_DELETE,
+      delete: type === PostType.PAGE ? PERMISSIONS.PAGE_DELETE : PERMISSIONS.ARTICLE_DELETE,
+      restore: type === PostType.PAGE ? PERMISSIONS.PAGE_EDIT : PERMISSIONS.ARTICLE_EDIT,
+    }
+
+    const { adminUserId, error } = await requireAdminAuth(req, permissionMap[body.action])
+    if (error) return error
+    if (!adminUserId) return await ApiResponse.adminError('unauthorized', 401)
+
+    const posts = await postService.getPostsByIds(body.ids, type)
+    if (posts.length !== body.ids.length) {
+      return await ApiResponse.adminError('not_found', 404)
+    }
+
+    await postService.bulkOperatePosts(body.ids, body.action)
+
+    const auditActionMap: Record<PostType, string> = {
+      [PostType.ARTICLE]: 'ARTICLE_EDIT',
+      [PostType.PAGE]: 'PAGE_EDIT',
+    }
+
+    await Promise.all(
+      posts.map(post =>
+        logAudit({
+          adminUserId,
+          action: body.action === 'delete'
+            ? type === PostType.PAGE
+              ? AUDIT_ACTIONS.PAGE_DELETE
+              : AUDIT_ACTIONS.ARTICLE_DELETE
+            : auditActionMap[type],
+          resource: type === PostType.PAGE ? 'page' : 'article',
+          resourceId: post.id,
+          details: { bulkAction: body.action, title: post.title, slug: post.slug },
+          ipAddress: req.headers.get('x-forwarded-for') || 'unknown',
+          userAgent: req.headers.get('user-agent') || 'unknown',
+        })
+      )
+    )
+
+    return ApiResponse.success({ count: posts.length })
+  } catch (error) {
+    console.error('Bulk update posts error:', error)
     return await ApiResponse.adminError('server_error', 500)
   }
 }

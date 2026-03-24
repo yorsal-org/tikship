@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/db/prisma'
-import { PostInput, PostStatus, PostType } from '@/types/post'
+import { PostInput, PostStatus, PostType, PostBulkAction } from '@/types/post'
 
 export interface CategoryTree {
   id: string
@@ -405,6 +405,64 @@ export class PostService {
       where: { id },
       data: { status: PostStatus.TRASH },
     })
+  }
+
+  async getPostsByIds(ids: string[], type?: PostType) {
+    return await prisma.post.findMany({
+      where: {
+        id: { in: ids },
+        ...(type ? { type } : {}),
+      },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        type: true,
+        status: true,
+      },
+    })
+  }
+
+  async updatePostsStatus(ids: string[], status: PostStatus) {
+    return await prisma.post.updateMany({
+      where: { id: { in: ids } },
+      data: {
+        status,
+        publishedAt: status === PostStatus.PUBLISHED ? new Date() : undefined,
+        modifiedAt: new Date(),
+      },
+    })
+  }
+
+  async deletePosts(ids: string[], permanent: boolean = false) {
+    if (permanent) {
+      return await prisma.post.deleteMany({
+        where: { id: { in: ids } },
+      })
+    }
+
+    return await prisma.post.updateMany({
+      where: { id: { in: ids } },
+      data: {
+        status: PostStatus.TRASH,
+        modifiedAt: new Date(),
+      },
+    })
+  }
+
+  async bulkOperatePosts(ids: string[], action: PostBulkAction) {
+    switch (action) {
+      case 'publish':
+        return await this.updatePostsStatus(ids, PostStatus.PUBLISHED)
+      case 'trash':
+        return await this.deletePosts(ids, false)
+      case 'restore':
+        return await this.updatePostsStatus(ids, PostStatus.DRAFT)
+      case 'delete':
+        return await this.deletePosts(ids, true)
+      default:
+        throw new Error('INVALID_BULK_ACTION')
+    }
   }
 
   /**

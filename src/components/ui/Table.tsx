@@ -5,7 +5,7 @@ import { Pagination } from '@/components/ui/Pagination'
 
 export interface Column<T> {
   key: string
-  label: string
+  label: ReactNode
   render: (item: T) => ReactNode
   className?: string
 }
