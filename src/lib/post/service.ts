@@ -291,12 +291,21 @@ export class PostService {
             .replace(/[^\p{L}\p{N}\-]/gu, '')
             .replace(/-{2,}/g, '-')
             .replace(/^-+|-+$/g, '')
-          const tag = await prisma.tag.upsert({
-            where: { name },
-            update: {},
-            create: { name, slug: tagSlug },
+          
+          // Try to find existing tag by slug first (slug is the unique identifier)
+          let tag = await prisma.tag.findUnique({
+            where: { slug: tagSlug },
             select: { id: true },
           })
+          
+          // If not found, create new tag
+          if (!tag) {
+            tag = await prisma.tag.create({
+              data: { name, slug: tagSlug },
+              select: { id: true },
+            })
+          }
+          
           return tag.id
         })
       )
@@ -371,12 +380,21 @@ export class PostService {
               .replace(/[^\p{L}\p{N}\-]/gu, '')
               .replace(/-{2,}/g, '-')
               .replace(/^-+|-+$/g, '')
-            const tag = await prisma.tag.upsert({
-              where: { name },
-              update: {},
-              create: { name, slug: tagSlug },
+            
+            // Try to find existing tag by slug first (slug is the unique identifier)
+            let tag = await prisma.tag.findUnique({
+              where: { slug: tagSlug },
               select: { id: true },
             })
+            
+            // If not found, create new tag
+            if (!tag) {
+              tag = await prisma.tag.create({
+                data: { name, slug: tagSlug },
+                select: { id: true },
+              })
+            }
+            
             return tag.id
           })
         )
