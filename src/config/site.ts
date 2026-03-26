@@ -30,8 +30,8 @@ export const siteConfig = {
 
   // Locale configuration
   locale: {
-    // Default application language
-    default: 'en',
+    // Default application language, if empty, will load cookie , then Accept-Language header
+    default: '',
     // List of supported languages with display names
     supported: [
       { value: 'en', label: 'English', nativeName: 'English' },

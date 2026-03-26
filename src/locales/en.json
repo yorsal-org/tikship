@@ -492,6 +492,7 @@
         "trash": "In Trash"
       },
       "editor": {
+        "back": "Back",
         "title_placeholder": "Enter title here...",
         "permalink": "Permalink",
         "content_placeholder": "Write something amazing...",

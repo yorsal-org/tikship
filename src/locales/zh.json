@@ -492,6 +492,7 @@
         "trash": "回收站"
       },
       "editor": {
+        "back": "返回",
         "title_placeholder": "在此输入标题...",
         "permalink": "永久链接",
         "content_placeholder": "开启您的创作灵感...",

@@ -28,18 +28,26 @@ function detectLocaleFromAcceptLanguage(acceptLanguage: string): string {
 }
 
 /**
- * Get current locale: cookie > Accept-Language header > defaultLocale
+ * Get current locale: defaultLocale > cookie > Accept-Language header
+ * If defaultLocale is empty/invalid, fall back to cookie > header.
  */
 export async function getLocale(): Promise<string> {
+  const configuredDefault = defaultLocale?.trim()
+
+  // 1. Highest priority: explicit default locale in site config
+  if (configuredDefault && locales.includes(configuredDefault)) {
+    return configuredDefault
+  }
+
   const cookieStore = await cookies()
   const localeCookie = cookieStore.get('locale')?.value
 
-  // 1. Cookie takes priority (user has explicitly chosen a locale)
+  // 2. Cookie (user has explicitly chosen a locale)
   if (localeCookie && locales.includes(localeCookie)) {
     return localeCookie
   }
 
-  // 2. Fall back to browser's Accept-Language header
+  // 3. Fall back to browser's Accept-Language header
   try {
     const { headers } = await import('next/headers')
     const headerStore = await headers()
@@ -51,8 +59,8 @@ export async function getLocale(): Promise<string> {
     // headers() may throw outside of a request context (e.g. build time)
   }
 
-  // 3. Hard fallback
-  return defaultLocale
+  // 4. Final fallback
+  return configuredDefault || defaultLocale || locales[0] || 'en'
 }
 
 /**

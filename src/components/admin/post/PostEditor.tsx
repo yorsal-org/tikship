@@ -9,7 +9,7 @@ import { CategoriesTreeResponse } from '@/types/admin'
 type CategoryTreeNode = CategoriesTreeResponse['categories'][number]
 import { ApiResponse } from '@/types/api'
 import { useApi } from '@/hooks/useApi'
-import { Globe, History } from 'lucide-react'
+import { Globe, History, ArrowLeft } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { toast } from '@/lib/utils/toast'
 import { generateSlug } from '@/lib/utils/common'
@@ -153,10 +153,24 @@ export function PostEditor({ initialData, type }: PostEditorProps) {
     setTags(tags.filter(t => t !== tag))
   }
 
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      router.back()
+      return
+    }
+
+    router.push(`${siteConfig.admin.path}/${type.toLowerCase()}s`)
+  }
+
   return (
     <div className="flex flex-col lg:flex-row gap-6 p-1">
       {/* Main Content */}
       <div className="flex-1 space-y-6">
+        <button type="button" className="btn btn-ghost btn-sm w-fit" onClick={handleBack}>
+          <ArrowLeft size={16} />
+          {t('editor.back')}
+        </button>
+
         <div className="form-control">
           <input
             type="text"
