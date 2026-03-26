@@ -570,6 +570,7 @@ export class PostService {
       slug: string
       description: string | null
       parentId: string | null
+      locale: string
       createdAt: Date
       updatedAt: Date
       _count?: { posts: number }
@@ -626,21 +627,24 @@ export class PostService {
     return roots
   }
 
-  async listCategories() {
+  async listCategories(locale?: string) {
     return await prisma.category.findMany({
+      where: locale ? { locale } : undefined,
       include: { _count: { select: { posts: true } } },
       orderBy: { name: 'asc' },
     })
   }
 
-  async listCategoriesTree(): Promise<CategoryTree[]> {
+  async listCategoriesTree(locale?: string): Promise<CategoryTree[]> {
     const flat = await prisma.category.findMany({
+      where: locale ? { locale } : undefined,
       select: {
         id: true,
         name: true,
         slug: true,
         description: true,
         parentId: true,
+        locale: true,
         order: true,
         createdAt: true,
         updatedAt: true,
@@ -659,15 +663,17 @@ export class PostService {
    * Only counts published posts (status=PUBLISHED with publishedAt <= now)
    * unique postId
    */
-  async listPublicCategoriesTree(): Promise<CategoryTree[]> {
+  async listPublicCategoriesTree(locale?: string): Promise<CategoryTree[]> {
     const now = new Date()
     const flat = await prisma.category.findMany({
+      where: locale ? { locale } : undefined,
       select: {
         id: true,
         name: true,
         slug: true,
         description: true,
         parentId: true,
+        locale: true,
         createdAt: true,
         updatedAt: true,
         posts: {
@@ -688,7 +694,7 @@ export class PostService {
     return this.buildCategoryTree(flat, postIdsByCategoryId)
   }
 
-  async createCategory(name: string, description?: string, parentId?: string) {
+  async createCategory(name: string, description?: string, parentId?: string, locale: string = 'en') {
     if (parentId) {
       const parentDepth = await this.getCategoryDepth(parentId)
       if (parentDepth >= 3) throw new Error('MAX_DEPTH_EXCEEDED')
@@ -712,7 +718,7 @@ export class PostService {
     }
 
     return await prisma.category.create({
-      data: { name, slug, description, parentId: parentId || null },
+      data: { name, slug, description, parentId: parentId || null, locale },
     })
   }
 
@@ -724,7 +730,7 @@ export class PostService {
     )
   }
 
-  async updateCategory(id: string, name: string, description?: string, parentId?: string | null) {
+  async updateCategory(id: string, name: string, description?: string, parentId?: string | null, locale?: string) {
     if (parentId) {
       // Ensure we don't create circular reference
       if (parentId === id) throw new Error('CIRCULAR_REFERENCE')
@@ -734,7 +740,7 @@ export class PostService {
 
     return await prisma.category.update({
       where: { id },
-      data: { name, description, parentId: parentId ?? null },
+      data: { name, description, parentId: parentId ?? null, ...(locale ? { locale } : {}) },
     })
   }
 

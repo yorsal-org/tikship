@@ -1,3 +1,4 @@
+import { NextRequest } from 'next/server'
 import { ApiResponse } from '@/lib/utils/api-response'
 import { postService } from '@/lib/post/service'
 
@@ -9,9 +10,11 @@ import { postService } from '@/lib/post/service'
  * @responseSet public
  * @openapi
  */
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    const categories = await postService.listPublicCategoriesTree()
+    const { searchParams } = new URL(req.url)
+    const locale = searchParams.get('locale') || undefined
+    const categories = await postService.listPublicCategoriesTree(locale)
     return ApiResponse.success({ categories })
   } catch (error) {
     console.error('List categories error:', error)

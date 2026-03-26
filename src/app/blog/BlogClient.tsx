@@ -8,7 +8,7 @@ import { FileText, ChevronRight, ChevronDown, Layers, List, Grid3x3 } from 'luci
 import { PaginationWrapper } from '@/components/ui/PaginationWrapper'
 import { usePagination } from '@/hooks/usePagination'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 
 interface CategoryTree {
   id: string
@@ -136,6 +136,7 @@ function findCategoryName(tree: CategoryTree[], id: string): string | null {
 
 export default function BlogPage() {
   const t = useTranslations('blog')
+  const locale = useLocale()
   const searchParams = useSearchParams()
   const router = useRouter()
   const selectedCategory = searchParams.get('category') || undefined
@@ -143,13 +144,13 @@ export default function BlogPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
-    fetch('/api/posts/categories')
+    fetch(`/api/posts/categories?locale=${locale}`)
       .then(r => r.json())
       .then(result => {
         if (result.success && result.data) setCategoryTree(result.data.categories)
       })
       .catch(err => console.error('Failed to fetch categories:', err))
-  }, [])
+  }, [locale])
 
   const handleCategorySelect = useCallback(
     (id: string | undefined) => {
@@ -161,7 +162,7 @@ export default function BlogPage() {
 
   const fetchPosts = useCallback(
     async (page: number, pageSize: number) => {
-      const params = new URLSearchParams({ page: String(page), pageSize: String(pageSize) })
+      const params = new URLSearchParams({ page: String(page), pageSize: String(pageSize), locale })
       if (selectedCategory) params.append('category', selectedCategory)
       const res = await fetch(`/api/posts/blog?${params}`)
       const result = await res.json()
@@ -169,7 +170,7 @@ export default function BlogPage() {
         return { items: result.data.posts, totalCount: result.data.totalCount }
       return { items: [], totalCount: 0 }
     },
-    [selectedCategory]
+    [selectedCategory, locale]
   )
 
   const {

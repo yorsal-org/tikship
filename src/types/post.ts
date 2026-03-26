@@ -39,6 +39,7 @@ export interface Category {
   slug: string
   description?: string | null
   parentId?: string | null
+  locale?: string
   parent?: Category | null
   children?: Category[] | null
   createdAt: Date | string

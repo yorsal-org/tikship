@@ -1,4 +1,9 @@
 {
+  "site": {
+    "name": "Tikship",
+    "description": "Tikship 是基于 Next.js 15 打造的生产级 SaaS 模板，内置认证、Stripe & PayPal 支付、CMS 内容管理、基于角色的管理后台和国际化支持，帮助你在数天内而非数月内上线 SaaS 产品。",
+    "keywords": "Next.js SaaS 模板, SaaS 启动套件, 快速上线 SaaS, Next.js 15 模板, Stripe PayPal 支付, 带认证的 SaaS, 基于角色的管理后台, 多语言 SaaS, 生产级 SaaS, 数天内上线 SaaS"
+  },
   "common": {
     "pagination": {
       "showing_results": "显示第 {from} 至 {to} 条，共 {total} 条结果"
@@ -566,7 +571,9 @@
         "update_success": "分类更新成功",
         "reorder_success": "排序已保存",
         "reorder_hint": "拖拽调整顺序后点击保存",
-        "reorder_save": "保存排序"
+        "reorder_save": "保存排序",
+        "locale": "语言",
+        "locale_hint": "分类将在前台博客按语言分别显示"
       }
     },
     "roles": {

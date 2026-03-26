@@ -31,7 +31,8 @@ import {
   arrayMove,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
+import { siteConfig } from '@/config/site'
 import { DeleteConfirmModal } from '@/components/admin/common/DeleteConfirmModal'
 import { useModalState } from '@/hooks/useModalState'
 import { toast } from '@/lib/utils/toast'
@@ -49,13 +50,20 @@ interface FlatCategory {
   name: string
   parentId: string | null
   depth: number
+  locale?: string
 }
 
 /** Flatten tree for parent selector dropdown */
 function flattenTree(nodes: CategoryTree[], depth = 0): FlatCategory[] {
   const result: FlatCategory[] = []
   for (const node of nodes) {
-    result.push({ id: node.id, name: node.name, parentId: node.parentId ?? null, depth })
+    result.push({
+      id: node.id,
+      name: node.name,
+      parentId: node.parentId ?? null,
+      depth,
+      locale: node.locale,
+    })
     if (node.children && node.children.length > 0) {
       result.push(...flattenTree(node.children, depth + 1))
     }
@@ -109,6 +117,9 @@ function SortableCategoryRow({ node, depth, onDelete, onEdit, onReorderChildren,
             )}
             {hasChildren ? <FolderOpen size={15} className="opacity-60 shrink-0" /> : <Folder size={15} className="opacity-40 shrink-0" />}
             <span className="font-semibold text-sm">{node.name}</span>
+            {node.locale && (
+              <span className="badge badge-xs badge-ghost opacity-50 font-mono">{node.locale}</span>
+            )}
           </div>
         </td>
         <td width="100">
@@ -202,6 +213,7 @@ interface EditModalProps {
 function EditCategoryModal({ cat, onClose, onSaved, t }: EditModalProps) {
   const [name, setName] = useState(cat.name)
   const [description, setDescription] = useState(cat.description || '')
+  const [locale, setLocale] = useState(cat.locale || 'en')
 
   const { request: updateCategory, loading: saving } = useApi(`/api/admin/categories`, 'PATCH')
 
@@ -209,7 +221,7 @@ function EditCategoryModal({ cat, onClose, onSaved, t }: EditModalProps) {
     e.preventDefault()
     if (!name) return
     await updateCategory(
-      { name, description },
+      { name, description, locale },
       {
         params: { id: cat.id },
         onSuccess: () => {
@@ -234,6 +246,24 @@ function EditCategoryModal({ cat, onClose, onSaved, t }: EditModalProps) {
           </button>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
+
+          {/* Locale selector */}
+          <div className="form-control">
+            <label className="label block text-xs uppercase font-bold opacity-60 px-0">
+              {t('locale')}
+            </label>
+            <select
+              className="select select-bordered h-10 min-h-0 text-sm"
+              value={locale}
+              onChange={e => setLocale(e.target.value)}
+            >
+              {siteConfig.locale.supported.map(lang => (
+                <option key={lang.value} value={lang.value}>
+                  {lang.nativeName} ({lang.label})
+                </option>
+              ))}
+            </select>
+          </div>
 
           {/* Name */}
           <div className="form-control">
@@ -283,9 +313,11 @@ function EditCategoryModal({ cat, onClose, onSaved, t }: EditModalProps) {
 
 export default function CategoriesPage() {
   const t = useTranslations('admin.posts.categories')
+  const currentLocale = useLocale()
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [parentId, setParentId] = useState<string>('')
+  const [locale, setLocale] = useState<string>(currentLocale)
   const [localTree, setLocalTree] = useState<CategoryTree[]>([])
   const [pendingReorder, setPendingReorder] = useState(false)
 
@@ -315,7 +347,13 @@ export default function CategoriesPage() {
   }, [catData])
 
   const flatList = flattenTree(localTree)
-  const parentOptions = flatList.filter(c => c.depth < 2)
+  const parentOptions = flatList.filter(c => c.depth < 2 && c.locale === locale)
+  const groupedTrees = siteConfig.locale.supported
+    .map(lang => ({
+      lang,
+      nodes: localTree.filter(cat => (cat.locale || siteConfig.locale.default) === lang.value),
+    }))
+    .filter(group => group.nodes.length > 0)
 
   const updateTreeChildren = useCallback(
     (tree: CategoryTree[], parentId: string | null, newChildren: CategoryTree[]): CategoryTree[] => {
@@ -364,12 +402,13 @@ export default function CategoriesPage() {
     e.preventDefault()
     if (!name) return
     await createCategory(
-      { name, description, parentId: parentId || undefined },
+      { name, description, parentId: parentId || undefined, locale },
       {
         onSuccess: () => {
           setName('')
           setDescription('')
           setParentId('')
+          setLocale(currentLocale)
           fetchCategories()
         },
         onError: (error: string) => {
@@ -405,6 +444,24 @@ export default function CategoriesPage() {
         <Card className="p-4 border border-base-content/10">
           <h2 className="text-xl font-bold mb-4">{t('add_new')}</h2>
           <form onSubmit={handleCreate} className="space-y-4">
+            {/* Locale selector */}
+            <div className="form-control">
+              <label className="label text-xs uppercase font-bold opacity-60 px-0">
+                {t('locale')}
+              </label>
+              <select
+                className="select select-bordered h-10 min-h-0 text-sm"
+                value={locale}
+                onChange={e => setLocale(e.target.value)}
+              >
+                {siteConfig.locale.supported.map(lang => (
+                  <option key={lang.value} value={lang.value}>
+                    {lang.nativeName} ({lang.label})
+                  </option>
+                ))}
+              </select>
+            </div>
+
             {/* Parent selector */}
             <div className="form-control">
               <label className="label text-xs uppercase font-bold opacity-60 px-0">
@@ -487,20 +544,32 @@ export default function CategoriesPage() {
       </div>
 
       {/* Category tree table */}
-      <div className="md:col-span-2">
-        <Card className="border border-base-content/10 overflow-hidden">
-          {loading ? (
+      <div className="md:col-span-2 space-y-6">
+        {loading ? (
+          <Card className="border border-base-content/10 overflow-hidden">
             <div className="p-8 flex justify-center">
               <span className="loading loading-spinner loading-md" />
             </div>
-          ) : localTree.length === 0 ? (
+          </Card>
+        ) : groupedTrees.length === 0 ? (
+          <Card className="border border-base-content/10 overflow-hidden">
             <div className="p-10 text-center opacity-40">
               <FolderOpen size={40} className="mx-auto mb-3" />
               <p className="text-sm">{t('no_found')}</p>
             </div>
-          ) : (
-            <>
-              {pendingReorder && (
+          </Card>
+        ) : (
+          groupedTrees.map(({ lang, nodes }) => (
+            <Card key={lang.value} className="border border-base-content/10 overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-base-content/10 bg-base-200/30">
+                <div className="flex items-center gap-2">
+                  <h3 className="font-semibold text-sm">{lang.nativeName}</h3>
+                  <span className="badge badge-sm badge-outline">{lang.label}</span>
+                </div>
+                <span className="text-xs opacity-50 font-mono">{lang.value}</span>
+              </div>
+
+              {pendingReorder && nodes.length > 0 && (
                 <div className="flex items-center justify-end px-4 py-2 border-b border-base-content/10 bg-warning/5">
                   <span className="text-xs opacity-60 mr-3">{t('reorder_hint')}</span>
                   <Button
@@ -513,6 +582,7 @@ export default function CategoriesPage() {
                   </Button>
                 </div>
               )}
+
               <div className="overflow-x-auto">
                 <table className="table table-sm w-full">
                   <thead>
@@ -526,7 +596,7 @@ export default function CategoriesPage() {
                   </thead>
                   <tbody>
                     <SortableGroup
-                      nodes={localTree}
+                      nodes={nodes}
                       parentId={null}
                       depth={0}
                       onDelete={handleDelete}
@@ -537,9 +607,9 @@ export default function CategoriesPage() {
                   </tbody>
                 </table>
               </div>
-            </>
-          )}
-        </Card>
+            </Card>
+          ))
+        )}
       </div>
 
       <DeleteConfirmModal

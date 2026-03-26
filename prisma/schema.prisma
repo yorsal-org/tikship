@@ -222,6 +222,7 @@ model Category {
   description String?
   parentId    String?
   order       Int            @default(0)
+  locale      String         @default("en")
   parent      Category?      @relation("CategoryToCategory", fields: [parentId], references: [id])
   children    Category[]     @relation("CategoryToCategory")
   posts       PostCategory[]
@@ -230,6 +231,7 @@ model Category {
 
   @@index([parentId])
   @@index([order])
+  @@index([locale])
 }
 
 model Tag {

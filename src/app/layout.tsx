@@ -8,29 +8,36 @@ import { getLocale } from '@/lib/i18n/config'
 const BASE_URL = process.env.NEXTAUTH_URL || ''
 
 export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const messages: Record<string, any> = (await import(`../locales/${locale}.json`)).default
+  const siteName: string = messages?.site?.name ?? siteConfig.name
+  const siteDescription: string = messages?.site?.description ?? siteConfig.description
+  const siteKeywords: string = messages?.site?.keywords ?? siteConfig.keywords.join(', ')
+
   return {
     metadataBase: new URL(BASE_URL),
     title: {
-      default: siteConfig.name,
-      template: `%s | ${siteConfig.name}`,
+      default: siteName,
+      template: `%s | ${siteName}`,
     },
-    description: siteConfig.description,
-    keywords: siteConfig.keywords,
-    authors: [{ name: siteConfig.name, url: BASE_URL }],
-    creator: siteConfig.name,
+    description: siteDescription,
+    keywords: siteKeywords,
+    authors: [{ name: siteName, url: BASE_URL }],
+    creator: siteName,
     openGraph: {
       type: 'website',
-      locale: 'en_US',
+      locale: locale,
       url: BASE_URL,
-      siteName: siteConfig.name,
-      title: siteConfig.name,
-      description: siteConfig.description,
+      siteName: siteName,
+      title: siteName,
+      description: siteDescription,
     },
     twitter: {
       card: 'summary_large_image',
-      title: siteConfig.name,
-      description: siteConfig.description,
-      creator: `@${siteConfig.name.toLowerCase()}`,
+      title: siteName,
+      description: siteDescription,
+      creator: `@${siteName.toLowerCase()}`,
     },
     icons: {
       icon: siteConfig.favicon,

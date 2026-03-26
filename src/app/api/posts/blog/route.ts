@@ -20,11 +20,27 @@ export async function GET(req: NextRequest) {
     const tagId = searchParams.get('tagId') || undefined
     const page = parseInt(searchParams.get('page') || '1')
     const pageSize = parseInt(searchParams.get('pageSize') || '12')
+    const locale = searchParams.get('locale') || undefined
 
-    // Expand category to include all descendant categories
-    const categoryIds = categoryId
-      ? await postService.getAllDescendantCategoryIds(categoryId)
-      : undefined
+    let categoryIds: string[] | undefined
+
+    if (categoryId) {
+      // Specific category selected: expand to all descendants
+      categoryIds = await postService.getAllDescendantCategoryIds(categoryId)
+    } else if (locale) {
+      // No specific category: filter by all categories belonging to this locale
+      const localeCategories = await postService.listCategories(locale)
+      categoryIds = localeCategories.map(c => c.id)
+      // If no categories exist for this locale, return empty (no cross-locale bleed)
+      if (categoryIds.length === 0) {
+        return ApiResponse.success({
+          posts: [],
+          totalCount: 0,
+          totalPages: 0,
+          currentPage: page,
+        })
+      }
+    }
 
     const result = await postService.listPublicPosts({
       type: PostType.ARTICLE,
