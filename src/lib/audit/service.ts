@@ -122,6 +122,20 @@ export async function getAuditLogs({
   }
 }
 
+/**
+ * Delete audit logs older than a given date
+ */
+export async function deleteOldAuditLogs(beforeDate: Date): Promise<number> {
+  const result = await prisma.adminAuditLog.deleteMany({
+    where: {
+      createdAt: {
+        lt: beforeDate,
+      },
+    },
+  })
+  return result.count
+}
+
 // Audit action constants
 export const AUDIT_ACTIONS = {
   // Admin User actions

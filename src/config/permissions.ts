@@ -21,6 +21,7 @@ export const PERMISSIONS = {
 
   // Audit Log
   AUDIT_LOG_VIEW: 'audit_log:view',
+  AUDIT_LOG_DELETE: 'audit_log:delete',
 
   // Frontend User Management (for admin to manage frontend users)
   USER_VIEW: 'user:view',

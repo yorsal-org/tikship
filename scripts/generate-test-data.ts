@@ -2,6 +2,11 @@
  * Test Data Generator Script
  * Generates realistic mock data that satisfies validation requirements
  * Run with: npm run db:generate-test-data
+ *
+ * Features:
+ *  - Skips any table that already contains data (dependency-aware)
+ *  - Respects FK dependency order: users/adminUsers -> roles -> categories/tags -> posts -> products -> orders -> auditLogs
+ *  - All record counts are configurable via the CONFIG object below
  */
 
 // Load environment variables first
@@ -10,7 +15,22 @@ import { PrismaClient } from '../prisma/generated/client'
 import { hashPassword } from '../src/lib/auth/password'
 import { validationConfig } from '../src/config/validation'
 
-// Initialize Prisma Client with adapter
+// ─────────────────────────────────────────────────────────────────────────────
+// Configuration – tweak counts here before running
+// ─────────────────────────────────────────────────────────────────────────────
+const CONFIG = {
+  users: 50,        // frontend users
+  adminUsers: 10,   // admin users (index 0 will be superuser)
+  articles: 30,     // ARTICLE type posts
+  pages: 5,         // PAGE type posts
+  products: 12,     // products (each may get stripe/paypal payment methods)
+  orders: 100,      // orders (depends on users + products)
+  auditLogs: 200,   // audit log entries (depends on adminUsers)
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Database adapter bootstrap
+// ─────────────────────────────────────────────────────────────────────────────
 const DATABASE_URL = process.env.DATABASE_URL || ''
 
 console.log(
@@ -44,7 +64,31 @@ const getAdapter = async () => {
 const adapter = await getAdapter()
 const prisma = new PrismaClient({ adapter } as never)
 
-// Utility functions for generating realistic data
+// ─────────────────────────────────────────────────────────────────────────────
+// Guard helper – returns true when the table already has rows
+// ─────────────────────────────────────────────────────────────────────────────
+type PrismaTableName =
+  | 'user'
+  | 'adminUser'
+  | 'adminRole'
+  | 'adminUserRole'
+  | 'category'
+  | 'tag'
+  | 'post'
+  | 'product'
+  | 'paymentMethod'
+  | 'order'
+  | 'adminAuditLog'
+
+async function tableHasData(table: PrismaTableName): Promise<boolean> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const count = await (prisma as any)[table].count()
+  return count > 0
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Utility helpers
+// ─────────────────────────────────────────────────────────────────────────────
 const randomInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
 
 const randomElement = <T>(arr: T[]): T => arr[randomInt(0, arr.length - 1)]
@@ -54,146 +98,47 @@ const randomElements = <T>(arr: T[], count: number): T[] => {
   return shuffled.slice(0, Math.min(count, arr.length))
 }
 
-const generateSlug = (text: string): string => {
-  return text
+const generateSlug = (text: string): string =>
+  text
     .toLowerCase()
     .replace(/[^\w\s-]/g, '')
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
     .trim()
-}
 
-// Realistic data pools
+// ─────────────────────────────────────────────────────────────────────────────
+// Data pools
+// ─────────────────────────────────────────────────────────────────────────────
 const FIRST_NAMES = [
-  'Emma',
-  'Liam',
-  'Olivia',
-  'Noah',
-  'Ava',
-  'Ethan',
-  'Sophia',
-  'Mason',
-  'Isabella',
-  'William',
-  'Mia',
-  'James',
-  'Charlotte',
-  'Benjamin',
-  'Amelia',
-  'Lucas',
-  'Harper',
-  'Henry',
-  'Evelyn',
-  'Alexander',
-  'Abigail',
-  'Michael',
-  'Emily',
-  'Daniel',
-  'Elizabeth',
-  'Matthew',
-  'Sofia',
-  'Jackson',
-  'Avery',
-  'Sebastian',
-  'Ella',
-  'Jack',
-  'Scarlett',
-  'Aiden',
-  'Grace',
-  'Owen',
-  'Chloe',
+  'Emma', 'Liam', 'Olivia', 'Noah', 'Ava', 'Ethan', 'Sophia', 'Mason', 'Isabella', 'William',
+  'Mia', 'James', 'Charlotte', 'Benjamin', 'Amelia', 'Lucas', 'Harper', 'Henry', 'Evelyn',
+  'Alexander', 'Abigail', 'Michael', 'Emily', 'Daniel', 'Elizabeth', 'Matthew', 'Sofia',
+  'Jackson', 'Avery', 'Sebastian', 'Ella', 'Jack', 'Scarlett', 'Aiden', 'Grace', 'Owen', 'Chloe',
 ]
 
 const LAST_NAMES = [
-  'Smith',
-  'Johnson',
-  'Williams',
-  'Brown',
-  'Jones',
-  'Garcia',
-  'Miller',
-  'Davis',
-  'Rodriguez',
-  'Martinez',
-  'Hernandez',
-  'Lopez',
-  'Gonzalez',
-  'Wilson',
-  'Anderson',
-  'Thomas',
-  'Taylor',
-  'Moore',
-  'Jackson',
-  'Martin',
-  'Lee',
-  'Thompson',
-  'White',
-  'Harris',
-  'Clark',
-  'Lewis',
-  'Robinson',
-  'Walker',
+  'Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez',
+  'Martinez', 'Hernandez', 'Lopez', 'Gonzalez', 'Wilson', 'Anderson', 'Thomas', 'Taylor',
+  'Moore', 'Jackson', 'Martin', 'Lee', 'Thompson', 'White', 'Harris', 'Clark', 'Lewis',
+  'Robinson', 'Walker',
 ]
 
 const EMAIL_DOMAINS = [
-  'gmail.com',
-  'yahoo.com',
-  'outlook.com',
-  'hotmail.com',
-  'icloud.com',
-  'protonmail.com',
-  'mail.com',
-  'aol.com',
-  'zoho.com',
-  'fastmail.com',
+  'gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com', 'icloud.com',
+  'protonmail.com', 'mail.com', 'aol.com', 'zoho.com', 'fastmail.com',
 ]
 
 const COMPANY_NAMES = [
-  'TechCorp',
-  'InnovateLabs',
-  'DataSystems',
-  'CloudWorks',
-  'DevHub',
-  'CodeFactory',
-  'DigitalEdge',
-  'SmartSolutions',
-  'NextGen',
-  'FutureTech',
-  'WebMasters',
-  'AppBuilders',
-  'SoftwareHouse',
-  'TechVentures',
-  'ByteWorks',
+  'TechCorp', 'InnovateLabs', 'DataSystems', 'CloudWorks', 'DevHub', 'CodeFactory',
+  'DigitalEdge', 'SmartSolutions', 'NextGen', 'FutureTech', 'WebMasters', 'AppBuilders',
+  'SoftwareHouse', 'TechVentures', 'ByteWorks',
 ]
 
 const PRODUCT_NAMES = [
-  'Starter Plan',
-  'Professional Plan',
-  'Enterprise Plan',
-  'Premium Subscription',
-  'Basic Package',
-  'Advanced Package',
-  'Ultimate Package',
-  'Monthly Membership',
-  'Annual Membership',
-  'Lifetime Access',
-  'Pro Edition',
-  'Business Edition',
-  'Team License',
-  'Individual License',
-  'Corporate License',
-]
-
-const PRODUCT_CONTENT_TEMPLATES = [
-  `<h2>Product Overview</h2><p>This comprehensive solution is designed to meet the needs of modern businesses and individuals seeking excellence in their operations.</p><h2>Key Features</h2><ul><li>Advanced analytics and reporting capabilities</li><li>24/7 customer support with dedicated account manager</li><li>Seamless integration with popular tools and platforms</li><li>Regular updates and new feature releases</li><li>Enterprise-grade security and compliance</li></ul><h2>What's Included</h2><p>Get access to our full suite of tools and resources, including premium templates, exclusive content, and priority support. Everything you need to succeed is at your fingertips.</p><h2>Perfect For</h2><p>Ideal for professionals, teams, and organizations looking to streamline their workflow and boost productivity. Whether you're a startup or an established enterprise, this plan scales with your needs.</p><h2>Getting Started</h2><p>Sign up today and get instant access to all features. Our onboarding team will guide you through the setup process to ensure you're up and running in no time.</p>`,
-  
-  `<h2>Why Choose This Plan?</h2><p>Experience the power of cutting-edge technology combined with intuitive design. Our platform has helped thousands of users achieve their goals faster and more efficiently.</p><h2>Core Benefits</h2><ul><li>Unlimited storage and bandwidth</li><li>Advanced collaboration tools for teams</li><li>Custom branding and white-label options</li><li>API access for custom integrations</li><li>Detailed usage analytics and insights</li></ul><h2>Technical Specifications</h2><p>Built on a robust infrastructure that ensures 99.9% uptime. Our platform leverages the latest cloud technologies to deliver exceptional performance and reliability.</p><h2>Support & Training</h2><p>Access our comprehensive knowledge base, video tutorials, and live training sessions. Our support team is available around the clock to assist you with any questions.</p><h2>Money-Back Guarantee</h2><p>Try risk-free with our 30-day money-back guarantee. If you're not completely satisfied, we'll refund your purchase—no questions asked.</p>`,
-  
-  `<h2>Transform Your Workflow</h2><p>Discover a smarter way to work with our all-in-one solution. Designed by experts, trusted by industry leaders worldwide.</p><h2>Premium Features</h2><ul><li>AI-powered automation and smart workflows</li><li>Real-time collaboration with team members</li><li>Advanced security with SSO and 2FA</li><li>Customizable dashboards and reports</li><li>Priority feature requests and roadmap input</li></ul><h2>Integration Ecosystem</h2><p>Connect seamlessly with over 100+ popular apps and services. From CRM systems to project management tools, we've got you covered with native integrations and webhooks.</p><h2>Scalability</h2><p>Start small and grow without limits. Our infrastructure automatically scales to handle your increasing demands, ensuring consistent performance at any size.</p><h2>Success Stories</h2><p>Join thousands of satisfied customers who have transformed their business with our platform. See measurable results within the first month of implementation.</p>`,
-  
-  `<h2>Unlock Your Potential</h2><p>Take your productivity to the next level with our feature-rich platform. Everything you need, nothing you don't.</p><h2>What You Get</h2><ul><li>Full access to all current and future features</li><li>Dedicated account manager for personalized support</li><li>Custom onboarding and training sessions</li><li>Priority bug fixes and feature development</li><li>Exclusive access to beta features and early releases</li></ul><h2>Security First</h2><p>Your data security is our top priority. We employ bank-level encryption, regular security audits, and comply with GDPR, SOC 2, and ISO 27001 standards.</p><h2>Performance Metrics</h2><p>Track your success with detailed analytics and reporting. Monitor key performance indicators, generate custom reports, and make data-driven decisions with confidence.</p><h2>Community Access</h2><p>Join our thriving community of users. Share best practices, get inspired by others, and participate in exclusive events and webinars.</p>`,
-  
-  `<h2>The Complete Solution</h2><p>Everything you need in one powerful package. Streamline operations, reduce costs, and drive growth with our comprehensive platform.</p><h2>Advanced Capabilities</h2><ul><li>Multi-language support for global teams</li><li>Advanced permission controls and user management</li><li>Automated workflows and task scheduling</li><li>Custom fields and flexible data structures</li><li>Export and backup tools for data portability</li></ul><h2>Mobile Experience</h2><p>Work from anywhere with our fully-featured mobile apps for iOS and Android. Stay connected and productive whether you're in the office or on the go.</p><h2>Compliance & Certifications</h2><p>Rest easy knowing we meet the highest industry standards. Our platform is certified for HIPAA, PCI DSS, and other critical compliance frameworks.</p><h2>Upgrade Anytime</h2><p>Need more power? Upgrade or downgrade your plan at any time with no penalties. We offer flexible billing options to match your business needs.</p>`,
+  'Starter Plan', 'Professional Plan', 'Enterprise Plan', 'Premium Subscription',
+  'Basic Package', 'Advanced Package', 'Ultimate Package', 'Monthly Membership',
+  'Annual Membership', 'Lifetime Access', 'Pro Edition', 'Business Edition',
+  'Team License', 'Individual License', 'Corporate License',
 ]
 
 const ARTICLE_TITLES = [
@@ -219,10 +164,23 @@ const ARTICLE_TITLES = [
   'Monitoring and Logging Best Practices',
 ]
 
+const TAG_NAMES = [
+  'javascript', 'typescript', 'react', 'nodejs', 'python', 'docker', 'kubernetes',
+  'aws', 'azure', 'mongodb', 'postgresql', 'redis', 'graphql', 'rest-api',
+  'microservices', 'serverless', 'devops', 'ci-cd', 'testing', 'security',
+  'performance', 'scalability',
+]
+
+const PRODUCT_CONTENT_TEMPLATES = [
+  '<h2>Product Overview</h2><p>This comprehensive solution is designed to meet the needs of modern businesses and individuals seeking excellence in their operations.</p><h2>Key Features</h2><ul><li>Advanced analytics and reporting capabilities</li><li>24/7 customer support with dedicated account manager</li><li>Seamless integration with popular tools and platforms</li><li>Regular updates and new feature releases</li><li>Enterprise-grade security and compliance</li></ul><h2>Getting Started</h2><p>Sign up today and get instant access to all features. Our onboarding team will guide you through the setup process to ensure you are up and running in no time.</p>',
+  '<h2>Why Choose This Plan?</h2><p>Experience the power of cutting-edge technology combined with intuitive design. Our platform has helped thousands of users achieve their goals faster and more efficiently.</p><h2>Core Benefits</h2><ul><li>Unlimited storage and bandwidth</li><li>Advanced collaboration tools for teams</li><li>Custom branding and white-label options</li><li>API access for custom integrations</li><li>Detailed usage analytics and insights</li></ul><h2>Money-Back Guarantee</h2><p>Try risk-free with our 30-day money-back guarantee. If you are not completely satisfied, we will refund your purchase.</p>',
+  '<h2>Transform Your Workflow</h2><p>Discover a smarter way to work with our all-in-one solution. Designed by experts, trusted by industry leaders worldwide.</p><h2>Premium Features</h2><ul><li>AI-powered automation and smart workflows</li><li>Real-time collaboration with team members</li><li>Advanced security with SSO and 2FA</li><li>Customizable dashboards and reports</li><li>Priority feature requests and roadmap input</li></ul><h2>Scalability</h2><p>Start small and grow without limits. Our infrastructure automatically scales to handle your increasing demands.</p>',
+]
+
 const ARTICLE_CONTENT_TEMPLATES = [
-  `<h2>Introduction</h2><p>In this comprehensive guide, we'll explore the fundamental concepts and best practices that every developer should know.</p><h2>Key Concepts</h2><p>Understanding the core principles is essential for building robust and maintainable applications. Let's dive into the details.</p><h2>Implementation</h2><p>Here's how you can implement these concepts in your projects with practical examples and code snippets.</p><h2>Best Practices</h2><p>Following industry standards and best practices will help you create better software that stands the test of time.</p><h2>Conclusion</h2><p>By applying these techniques, you'll be well-equipped to tackle complex challenges in modern software development.</p>`,
-  `<h2>Overview</h2><p>This article provides an in-depth look at advanced techniques and methodologies used by industry professionals.</p><h2>Background</h2><p>Before we begin, it's important to understand the historical context and evolution of these approaches.</p><h2>Technical Details</h2><p>Let's examine the technical implementation details and architectural considerations you need to be aware of.</p><h2>Real-world Examples</h2><p>We'll look at several case studies from successful companies that have implemented these strategies.</p><h2>Summary</h2><p>These insights will help you make informed decisions when designing your next project.</p>`,
-  `<h2>Getting Started</h2><p>Welcome to this tutorial where we'll walk through everything you need to know step by step.</p><h2>Prerequisites</h2><p>Make sure you have the necessary tools and knowledge before proceeding with the implementation.</p><h2>Step-by-Step Guide</h2><p>Follow these detailed instructions to achieve the desired results in your development workflow.</p><h2>Troubleshooting</h2><p>Common issues and their solutions are covered here to help you overcome potential obstacles.</p><h2>Next Steps</h2><p>Continue your learning journey with these recommended resources and advanced topics.</p>`,
+  '<h2>Introduction</h2><p>In this comprehensive guide, we will explore the fundamental concepts and best practices that every developer should know.</p><h2>Key Concepts</h2><p>Understanding the core principles is essential for building robust and maintainable applications.</p><h2>Implementation</h2><p>Here is how you can implement these concepts in your projects with practical examples and code snippets.</p><h2>Best Practices</h2><p>Following industry standards and best practices will help you create better software that stands the test of time.</p><h2>Conclusion</h2><p>By applying these techniques, you will be well-equipped to tackle complex challenges in modern software development.</p>',
+  '<h2>Overview</h2><p>This article provides an in-depth look at advanced techniques and methodologies used by industry professionals.</p><h2>Background</h2><p>Before we begin, it is important to understand the historical context and evolution of these approaches.</p><h2>Technical Details</h2><p>Let us examine the technical implementation details and architectural considerations you need to be aware of.</p><h2>Real-world Examples</h2><p>We will look at several case studies from successful companies that have implemented these strategies.</p><h2>Summary</h2><p>These insights will help you make informed decisions when designing your next project.</p>',
+  '<h2>Getting Started</h2><p>Welcome to this tutorial where we will walk through everything you need to know step by step.</p><h2>Prerequisites</h2><p>Make sure you have the necessary tools and knowledge before proceeding with the implementation.</p><h2>Step-by-Step Guide</h2><p>Follow these detailed instructions to achieve the desired results in your development workflow.</p><h2>Troubleshooting</h2><p>Common issues and their solutions are covered here to help you overcome potential obstacles.</p><h2>Next Steps</h2><p>Continue your learning journey with these recommended resources and advanced topics.</p>',
 ]
 
 // Hierarchical category definitions (max 3 levels)
@@ -305,39 +263,19 @@ const CATEGORY_TREE = [
   },
 ]
 
-const TAG_NAMES = [
-  'javascript',
-  'typescript',
-  'react',
-  'nodejs',
-  'python',
-  'docker',
-  'kubernetes',
-  'aws',
-  'azure',
-  'mongodb',
-  'postgresql',
-  'redis',
-  'graphql',
-  'rest-api',
-  'microservices',
-  'serverless',
-  'devops',
-  'ci-cd',
-  'testing',
-  'security',
-  'performance',
-  'scalability',
-]
 
-// Generate realistic user data
+// Hierarchical category definitions (max 3 levels)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Data generators
+// ─────────────────────────────────────────────────────────────────────────────
+
 const generateUser = async () => {
   const firstName = randomElement(FIRST_NAMES)
   const lastName = randomElement(LAST_NAMES)
   const username = `${firstName.toLowerCase()}${lastName.toLowerCase()}${randomInt(1, 999)}`
   const email = `${username}@${randomElement(EMAIL_DOMAINS)}`
   const password = await hashPassword('User123!')
-
   return {
     name: `${firstName} ${lastName}`,
     email,
@@ -349,13 +287,11 @@ const generateUser = async () => {
   }
 }
 
-// Generate realistic admin user data
 const generateAdminUser = (index: number) => {
   const firstName = randomElement(FIRST_NAMES)
   const lastName = randomElement(LAST_NAMES)
   const username = `admin_${firstName.toLowerCase()}_${lastName.toLowerCase()}_${index}`
   const email = `${username}@${randomElement(COMPANY_NAMES).toLowerCase()}.com`
-
   return {
     username: username.substring(0, validationConfig.user.username.maxLength),
     email: email.substring(0, validationConfig.user.email.maxLength),
@@ -367,14 +303,10 @@ const generateAdminUser = (index: number) => {
   }
 }
 
-// Generate realistic product data
 const generateProduct = (index: number) => {
   const name = randomElement(PRODUCT_NAMES)
-  const currencies = ['usd', 'eur', 'cny', 'gbp']
-  
   const prices = [999, 1999, 4999, 9999, 19999, 49999, 99900]
-
-  // Use Unsplash images for products
+  const currencies = ['usd', 'eur', 'cny', 'gbp']
   const productImages = [
     'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=600&fit=crop',
     'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop',
@@ -389,41 +321,28 @@ const generateProduct = (index: number) => {
     'https://images.unsplash.com/photo-1556761175-b413da4baf72?w=800&h=600&fit=crop',
     'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&h=600&fit=crop',
   ]
-
-  const productImage = productImages[index % productImages.length]
   const slug = `${generateSlug(name)}-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`
-  const content = randomElement(PRODUCT_CONTENT_TEMPLATES)
-
   return {
     name: name.substring(0, validationConfig.product.name.maxLength),
-    description:
-      `${name} includes all essential features. Perfect for ${randomElement(['individuals', 'teams', 'businesses', 'enterprises'])}.`.substring(
-        0,
-        validationConfig.product.description.maxLength
-      ),
-    content,
+    description: `${name} includes all essential features. Perfect for ${randomElement(['individuals', 'teams', 'businesses', 'enterprises'])}.`.substring(0, validationConfig.product.description.maxLength),
+    content: randomElement(PRODUCT_CONTENT_TEMPLATES),
     slug,
-    image: productImage,
+    image: productImages[index % productImages.length],
     price: randomElement(prices),
     currency: randomElement(currencies),
-    quantity: Math.random() > 0.3 ? randomInt(5, 100) : null, // null = unlimited
+    quantity: Math.random() > 0.3 ? randomInt(5, 100) : null,
     isActive: Math.random() > 0.2,
     metadata: JSON.stringify({
-      features: randomElements(
-        ['Feature A', 'Feature B', 'Feature C', 'Feature D'],
-        randomInt(2, 4)
-      ),
+      features: randomElements(['Feature A', 'Feature B', 'Feature C', 'Feature D'], randomInt(2, 4)),
       popular: Math.random() > 0.7,
     }),
   }
 }
 
-// Generate payment method for a product
 const generatePaymentMethod = (productId: string, provider: 'stripe' | 'paypal') => {
   const modes = ['payment', 'subscription']
   const mode = randomElement(modes)
   const intervals = ['month', 'year', 'week', 'day']
-
   if (provider === 'stripe') {
     return {
       productId,
@@ -455,39 +374,26 @@ const generatePaymentMethod = (productId: string, provider: 'stripe' | 'paypal')
   }
 }
 
-// Generate realistic article/post data
 const generatePost = (authorId: string, type: 'ARTICLE' | 'PAGE', index: number) => {
   const title =
     type === 'ARTICLE'
       ? randomElement(ARTICLE_TITLES)
       : `About ${randomElement(['Us', 'Our Mission', 'Our Team', 'Privacy Policy', 'Terms of Service'])}`
-
-  // Add timestamp and random string to ensure absolutely unique slugs
   const timestamp = Date.now()
   const randomStr = Math.random().toString(36).substring(2, 8)
   const slug = `${generateSlug(title)}-${timestamp}-${randomStr}`
-  const content = randomElement(ARTICLE_CONTENT_TEMPLATES)
-  const statuses = ['DRAFT', 'PUBLISHED', 'SCHEDULED']
-  const status = randomElement(statuses)
-
-  // Use Unsplash random images for articles (tech/coding themed)
-  const imageId = 2000 + index
-  const articleImage =
-    type === 'ARTICLE' ? `https://picsum.photos/seed/article${imageId}/1200/630` : null
-
+  const status = randomElement(['DRAFT', 'PUBLISHED', 'SCHEDULED'])
+  const articleImage = type === 'ARTICLE' ? `https://picsum.photos/seed/article${2000 + index}/1200/630` : null
   return {
     title: title.substring(0, validationConfig.post.title.maxLength),
     slug: slug.substring(0, validationConfig.post.slug.maxLength),
-    content,
+    content: randomElement(ARTICLE_CONTENT_TEMPLATES),
     excerpt: `${title.substring(0, 100)}...`.substring(0, validationConfig.post.excerpt.maxLength),
     featuredImage: articleImage,
     type,
     status,
     seoTitle: title.substring(0, validationConfig.post.seoTitle.maxLength),
-    seoDescription: `Learn about ${title.toLowerCase()} in this comprehensive guide.`.substring(
-      0,
-      validationConfig.post.seoDescription.maxLength
-    ),
+    seoDescription: `Learn about ${title.toLowerCase()} in this comprehensive guide.`.substring(0, validationConfig.post.seoDescription.maxLength),
     publishedAt:
       status === 'PUBLISHED'
         ? new Date(Date.now() - randomInt(0, 90) * 24 * 60 * 60 * 1000)
@@ -498,305 +404,287 @@ const generatePost = (authorId: string, type: 'ARTICLE' | 'PAGE', index: number)
   }
 }
 
-// Main seed function
+
+// Main seed function - dependency order:
+// 1.user 2.adminUser 3.adminRole 4.adminUserRole 5.category 6.tag 7.post 8.product 9.order 10.adminAuditLog
 async function generateTestData() {
-  console.log('🚀 Starting test data generation...\n')
-
+  console.log('Starting test data generation...')
   try {
-    // 1. Generate Frontend Users
-    console.log('👥 Generating frontend users...')
-    const users = []
-    for (let i = 0; i < 50; i++) {
-      const userData = await generateUser()
-      const user = await prisma.user.create({
-        data: userData,
-      })
-      users.push(user)
+    // 1. Frontend Users
+    const users: { id: string }[] = []
+    if (await tableHasData('user')) {
+      console.log('Skipping users - table already has data')
+      const existing = await prisma.user.findMany({ select: { id: true } })
+      users.push(...existing)
+    } else {
+      console.log('Generating frontend users...')
+      for (let i = 0; i < CONFIG.users; i++) {
+        const user = await prisma.user.create({ data: await generateUser() })
+        users.push(user)
+      }
+      console.log('Created ' + users.length + ' frontend users (password: User123!')
     }
-    console.log(`✅ Created ${users.length} frontend users (password: User123!)\n`)
 
-    // 2. Generate Admin Users
-    console.log('👨‍💼 Generating admin users...')
-    const adminUsers = []
-    const defaultPassword = await hashPassword('Admin123!')
-
-    for (let i = 0; i < 10; i++) {
-      const adminData = generateAdminUser(i)
-      const adminUser = await prisma.adminUser.create({
-        data: {
-          ...adminData,
-          password: defaultPassword,
-        },
-      })
-      adminUsers.push(adminUser)
+    // 2. Admin Users
+    // Generate only when the table is empty OR contains exactly 1 superuser record
+    // (the default superuser created during initial setup)
+    const adminUsers: { id: string }[] = []
+    const adminUserCount = await prisma.adminUser.count()
+    const onlyDefaultSuperuser =
+      adminUserCount === 1 && (await prisma.adminUser.count({ where: { isSuperuser: true } })) === 1
+    if (adminUserCount > 0 && !onlyDefaultSuperuser) {
+      console.log('Skipping adminUsers - table already has data (not just the default superuser)')
+      const existing = await prisma.adminUser.findMany({ select: { id: true } })
+      adminUsers.push(...existing)
+    } else {
+      console.log('Generating admin users...')
+      const defaultPassword = await hashPassword('Admin123!')
+      for (let i = 0; i < CONFIG.adminUsers; i++) {
+        const adminUser = await prisma.adminUser.create({
+          data: { ...generateAdminUser(i), password: defaultPassword },
+        })
+        adminUsers.push(adminUser)
+      }
+      console.log('Created ' + adminUsers.length + ' admin users (password: Admin123!')
     }
-    console.log(`✅ Created ${adminUsers.length} admin users (password: Admin123!)\n`)
 
-    // 3. Generate Roles
-    console.log('🎭 Generating roles...')
+    // 3. Roles
     const roleNames = [
       { name: 'Content Editor', description: 'Can create and edit content' },
-      {
-        name: 'Product Manager',
-        description: 'Can manage products and orders',
-      },
+      { name: 'Product Manager', description: 'Can manage products and orders' },
       { name: 'User Manager', description: 'Can manage frontend users' },
       { name: 'Viewer', description: 'Read-only access to most resources' },
     ]
-
-    const roles = []
-    for (const roleData of roleNames) {
-      const role = await prisma.adminRole.upsert({
-        where: { name: roleData.name },
-        update: {},
-        create: {
-          name: roleData.name.substring(0, validationConfig.role.name.maxLength),
-          description: roleData.description.substring(
-            0,
-            validationConfig.role.description.maxLength
-          ),
-        },
-      })
-      roles.push(role)
-    }
-    console.log(`✅ Created/found ${roles.length} roles\n`)
-
-    // 4. Assign roles to admin users (skip superuser)
-    console.log('🔗 Assigning roles to admin users...')
-    let roleAssignments = 0
-    for (let i = 1; i < adminUsers.length; i++) {
-      const rolesToAssign = randomElements(roles, randomInt(1, 2))
-      for (const role of rolesToAssign) {
-        await prisma.adminUserRole.create({
-          data: {
-            adminUserId: adminUsers[i].id,
-            roleId: role.id,
+    const roles: { id: string }[] = []
+    // Generate only when the table is empty OR contains exactly 1 "Default Admin" role
+    // (the default role created during initial setup)
+    const adminRoleCount = await prisma.adminRole.count()
+    const onlyDefaultAdminRole =
+      adminRoleCount === 1 && (await prisma.adminRole.count({ where: { name: 'Admin', isDefault: true } })) === 1
+    if (adminRoleCount > 0 && !onlyDefaultAdminRole) {
+      console.log('Skipping roles - table already has data (not just the default admin role)')
+      const existing = await prisma.adminRole.findMany({ select: { id: true } })
+      roles.push(...existing)
+    } else {
+      console.log('Generating roles...')
+      for (const roleData of roleNames) {
+        const role = await prisma.adminRole.upsert({
+          where: { name: roleData.name },
+          update: {},
+          create: {
+            name: roleData.name.substring(0, validationConfig.role.name.maxLength),
+            description: roleData.description.substring(0, validationConfig.role.description.maxLength),
           },
         })
-        roleAssignments++
+        roles.push(role)
       }
+      console.log('Created ' + roles.length + ' roles')
     }
-    console.log(`✅ Created ${roleAssignments} role assignments\n`)
 
-    // 5. Generate Hierarchical Categories (max 3 levels)
-    console.log('📁 Generating hierarchical categories...')
-    interface CategoryNode { name: string; description: string; children?: CategoryNode[] }
-    const categories: { id: string; name: string; slug: string; description: string | null; parentId: string | null }[] = []
-
-    const createCategoryNode = async (catData: CategoryNode, parentId?: string): Promise<void> => {
-      const slug = generateSlug(catData.name) + '-' + Math.random().toString(36).substring(2, 6)
-      const category = await prisma.category.create({
-        data: {
-          name: catData.name.substring(0, validationConfig.category.name.maxLength),
-          slug,
-          description: catData.description.substring(0, validationConfig.category.description.maxLength),
-          parentId: parentId || null,
-        },
-      })
-      categories.push(category)
-      if (catData.children) {
-        for (const child of catData.children) {
-          await createCategoryNode(child, category.id)
+    // 4. Role assignments (deps: adminUser + adminRole)
+    if (await tableHasData('adminUserRole')) {
+      console.log('Skipping role assignments - table already has data')
+    } else {
+      console.log('Assigning roles to admin users...')
+      let roleAssignments = 0
+      for (let i = 1; i < adminUsers.length; i++) {
+        const rolesToAssign = randomElements(roles, randomInt(1, 2))
+        for (const role of rolesToAssign) {
+          await prisma.adminUserRole.create({
+            data: { adminUserId: adminUsers[i].id, roleId: role.id },
+          })
+          roleAssignments++
         }
       }
+      console.log('Created ' + roleAssignments + ' role assignments')
     }
 
-    for (const rootCat of CATEGORY_TREE) {
-      await createCategoryNode(rootCat)
-    }
-    console.log(`✅ Created ${categories.length} categories (3-level hierarchy)\n`)
-    // 6. Generate Tags
-    console.log('🏷️  Generating tags...')
-    const tags: { id: string; name: string; slug: string }[] = []
-    for (const tagName of TAG_NAMES) {
-      const slug = generateSlug(tagName)
-      const tag = await prisma.tag.upsert({
-        where: { slug },
-        update: {},
-        create: {
-          name: tagName.substring(0, validationConfig.post.tagName.maxLength),
-          slug,
-        },
-      })
-      tags.push(tag)
-    }
-    console.log(`✅ Created/found ${tags.length} tags\n`)
-
-    // 7. Generate Articles
-    console.log('📝 Generating articles...')
-    const articles = []
-    for (let i = 0; i < 30; i++) {
-      const author = randomElement(adminUsers)
-      const postData = generatePost(author.id, 'ARTICLE', i)
-
-      const article = await prisma.post.create({
-        data: postData,
-      })
-
-      // Assign categories
-      const postCategories = randomElements(categories, randomInt(1, 3))
-      for (const category of postCategories) {
-        await prisma.postCategory.create({
+    // 5. Categories (self-referential, depth-first, no external deps)
+    interface CategoryNode { name: string; description: string; children?: CategoryNode[] }
+    const categories: { id: string }[] = []
+    if (await tableHasData('category')) {
+      console.log('Skipping categories - table already has data')
+      const existing = await prisma.category.findMany({ select: { id: true } })
+      categories.push(...existing)
+    } else {
+      console.log('Generating hierarchical categories...')
+      const createCategoryNode = async (catData: CategoryNode, parentId?: string): Promise<void> => {
+        const slug = generateSlug(catData.name) + '-' + Math.random().toString(36).substring(2, 6)
+        const category = await prisma.category.create({
           data: {
-            postId: article.id,
-            categoryId: category.id,
+            name: catData.name.substring(0, validationConfig.category.name.maxLength),
+            slug,
+            description: catData.description.substring(0, validationConfig.category.description.maxLength),
+            parentId: parentId ?? null,
           },
         })
+        categories.push(category)
+        if (catData.children) {
+          for (const child of catData.children) {
+            await createCategoryNode(child, category.id)
+          }
+        }
       }
+      for (const rootCat of CATEGORY_TREE) {
+        await createCategoryNode(rootCat)
+      }
+      console.log('Created ' + categories.length + ' categories (3-level hierarchy)')
+    }
 
-      // Assign tags
-      const postTags = randomElements(tags, randomInt(2, 5))
-      for (const tag of postTags) {
-        await prisma.postTag.create({
-          data: {
-            postId: article.id,
-            tagId: tag.id,
+    // 6. Tags (no deps)
+    const tags: { id: string }[] = []
+    if (await tableHasData('tag')) {
+      console.log('Skipping tags - table already has data')
+      const existing = await prisma.tag.findMany({ select: { id: true } })
+      tags.push(...existing)
+    } else {
+      console.log('Generating tags...')
+      for (const tagName of TAG_NAMES) {
+        const slug = generateSlug(tagName)
+        const tag = await prisma.tag.upsert({
+          where: { slug },
+          update: {},
+          create: {
+            name: tagName.substring(0, validationConfig.post.tagName.maxLength),
+            slug,
           },
         })
+        tags.push(tag)
       }
-
-      articles.push(article)
+      console.log('Created ' + tags.length + ' tags')
     }
-    console.log(`✅ Created ${articles.length} articles\n`)
 
-    // 8. Generate Pages
-    console.log('📄 Generating pages...')
-    const pages = []
-    for (let i = 0; i < 5; i++) {
-      const author = randomElement(adminUsers)
-      const pageData = generatePost(author.id, 'PAGE', i)
+    // 7. Posts (deps: adminUser, category, tag)
+    if (await tableHasData('post')) {
+      console.log('Skipping posts - table already has data')
+    } else {
+      console.log('Generating articles...')
+      const articles: { id: string }[] = []
+      for (let i = 0; i < CONFIG.articles; i++) {
+        const author = randomElement(adminUsers)
+        const article = await prisma.post.create({ data: generatePost(author.id, 'ARTICLE', i) })
+        articles.push(article)
+        for (const category of randomElements(categories, randomInt(1, 3))) {
+          await prisma.postCategory.create({ data: { postId: article.id, categoryId: category.id } })
+        }
+        for (const tag of randomElements(tags, randomInt(2, 5))) {
+          await prisma.postTag.create({ data: { postId: article.id, tagId: tag.id } })
+        }
+      }
+      console.log('Created ' + articles.length + ' articles')
 
-      const page = await prisma.post.create({
-        data: pageData,
-      })
-      pages.push(page)
+      console.log('Generating pages...')
+      const pages: { id: string }[] = []
+      for (let i = 0; i < CONFIG.pages; i++) {
+        const author = randomElement(adminUsers)
+        const page = await prisma.post.create({ data: generatePost(author.id, 'PAGE', i) })
+        pages.push(page)
+      }
+      console.log('Created ' + pages.length + ' pages')
     }
-    console.log(`✅ Created ${pages.length} pages\n`)
 
-    // 9. Generate Products
-    console.log('💰 Generating products...')
-    const products = []
-    for (let i = 0; i < 12; i++) {
-      const productData = generateProduct(i)
-      const product = await prisma.product.create({
-        data: productData,
-      })
-      products.push(product)
+    // 8. Products + PaymentMethods (product has no external deps)
+    const products: { id: string; price: number; currency: string }[] = []
+    if (await tableHasData('product')) {
+      console.log('Skipping products - table already has data')
+      const existing = await prisma.product.findMany({ select: { id: true, price: true, currency: true } })
+      products.push(...existing)
+    } else {
+      console.log('Generating products...')
+      for (let i = 0; i < CONFIG.products; i++) {
+        const product = await prisma.product.create({ data: generateProduct(i) })
+        products.push(product)
+        if (Math.random() > 0.3) {
+          await prisma.paymentMethod.create({ data: generatePaymentMethod(product.id, 'stripe') })
+        }
+        if (Math.random() > 0.3) {
+          await prisma.paymentMethod.create({ data: generatePaymentMethod(product.id, 'paypal') })
+        }
+      }
+      console.log('Created ' + products.length + ' products with payment methods')
+    }
 
-      // Generate payment methods for each product
-      const hasStripe = Math.random() > 0.3
-      const hasPayPal = Math.random() > 0.3
-
-      if (hasStripe) {
-        const stripeMethod = generatePaymentMethod(product.id, 'stripe')
-        await prisma.paymentMethod.create({
-          data: stripeMethod,
+    // 9. Orders (deps: user + product)
+    if (await tableHasData('order')) {
+      console.log('Skipping orders - table already has data')
+    } else if (users.length === 0 || products.length === 0) {
+      console.log('Skipping orders - no users or products available')
+    } else {
+      console.log('Generating orders...')
+      const orderStatuses = ['pending', 'completed', 'failed', 'refunded', 'expired']
+      const paymentProviders = ['stripe', 'paypal']
+      let ordersCreated = 0
+      for (let i = 0; i < CONFIG.orders; i++) {
+        const user = randomElement(users)
+        const product = randomElement(products)
+        const status = randomElement(orderStatuses)
+        const provider = randomElement(paymentProviders)
+        await prisma.order.create({
+          data: {
+            userId: user.id,
+            productId: product.id,
+            paymentProvider: provider,
+            stripeSessionId: provider === 'stripe' ? 'cs_test_' + Math.random().toString(36).substring(2, 15) : null,
+            stripeCustomerId: provider === 'stripe' ? 'cus_' + Math.random().toString(36).substring(2, 15) : null,
+            paypalOrderId: provider === 'paypal' ? Math.random().toString(36).substring(2, 15).toUpperCase() : null,
+            paypalSubscriptionId: provider === 'paypal' && Math.random() > 0.5 ? 'I-' + Math.random().toString(36).substring(2, 15).toUpperCase() : null,
+            status,
+            amount: product.price,
+            currency: product.currency,
+            metadata: JSON.stringify({
+              userAgent: 'Mozilla/5.0',
+              ipAddress: randomInt(1,255)+'.'+randomInt(1,255)+'.'+randomInt(1,255)+'.'+randomInt(1,255),
+            }),
+            createdAt: new Date(Date.now() - randomInt(0, 180) * 24 * 60 * 60 * 1000),
+          },
         })
+        ordersCreated++
       }
+      console.log('Created ' + ordersCreated + ' orders')
+    }
 
-      if (hasPayPal) {
-        const paypalMethod = generatePaymentMethod(product.id, 'paypal')
-        await prisma.paymentMethod.create({
-          data: paypalMethod,
+    // 10. Audit Logs (deps: adminUser)
+    if (await tableHasData('adminAuditLog')) {
+      console.log('Skipping audit logs - table already has data')
+    } else if (adminUsers.length === 0) {
+      console.log('Skipping audit logs - no admin users available')
+    } else {
+      console.log('Generating audit logs...')
+      const actions = ['CREATE', 'UPDATE', 'DELETE', 'VIEW', 'LOGIN', 'LOGOUT']
+      const resources = ['user', 'product', 'order', 'article', 'page', 'category', 'role', 'permission']
+      let logsCreated = 0
+      for (let i = 0; i < CONFIG.auditLogs; i++) {
+        await prisma.adminAuditLog.create({
+          data: {
+            adminUserId: randomElement(adminUsers).id,
+            action: randomElement(actions),
+            resource: randomElement(resources),
+            resourceId: Math.random().toString(36).substring(2, 15),
+            details: 'Test audit log entry ' + (i + 1),
+            ipAddress: randomInt(1,255)+'.'+randomInt(1,255)+'.'+randomInt(1,255)+'.'+randomInt(1,255),
+            userAgent: 'Mozilla/5.0 (Test User Agent)',
+            createdAt: new Date(Date.now() - randomInt(0, 30) * 24 * 60 * 60 * 1000),
+          },
         })
+        logsCreated++
       }
+      console.log('Created ' + logsCreated + ' audit logs')
     }
-    console.log(`✅ Created ${products.length} products with payment methods\n`)
 
-    // 10. Generate Orders
-    console.log('🛒 Generating orders...')
-    const orderStatuses = ['pending', 'completed', 'failed', 'refunded', 'expired']
-    const paymentProviders = ['stripe', 'paypal']
-
-    let ordersCreated = 0
-    for (let i = 0; i < 100; i++) {
-      const user = randomElement(users)
-      const product = randomElement(products)
-      const status = randomElement(orderStatuses)
-      const provider = randomElement(paymentProviders)
-
-      await prisma.order.create({
-        data: {
-          userId: user.id,
-          productId: product.id,
-          paymentProvider: provider,
-          stripeSessionId:
-            provider === 'stripe' ? `cs_test_${Math.random().toString(36).substring(2, 15)}` : null,
-          stripeCustomerId:
-            provider === 'stripe' ? `cus_${Math.random().toString(36).substring(2, 15)}` : null,
-          paypalOrderId:
-            provider === 'paypal'
-              ? `${Math.random().toString(36).substring(2, 15).toUpperCase()}`
-              : null,
-          paypalSubscriptionId:
-            provider === 'paypal' && Math.random() > 0.5
-              ? `I-${Math.random().toString(36).substring(2, 15).toUpperCase()}`
-              : null,
-          status,
-          amount: product.price,
-          currency: product.currency,
-          metadata: JSON.stringify({
-            userAgent: 'Mozilla/5.0',
-            ipAddress: `${randomInt(1, 255)}.${randomInt(1, 255)}.${randomInt(1, 255)}.${randomInt(1, 255)}`,
-          }),
-          createdAt: new Date(Date.now() - randomInt(0, 180) * 24 * 60 * 60 * 1000),
-        },
-      })
-      ordersCreated++
-    }
-    console.log(`✅ Created ${ordersCreated} orders\n`)
-
-    // 11. Generate Audit Logs
-    console.log('📋 Generating audit logs...')
-    const actions = ['CREATE', 'UPDATE', 'DELETE', 'VIEW', 'LOGIN', 'LOGOUT']
-    const resources = [
-      'user',
-      'product',
-      'order',
-      'article',
-      'page',
-      'category',
-      'role',
-      'permission',
-    ]
-
-    let logsCreated = 0
-    for (let i = 0; i < 200; i++) {
-      const adminUser = randomElement(adminUsers)
-      await prisma.adminAuditLog.create({
-        data: {
-          adminUserId: adminUser.id,
-          action: randomElement(actions),
-          resource: randomElement(resources),
-          resourceId: Math.random().toString(36).substring(2, 15),
-          details: `Test audit log entry ${i + 1}`,
-          ipAddress: `${randomInt(1, 255)}.${randomInt(1, 255)}.${randomInt(1, 255)}.${randomInt(1, 255)}`,
-          userAgent: 'Mozilla/5.0 (Test User Agent)',
-          createdAt: new Date(Date.now() - randomInt(0, 30) * 24 * 60 * 60 * 1000),
-        },
-      })
-      logsCreated++
-    }
-    console.log(`✅ Created ${logsCreated} audit logs\n`)
-
-    // Summary
-    console.log('✨ Test data generation completed!\n')
-    console.log('📊 Summary:')
-    console.log(`   - Frontend Users: ${users.length}`)
-    console.log(`   - Admin Users: ${adminUsers.length}`)
-    console.log(`   - Roles: ${roles.length}`)
-    console.log(`   - Categories: ${categories.length}`)
-    console.log(`   - Tags: ${tags.length}`)
-    console.log(`   - Articles: ${articles.length}`)
-    console.log(`   - Pages: ${pages.length}`)
-    console.log(`   - Products: ${products.length}`)
-    console.log(`   - Orders: ${ordersCreated}`)
-    console.log(`   - Audit Logs: ${logsCreated}`)
+    console.log('\n✨ Test data generation completed!')
+    console.log('\n📊 Config used:')
+    console.log('   users:      ' + CONFIG.users)
+    console.log('   adminUsers: ' + CONFIG.adminUsers)
+    console.log('   articles:   ' + CONFIG.articles)
+    console.log('   pages:      ' + CONFIG.pages)
+    console.log('   products:   ' + CONFIG.products)
+    console.log('   orders:     ' + CONFIG.orders)
+    console.log('   auditLogs:  ' + CONFIG.auditLogs)
     console.log('\n💡 Login credentials:')
     console.log('   Frontend Users - Password: User123!')
-    console.log('   Admin Users - Username: admin_[firstname]_[lastname], Password: Admin123!')
+    console.log('   Admin Users    - Username: admin_[firstname]_[lastname], Password: Admin123!')
   } catch (error) {
-    console.error('❌ Error generating test data:', error)
+    console.error('Error generating test data:', error)
     throw error
   }
 }
@@ -804,7 +692,7 @@ async function generateTestData() {
 // Run the script
 generateTestData()
   .catch(e => {
-    console.error('❌ Fatal error:', e)
+    console.error('Fatal error:', e)
     process.exit(1)
   })
   .finally(async () => {

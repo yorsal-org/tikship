@@ -678,7 +678,20 @@
       "ip_address": "IP Address",
       "details": "Details",
       "no_logs": "No audit logs found",
-      "showing_results": "Showing {from} to {to} of {total} results"
+      "showing_results": "Showing {from} to {to} of {total} results",
+      "cleanup": "Cleanup Logs",
+      "cleanup_title": "Bulk Delete Old Logs",
+      "cleanup_desc": "Delete all audit logs older than the selected period. This action cannot be undone.",
+      "cleanup_before_10_days": "10 days ago",
+      "cleanup_before_1_month": "1 month ago",
+      "cleanup_before_60_days": "60 days ago",
+      "cleanup_before_6_months": "6 months ago",
+      "cleanup_before_1_year": "1 year ago",
+      "cleanup_confirm": "Are you sure you want to delete all audit logs older than {period}?",
+      "cleanup_warning": "This action cannot be undone. Please proceed with caution.",
+      "cleanup_success": "Successfully deleted {count} log(s)",
+      "cleanup_empty": "No logs found matching the criteria",
+      "deleting": "Deleting..."
     },
     "members": {
       "title": "Registered Users",

@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 import { requireAdminAuth } from '@/lib/auth/admin'
 import { ApiResponse } from '@/lib/utils/api-response'
 import { PERMISSIONS } from '@/config/permissions'
-import { getAuditLogs } from '@/lib/audit/service'
+import { getAuditLogs, deleteOldAuditLogs } from '@/lib/audit/service'
 
 
 /**
@@ -44,6 +44,39 @@ export async function GET(req: NextRequest) {
     return ApiResponse.success(result)
   } catch (error) {
     console.error('Get audit logs error:', error)
-    return await await ApiResponse.adminError('operation_failed', 500)
+    return await ApiResponse.adminError('operation_failed', 500)
+  }
+}
+
+/**
+ * Delete audit logs older than a specified period
+ * @description Bulk delete audit logs that are older than the given number of days
+ * @tag Admin - Audit
+ * @auth bearerAuth
+ * @response 200:Returns count of deleted logs
+ * @responseSet auth
+ * @openapi
+ */
+export async function DELETE(req: NextRequest) {
+  try {
+    const { error } = await requireAdminAuth(req, PERMISSIONS.AUDIT_LOG_DELETE)
+    if (error) return error
+
+    const { searchParams } = new URL(req.url)
+    const days = parseInt(searchParams.get('days') || '0')
+
+    if (!days || days <= 0) {
+      return await ApiResponse.adminError('invalid_params', 400)
+    }
+
+    const beforeDate = new Date()
+    beforeDate.setDate(beforeDate.getDate() - days)
+
+    const deletedCount = await deleteOldAuditLogs(beforeDate)
+
+    return ApiResponse.success({ deletedCount })
+  } catch (error) {
+    console.error('Delete audit logs error:', error)
+    return await ApiResponse.adminError('operation_failed', 500)
   }
 }

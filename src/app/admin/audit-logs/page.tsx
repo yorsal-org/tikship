@@ -2,7 +2,9 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslations } from 'next-intl'
+import { Trash2 } from 'lucide-react'
 import { Table, Column } from '@/components/ui/Table'
+import { Button } from '@/components/ui/Button'
 import { useApi } from '@/hooks/useApi'
 import { toast } from '@/lib/utils/toast'
 import { siteConfig } from '@/config/site'
@@ -36,6 +38,50 @@ export default function AuditLogsPage() {
     total: 0,
     totalPages: 0,
   })
+
+  const [cleanupModalOpen, setCleanupModalOpen] = useState(false)
+  const [pendingDays, setPendingDays] = useState<number | null>(null)
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  const CLEANUP_OPTIONS: { labelKey: string; days: number }[] = [
+    { labelKey: 'cleanup_before_10_days', days: 10 },
+    { labelKey: 'cleanup_before_1_month', days: 30 },
+    { labelKey: 'cleanup_before_60_days', days: 60 },
+    { labelKey: 'cleanup_before_6_months', days: 180 },
+    { labelKey: 'cleanup_before_1_year', days: 365 },
+  ]
+
+  const handleCleanupSelect = (days: number) => {
+    setPendingDays(days)
+    setCleanupModalOpen(false)
+    setConfirmModalOpen(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!pendingDays) return
+    setIsDeleting(true)
+    try {
+      const res = await fetch(`/api/admin/audit-logs?days=${pendingDays}`, { method: 'DELETE' })
+      const json = await res.json()
+      if (res.ok && json.data) {
+        const count: number = json.data.deletedCount
+        if (count === 0) {
+          toast.info(t('cleanup_empty'))
+        } else {
+          toast.success(t('cleanup_success', { count }))
+        }
+        setConfirmModalOpen(false)
+        fetchLogs(1)
+      } else {
+        toast.error(json.error || t('cleanup_warning'))
+      }
+    } catch {
+      toast.error(t('cleanup_warning'))
+    } finally {
+      setIsDeleting(false)
+    }
+  }
 
   // API
   const auditLogsApi = useApi<AuditLogsListResponse>('/api/admin/audit-logs', 'GET')
@@ -151,12 +197,85 @@ export default function AuditLogsPage() {
     },
   ]
 
+  const pendingOption = CLEANUP_OPTIONS.find(o => o.days === pendingDays)
+
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">{t('title')}</h1>
-        <p className="mt-2 text-base-content/70">{t('subtitle')}</p>
+      <div className="mb-6 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">{t('title')}</h1>
+          <p className="mt-2 text-base-content/70">{t('subtitle')}</p>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="shrink-0"
+          onClick={() => setCleanupModalOpen(true)}
+        >
+          <Trash2 className="mr-1.5 h-4 w-4" />
+          {t('cleanup')}
+        </Button>
       </div>
+
+      {/* Cleanup period picker modal */}
+      {cleanupModalOpen && (
+        <div className="modal modal-open">
+          <div className="modal-box max-w-sm">
+            <h3 className="text-lg font-bold">{t('cleanup_title')}</h3>
+            <p className="mt-1 mb-4 text-sm text-base-content/70">{t('cleanup_desc')}</p>
+            <div className="flex flex-col gap-2">
+              {CLEANUP_OPTIONS.map(opt => (
+                <button
+                  key={opt.days}
+                  className="btn btn-outline btn-sm justify-start"
+                  onClick={() => handleCleanupSelect(opt.days)}
+                >
+                  <Trash2 className="mr-2 h-3.5 w-3.5 text-error" />
+                  {t(opt.labelKey as Parameters<typeof t>[0])}
+                </button>
+              ))}
+            </div>
+            <div className="modal-action">
+              <button className="btn btn-ghost btn-sm" onClick={() => setCleanupModalOpen(false)}>
+                Cancel
+              </button>
+            </div>
+          </div>
+          <div className="modal-backdrop" onClick={() => setCleanupModalOpen(false)} />
+        </div>
+      )}
+
+      {/* Confirm delete modal */}
+      {confirmModalOpen && pendingOption && (
+        <div className="modal modal-open">
+          <div className="modal-box max-w-sm">
+            <h3 className="text-lg font-bold text-error">{t('cleanup_title')}</h3>
+            <p className="mt-2 text-sm">
+              {t('cleanup_confirm', { period: t(pendingOption.labelKey as Parameters<typeof t>[0]) })}
+            </p>
+            <p className="mt-1 text-xs text-base-content/60">{t('cleanup_warning')}</p>
+            <div className="modal-action">
+              <button
+                className="btn btn-ghost btn-sm"
+                onClick={() => setConfirmModalOpen(false)}
+                disabled={isDeleting}
+              >
+                Cancel
+              </button>
+              <Button
+                variant="primary"
+                size="sm"
+                loading={isDeleting}
+                onClick={handleConfirmDelete}
+                className="btn-error"
+              >
+                {isDeleting ? t('deleting') : t('cleanup_title')}
+              </Button>
+            </div>
+          </div>
+          <div className="modal-backdrop" onClick={() => !isDeleting && setConfirmModalOpen(false)} />
+        </div>
+      )}
 
       <div className="mb-4 grid gap-4 md:grid-cols-2">
         <input

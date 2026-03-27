@@ -63,6 +63,7 @@ export async function seed() {
     'permission:edit',
     'permission:delete',
     'audit_log:view',
+    'audit_log:delete',
     'user:view',
     'user:edit',
     'user:delete',

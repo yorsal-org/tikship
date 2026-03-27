@@ -153,7 +153,7 @@ export default function PermissionsPage() {
     return (
       <div
         key={permission.id}
-        className={`border rounded-lg p-4 transition-all duration-200 ${
+        className={`border rounded-lg p-2.5 transition-all duration-200 ${
           permission.isSystem
             ? 'bg-base-100 border-info/30 hover:border-info/50 hover:shadow-md'
             : 'bg-base-100 border-base-300 hover:border-primary/50 hover:shadow-md'
@@ -161,9 +161,9 @@ export default function PermissionsPage() {
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-2">
-              <Lock className={`w-4 h-4 shrink-0 ${getResourceIcon(resource)}`} />
-              <span className="font-semibold text-base truncate">{permission.name}</span>
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <Lock className={`w-3.5 h-3.5 shrink-0 ${getResourceIcon(resource)}`} />
+              <span className="font-semibold text-sm truncate">{permission.name}</span>
               {permission.isSystem && (
                 <span className="badge badge-sm badge-info gap-1 shrink-0">
                   <Shield className="w-3 h-3" />
@@ -172,14 +172,8 @@ export default function PermissionsPage() {
               )}
             </div>
 
-            {permission.description && (
-              <div className="text-sm text-base-content/70 mb-2 line-clamp-2">
-                {permission.description}
-              </div>
-            )}
-
-            <div className="flex items-center gap-2 flex-wrap">
-              <code className="text-xs bg-base-200 px-2 py-1 rounded text-base-content/80">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <code className="text-xs bg-base-200 px-1.5 py-0.5 rounded text-base-content/80">
                 {permission.code}
               </code>
               <span className={`badge badge-xs ${getActionBadgeColor(action)}`}>{action}</span>
@@ -405,7 +399,7 @@ export default function PermissionsPage() {
           <p className="mt-4 text-base-content/60">{t('loading')}</p>
         </div>
       ) : sortMode === 'group' ? (
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-3">
           {groupedPermissions.map(({ resource, permissions: resourcePermissions }) => {
             const systemCount = resourcePermissions.filter(p => p.isSystem).length
             const customCount = resourcePermissions.filter(p => !p.isSystem).length
@@ -415,18 +409,18 @@ export default function PermissionsPage() {
                 key={resource}
                 className="card bg-base-100 shadow-xl border border-base-300 hover:shadow-2xl transition-shadow"
               >
-                <div className="card-body">
-                  <div className="flex items-center justify-between mb-2">
-                    <h2 className="card-title capitalize flex items-center gap-2">
-                      <Lock className={`w-5 h-5 ${getResourceIcon(resource)}`} />
+                <div className="card-body p-4">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <h2 className="card-title text-sm capitalize flex items-center gap-1.5">
+                      <Lock className={`w-4 h-4 ${getResourceIcon(resource)}`} />
                       {resource.replace(/_/g, ' ')}
                     </h2>
-                    <div className="badge badge-lg badge-outline">
+                    <div className="badge badge-sm badge-outline">
                       {resourcePermissions.length} {t('items_count')}
                     </div>
                   </div>
 
-                  <div className="flex gap-2 mb-4">
+                  <div className="flex gap-1.5 mb-3">
                     {systemCount > 0 && (
                       <span className="badge badge-info badge-sm gap-1">
                         <Shield className="w-3 h-3" />
@@ -440,7 +434,7 @@ export default function PermissionsPage() {
                     )}
                   </div>
 
-                  <div className="space-y-3">{resourcePermissions.map(renderPermissionCard)}</div>
+                  <div className="space-y-1.5">{resourcePermissions.map(renderPermissionCard)}</div>
                 </div>
               </div>
             )

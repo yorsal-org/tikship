@@ -99,6 +99,11 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
         name: 'View Audit Logs',
         description: 'View system operation logs',
       },
+      {
+        code: PERMISSIONS.AUDIT_LOG_DELETE,
+        name: 'delete Audit Logs',
+        description: 'Delete system operation logs',
+      },
     ],
   },
   {
