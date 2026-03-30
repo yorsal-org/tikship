@@ -7,7 +7,7 @@ import { createAdminUser } from '@/lib/auth/admin'
 import { logAudit, AUDIT_ACTIONS } from '@/lib/audit/service'
 import { checkPasswordStrength } from '@/lib/utils/validators'
 import { siteConfig } from '@/config/site'
- 
+
 import type { CreateAdminUserBody } from '@/types/api'
 
 type AdminUserBulkAction = 'activate' | 'deactivate' | 'delete'
@@ -189,7 +189,7 @@ export async function PUT(req: NextRequest) {
     if (error) return error
     if (!adminUserId) return await ApiResponse.adminError('unauthorized', 401)
 
-    const body = await req.json() as { ids?: unknown; action?: unknown }
+    const body = (await req.json()) as { ids?: unknown; action?: unknown }
     const { ids, action } = body
 
     if (!Array.isArray(ids) || ids.length === 0 || typeof action !== 'string') {
@@ -253,7 +253,7 @@ export async function PUT(req: NextRequest) {
 
     await logAudit({
       adminUserId,
-      action: AUDIT_ACTIONS.ADMIN_USER_EDIT,
+      action: isActive ? AUDIT_ACTIONS.ADMIN_USER_ACTIVATE : AUDIT_ACTIONS.ADMIN_USER_DEACTIVATE,
       resource: 'admin_user',
       details: { ids: targetIds, isActive, bulkCount: count },
     })
