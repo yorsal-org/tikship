@@ -7,7 +7,6 @@ import { ChevronLeft, Calendar, User, Hash } from 'lucide-react'
 import { getPostBySlug } from '@/lib/auth/utils'
 import Image from 'next/image'
 import { PostContent } from '@/components/post/PostContent'
-import { siteConfig } from '@/config/site'
 
 const BASE_URL = process.env.NEXTAUTH_URL || ''
 
@@ -19,6 +18,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const title = post.seoTitle || post.title
   const description = post.seoDescription || post.excerpt || ''
   const images = post.featuredImage ? [{ url: post.featuredImage, alt: title }] : []
+  const t = await getTranslations({ namespace: 'site' })
+  const siteName = t('name')
 
   return {
     title,
@@ -35,7 +36,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       publishedTime: post.publishedAt ? new Date(post.publishedAt).toISOString() : undefined,
       modifiedTime: post.updatedAt ? new Date(post.updatedAt).toISOString() : undefined,
       authors: post.author?.name ? [post.author.name] : undefined,
-      siteName: siteConfig.name,
+      siteName,
     },
     twitter: {
       card: 'summary_large_image',
@@ -50,6 +51,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   const { slug } = await params
   const post = await getPostBySlug(slug, PostType.ARTICLE)
   const t = await getTranslations('posts_public')
+  const siteT = await getTranslations({ namespace: 'site' })
+  const siteName = siteT('name')
 
   if (!post) {
     notFound()
@@ -71,7 +74,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
       : undefined,
     publisher: {
       '@type': 'Organization',
-      name: siteConfig.name,
+      name: siteName,
       url: BASE_URL,
     },
     mainEntityOfPage: {

@@ -1,6 +1,7 @@
-import { siteConfig } from '@/config/site'
+import { getDefaultSiteName } from '@/lib/i18n/site'
 
 const currentYear = new Date().getFullYear()
+const siteName = getDefaultSiteName()
 /**
  * Order success plain text
  */
@@ -11,7 +12,7 @@ export function orderSuccessPlainText(
   amount: string
 ): string {
   return `
-${siteConfig.name} - Payment Successful
+${siteName} - Payment Successful
 
 Hi ${userName},
 
@@ -26,7 +27,7 @@ View your order details at: ${process.env.NEXTAUTH_URL}/user/orders
 
 If you have any questions about your order, please don't hesitate to contact our support team.
 
-© ${currentYear} ${siteConfig.name}. All rights reserved.
+© ${currentYear} ${siteName}. All rights reserved.
   `.trim()
 }
 
@@ -39,7 +40,7 @@ export function orderFailedPlainText(
   productName: string
 ): string {
   return `
-${siteConfig.name} - Payment Failed
+${siteName} - Payment Failed
 
 Hi ${userName},
 
@@ -57,7 +58,7 @@ What you can do:
 
 Try again at: ${process.env.NEXTAUTH_URL}/products
 
-© ${currentYear} ${siteConfig.name}. All rights reserved.
+© ${currentYear} ${siteName}. All rights reserved.
   `.trim()
 }
 
@@ -70,7 +71,7 @@ export function orderExpiredPlainText(
   productName: string
 ): string {
   return `
-${siteConfig.name} - Checkout Session Expired
+${siteName} - Checkout Session Expired
 
 Hi ${userName},
 
@@ -84,6 +85,6 @@ Don't worry! You can start a new checkout session anytime. The product is still 
 
 Start a new checkout at: ${process.env.NEXTAUTH_URL}/products
 
-© ${currentYear} ${siteConfig.name}. All rights reserved.
+© ${currentYear} ${siteName}. All rights reserved.
   `.trim()
 }

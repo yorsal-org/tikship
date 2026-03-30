@@ -2,11 +2,11 @@
 
 import { useTranslations } from 'next-intl'
 import { Logo } from '@/components/ui/Logo'
-import { siteConfig } from '@/config/site'
 import Link from 'next/link'
 
 export function Footer() {
   const t = useTranslations('common')
+  const siteT = useTranslations('site')
   const currentYear = new Date().getFullYear()
 
   return (
@@ -71,7 +71,7 @@ export function Footer() {
 
         <div className="flex flex-col items-center justify-between gap-4 sm:flex-row text-sm text-base-content/50">
           <p>
-            © {currentYear} {siteConfig.name}. {t('footer.all_rights_reserved')}
+            © {currentYear} {siteT('name')}. {t('footer.all_rights_reserved')}
           </p>
           <div className="flex gap-4">{/* Social links could go here */}</div>
         </div>

@@ -4,6 +4,8 @@ import { requireAdminAuth } from '@/lib/auth/admin'
 import { ApiResponse } from '@/lib/utils/api-response'
 import { PERMISSIONS } from '@/config/permissions'
 
+type OrderBulkAction = 'completed' | 'failed' | 'refunded' | 'delete'
+
 
 /**
  * Get orders list
@@ -127,6 +129,62 @@ export async function GET(req: NextRequest) {
     })
   } catch (error) {
     console.error('Get orders error:', error)
+    return await ApiResponse.adminError('operation_failed', 500)
+  }
+}
+
+/**
+ * Bulk update/delete orders
+ * @tag Admin - Orders
+ * @auth bearerAuth
+ * @openapi
+ */
+export async function PUT(req: NextRequest) {
+  try {
+    const { error } = await requireAdminAuth(req, PERMISSIONS.ORDER_EDIT)
+    if (error) return error
+
+    const body = await req.json() as { ids?: unknown; action?: unknown }
+    const { ids, action } = body
+
+    if (!Array.isArray(ids) || ids.length === 0 || typeof action !== 'string') {
+      return await ApiResponse.adminError('required_fields_missing', 400)
+    }
+
+    const validActions: OrderBulkAction[] = ['completed', 'failed', 'refunded', 'delete']
+    if (!validActions.includes(action as OrderBulkAction)) {
+      return await ApiResponse.adminError('invalid_params', 400)
+    }
+
+    const bulkAction = action as OrderBulkAction
+    const targetIds = ids as string[]
+
+    if (bulkAction === 'delete') {
+      // Only allow deleting failed orders
+      const ordersToDelete = await prisma.order.findMany({
+        where: { id: { in: targetIds } },
+        select: { id: true, status: true },
+      })
+
+      const nonFailedOrders = ordersToDelete.filter(o => o.status !== 'failed')
+      if (nonFailedOrders.length > 0) {
+        return await ApiResponse.adminError('cannot_delete_non_failed_order', 400)
+      }
+
+      const { count } = await prisma.order.deleteMany({
+        where: { id: { in: targetIds }, status: 'failed' },
+      })
+      return ApiResponse.success({ count })
+    }
+
+    const { count } = await prisma.order.updateMany({
+      where: { id: { in: targetIds } },
+      data: { status: bulkAction },
+    })
+
+    return ApiResponse.success({ count })
+  } catch (error) {
+    console.error('Bulk update orders error:', error)
     return await ApiResponse.adminError('operation_failed', 500)
   }
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useTranslations } from 'next-intl'
 import { Table, Column } from '@/components/ui/Table'
 import { StatusBadge } from '@/components/ui/StatusBadge'
@@ -11,13 +11,14 @@ import { ChangePasswordModal } from '@/components/admin/member/ChangePasswordMod
 import { Users, Search, Eye, KeyRound, Power, PowerOff, Trash2 } from 'lucide-react'
 import { useApi } from '@/hooks/useApi'
 import { toast } from '@/lib/utils/toast'
-import { siteConfig } from '@/config/site'
 import { Member, MemberStats as MemberStatsType, MembersListResponse } from '@/types/admin'
 import Image from 'next/image'
 import { useAdminPagination as usePagination } from '@/hooks/useAdminPagination'
 import { useModalState } from '@/hooks/useModalState'
 import { useDataFetch } from '@/hooks/useDataFetch'
 import { formatters } from '@/lib/utils/formatters'
+
+type MemberBulkAction = 'activate' | 'deactivate' | 'delete'
 
 export default function AdminMembersPage() {
   const t = useTranslations('admin.members')
@@ -27,28 +28,31 @@ export default function AdminMembersPage() {
     searchInput,
     setSearchInput,
     handlePageChange,
+    handlePageSizeChange,
     handleFilterChange: syncFilters,
     getParam,
     pageSize,
-  } = usePagination({ pageSize: siteConfig.admin.pageSize })
+  } = usePagination()
 
   const statusParam = getParam('status')
 
   const { handleSuccess, handleError } = useDataFetch()
   const [users, setUsers] = useState<Member[]>([])
   const [stats, setStats] = useState<MemberStatsType | null>(null)
-  const [pagination, setPagination] = useState({
-    page: 1,
-    pageSize: siteConfig.admin.pageSize,
-    total: 0,
-    totalPages: 0,
-  })
+  const [pagination, setPagination] = useState({})
+
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
+
+  // Bulk action confirm modal
+  const [pendingBulkAction, setPendingBulkAction] = useState<MemberBulkAction | null>(null)
+  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false)
 
   // APIs
   const membersApi = useApi<MembersListResponse>('/api/admin/members', 'GET')
   const statsApi = useApi<MemberStatsType>('/api/admin/members/stats', 'GET')
   const updateMemberApi = useApi('', 'PUT')
   const deleteMemberApi = useApi('', 'DELETE')
+  const bulkMembersApi = useApi<{ count: number }>('/api/admin/members', 'PUT')
 
   // Modals using custom hook
   const detailsModal = useModalState<Member>()
@@ -80,13 +84,15 @@ export default function AdminMembersPage() {
       })
 
       if (success && result) {
-        setUsers(result.users)
-        setPagination(prev => ({
-          ...prev,
+        const nextUsers = result.users
+        setUsers(nextUsers)
+        setSelectedIds(current => current.filter(id => nextUsers.some(u => u.id === id)))
+        setPagination({
           page: result.page,
+          pageSize: result.pageSize,
           total: result.total,
           totalPages: result.totalPages,
-        }))
+        })
       }
     },
     [membersApi, searchParam, statusParam, pageSize]
@@ -132,7 +138,101 @@ export default function AdminMembersPage() {
     detailsModal.open(user)
   }
 
+  // --- Bulk selection ---
+  const allSelected = users.length > 0 && selectedIds.length === users.length
+  const selectedCount = selectedIds.length
+
+  const selectedUsers = useMemo(
+    () => users.filter(u => selectedIds.includes(u.id)),
+    [users, selectedIds]
+  )
+
+  const hasActiveSelection = selectedUsers.some(u => u.isActive)
+  const hasInactiveSelection = selectedUsers.some(u => !u.isActive)
+
+  const handleToggleSelectAll = () => {
+    setSelectedIds(allSelected ? [] : users.map(u => u.id))
+  }
+
+  const handleToggleSelect = (id: string) => {
+    setSelectedIds(current =>
+      current.includes(id) ? current.filter(i => i !== id) : [...current, id]
+    )
+  }
+
+  const requestBulkAction = (action: MemberBulkAction) => {
+    setPendingBulkAction(action)
+    setIsBulkModalOpen(true)
+  }
+
+  const resetBulkState = () => {
+    setPendingBulkAction(null)
+    setIsBulkModalOpen(false)
+  }
+
+  const handleBulkConfirm = async () => {
+    if (!pendingBulkAction) return
+    const { success, data } = await bulkMembersApi.request(
+      { ids: selectedIds, action: pendingBulkAction },
+      { onError: handleError }
+    )
+    if (success) {
+      const count = data?.count ?? selectedIds.length
+      toast.success(
+        t(pendingBulkAction === 'delete' ? 'bulk_delete_success' : 'bulk_status_updated', { count })
+      )
+      setSelectedIds([])
+      resetBulkState()
+      await fetchUsers(currentPage)
+    }
+  }
+
+  const bulkActionOptions = useMemo(() => {
+    const options: { value: MemberBulkAction; label: string }[] = []
+    if (hasInactiveSelection) options.push({ value: 'activate', label: t('bulk_activate') })
+    if (hasActiveSelection) options.push({ value: 'deactivate', label: t('bulk_deactivate') })
+
+    // Only show delete if all selected members are inactive
+    const allInactive = selectedUsers.every(u => !u.isActive)
+    if (allInactive && selectedCount > 0) {
+      options.push({ value: 'delete', label: t('bulk_delete') })
+    }
+
+    return options
+  }, [hasActiveSelection, hasInactiveSelection, selectedUsers, selectedCount, t])
+
+  const getBulkModalMessage = () => {
+    if (!pendingBulkAction) return ''
+    if (pendingBulkAction === 'activate')
+      return t('bulk_activate_confirm', { count: selectedCount })
+    if (pendingBulkAction === 'deactivate')
+      return t('bulk_deactivate_confirm', { count: selectedCount })
+    return t('bulk_delete_confirm', { count: selectedCount })
+  }
+
   const columns: Column<Member>[] = [
+    {
+      key: 'select',
+      label: (
+        <input
+          type="checkbox"
+          className="checkbox checkbox-sm"
+          checked={allSelected}
+          onChange={handleToggleSelectAll}
+          aria-label={t('select_all')}
+        />
+      ),
+      className: 'w-12',
+      render: user => (
+        <input
+          type="checkbox"
+          className="checkbox checkbox-sm"
+          checked={selectedIds.includes(user.id)}
+          onChange={() => handleToggleSelect(user.id)}
+          aria-label={t('select_item', { name: user.email || user.name || '' })}
+        />
+      ),
+    },
     {
       key: 'name',
       label: t('name'),
@@ -213,9 +313,7 @@ export default function AdminMembersPage() {
             {user.isActive ? <PowerOff className="w-4 h-4" /> : <Power className="w-4 h-4" />}
           </button>
           <button
-            onClick={() => {
-              deleteModal.open(user)
-            }}
+            onClick={() => deleteModal.open(user)}
             className="btn btn-ghost btn-sm btn-square text-error"
             title={t('delete')}
           >
@@ -256,6 +354,27 @@ export default function AdminMembersPage() {
         </select>
       </div>
 
+      {selectedCount > 0 && (
+        <div className="alert bg-base-200 border border-base-300 flex flex-wrap items-center gap-3">
+          <span className="font-medium">{t('selected_count', { count: selectedCount })}</span>
+          <div className="flex flex-wrap items-center gap-2 ml-auto">
+            {bulkActionOptions.map(option => (
+              <button
+                key={option.value}
+                className={`btn btn-sm${option.value === 'delete' ? ' btn-error btn-outline' : ''}`}
+                onClick={() => requestBulkAction(option.value)}
+                disabled={bulkMembersApi.loading}
+              >
+                {option.label}
+              </button>
+            ))}
+            <button className="btn btn-ghost btn-sm" onClick={() => setSelectedIds([])}>
+              {t('clear_selection')}
+            </button>
+          </div>
+        </div>
+      )}
+
       <Table
         columns={columns}
         data={users}
@@ -263,6 +382,7 @@ export default function AdminMembersPage() {
         emptyMessage={t('no_users')}
         pagination={pagination}
         onPageChange={handlePageChange}
+        onPageSizeChange={handlePageSizeChange}
         getRowKey={user => user.id}
       />
 
@@ -284,6 +404,7 @@ export default function AdminMembersPage() {
         />
       )}
 
+      {/* Single delete confirm */}
       <DeleteConfirmModal
         isOpen={deleteModal.isOpen}
         onClose={deleteModal.close}
@@ -294,6 +415,30 @@ export default function AdminMembersPage() {
           name: deleteModal.selectedItem?.email || deleteModal.selectedItem?.name || '',
         })}
         warning={t('delete_warning')}
+      />
+
+      {/* Bulk action confirm */}
+      <DeleteConfirmModal
+        isOpen={isBulkModalOpen}
+        onClose={resetBulkState}
+        onConfirm={handleBulkConfirm}
+        loading={bulkMembersApi.loading}
+        title={
+          pendingBulkAction === 'delete'
+            ? t('bulk_delete')
+            : pendingBulkAction === 'activate'
+              ? t('bulk_activate')
+              : t('bulk_deactivate')
+        }
+        message={getBulkModalMessage()}
+        warning={pendingBulkAction === 'delete' ? t('delete_warning') : undefined}
+        confirmText={
+          pendingBulkAction === 'delete'
+            ? t('bulk_delete')
+            : pendingBulkAction === 'activate'
+              ? t('bulk_activate')
+              : t('bulk_deactivate')
+        }
       />
     </div>
   )

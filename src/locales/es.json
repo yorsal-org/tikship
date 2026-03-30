@@ -1,7 +1,13 @@
 {
+  "site": {
+    "name": "Tikship",
+    "description": "Tikship es un boilerplate SaaS listo para producción construido con Next.js 16, con autenticación, pagos con Stripe y PayPal, CMS, panel de administración basado en roles e i18n para lanzar tu SaaS en días, no en meses.",
+    "keywords": "boilerplate SaaS Next.js, starter kit SaaS, lanzar SaaS rápido, plantilla Next.js 16, pagos Stripe PayPal, SaaS con autenticación, panel admin con roles, SaaS multilenguaje, SaaS listo para producción, lanzar SaaS en días"
+  },
   "common": {
     "pagination": {
-      "showing_results": "Mostrando {from} a {to} de {total} resultados"
+      "showing_results": "Mostrando {from} a {to} de {total} resultados",
+      "per_page": "Por página"
     },
     "tagline": "Turn Ideas into Products, Launches into Cash. \n The Rapid-Start Platform for One-Person Company.",
     "footer": {

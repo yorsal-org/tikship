@@ -1,16 +1,17 @@
-import { siteConfig } from '@/config/site'
+import { getDefaultSiteName } from '@/lib/i18n/site'
 
 /**
  * Generate plain text version of verification code email
  */
 export function verificationCodePlainText(code: string): string {
   const currentYear = new Date().getFullYear()
+  const siteName = getDefaultSiteName()
   return `
-${siteConfig.name} - Email Verification
+${siteName} - Email Verification
 
 Hello!
 
-Thank you for registering with ${siteConfig.name}. Please use the following verification code to complete your registration:
+Thank you for registering with ${siteName}. Please use the following verification code to complete your registration:
 
 Verification Code: ${code}
 
@@ -21,6 +22,6 @@ Important Notice:
 
 This email was sent automatically, please do not reply
 
-© ${currentYear} ${siteConfig.name}. All rights reserved.
+© ${currentYear} ${siteName}. All rights reserved.
   `.trim()
 }

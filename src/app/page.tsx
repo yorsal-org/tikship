@@ -21,11 +21,11 @@ import {
 import { getTranslations } from 'next-intl/server'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
-import { siteConfig } from '@/config/site'
 
 export default async function Home() {
   const session = await getServerSession(authOptions)
   const t = await getTranslations('home')
+  const siteT = await getTranslations('site')
 
   return (
     <div className="flex flex-col min-h-screen bg-base-100">
@@ -89,7 +89,7 @@ export default async function Home() {
                 </p>
 
                 <p className="text-lg text-base-content/60 mb-12 max-w-2xl mx-auto">
-                  {t('hero_desc', { siteName: siteConfig.name })}
+                  {t('hero_desc', { siteName: siteT('name') })}
                 </p>
 
                 <div className="flex flex-wrap justify-center gap-4 mb-12">

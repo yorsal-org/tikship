@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import { Search, Eye, RefreshCw, Download } from 'lucide-react'
+import { DeleteConfirmModal } from '@/components/admin/common/DeleteConfirmModal'
 import { toast } from '@/lib/utils/toast'
 import { Table, Column } from '@/components/ui/Table'
 import { OrderDetailsModal } from '@/components/admin/order/OrderDetailsModal'
@@ -17,6 +18,8 @@ import { useAdminPagination as usePagination } from '@/hooks/useAdminPagination'
 import { siteConfig } from '@/config/site'
 import type { Order, OrdersListResponse } from '@/types/order'
 
+type OrderBulkAction = 'completed' | 'failed' | 'refunded' | 'delete'
+
 export function OrderList() {
   const t = useTranslations('admin.orders')
   const router = useRouter()
@@ -27,21 +30,20 @@ export function OrderList() {
     searchInput,
     setSearchInput,
     handlePageChange,
+    handlePageSizeChange,
     handleFilterChange: syncFilters,
     getParam,
     pageSize,
-  } = usePagination({ pageSize: siteConfig.admin.pageSize })
+  } = usePagination()
 
   const statusParam = getParam('status')
   const paymentProviderParam = getParam('paymentProvider')
 
   const [orders, setOrders] = useState<Order[]>([])
-  const [pagination, setPagination] = useState({
-    page: 1,
-    pageSize: siteConfig.admin.pageSize as number,
-    total: 0,
-    totalPages: 0,
-  })
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [pendingBulkAction, setPendingBulkAction] = useState<OrderBulkAction | null>(null)
+  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false)
+  const [pagination, setPagination] = useState({})
 
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
@@ -49,6 +51,7 @@ export function OrderList() {
   // API hooks
   const ordersApi = useApi<OrdersListResponse>('/api/admin/orders', 'GET')
   const updateApi = useApi('', 'PATCH')
+  const bulkOrdersApi = useApi<{ count: number }>('/api/admin/orders', 'PUT')
 
   const fetchData = useCallback(
     async (page: number) => {
@@ -64,7 +67,9 @@ export function OrderList() {
       })
 
       if (ordersRes.success && ordersRes.data) {
-        setOrders(ordersRes.data.orders || [])
+        const nextOrders = ordersRes.data.orders || []
+        setOrders(nextOrders)
+        setSelectedIds(current => current.filter(id => nextOrders.some(order => order.id === id)))
         setPagination({
           page: ordersRes.data.pagination.page,
           pageSize: ordersRes.data.pagination.pageSize,
@@ -159,7 +164,125 @@ export function OrderList() {
     link.click()
   }
 
+  const selectedOrders = useMemo(
+    () => orders.filter(order => selectedIds.includes(order.id)),
+    [orders, selectedIds]
+  )
+  const selectedCount = selectedIds.length
+  const allSelected = orders.length > 0 && selectedIds.length === orders.length
+  const hasNonCompletedSelection = selectedOrders.some(order => order.status !== 'completed')
+  const hasNonFailedSelection = selectedOrders.some(order => order.status !== 'failed')
+  const hasNonRefundedSelection = selectedOrders.some(order => order.status !== 'refunded')
+
+  const handleToggleSelectAll = () => {
+    setSelectedIds(allSelected ? [] : orders.map(order => order.id))
+  }
+
+  const handleToggleSelect = (orderId: string) => {
+    setSelectedIds(current =>
+      current.includes(orderId) ? current.filter(id => id !== orderId) : [...current, orderId]
+    )
+  }
+
+  const resetBulkState = () => {
+    setPendingBulkAction(null)
+    setIsBulkModalOpen(false)
+  }
+
+  const handleBulkAction = async (action: OrderBulkAction) => {
+    if (selectedIds.length === 0) return
+
+    const { success, data } = await bulkOrdersApi.request(
+      { ids: selectedIds, action },
+      {
+        onError: (err: string) => toast.error(err),
+      }
+    )
+
+    if (success) {
+      toast.success(
+        t(action === 'delete' ? 'bulk_delete_success' : 'bulk_status_updated', {
+          count: data?.count ?? selectedIds.length,
+        })
+      )
+      setSelectedIds([])
+      resetBulkState()
+      router.refresh()
+      await fetchData(currentPage)
+    }
+  }
+
+  const requestBulkAction = (action: OrderBulkAction) => {
+    setPendingBulkAction(action)
+    setIsBulkModalOpen(true)
+  }
+
+  const handleBulkExport = () => {
+    if (selectedOrders.length === 0) return
+    const csv = convertToCSV(selectedOrders)
+    downloadCSV(csv, `orders-selected-${new Date().toISOString().split('T')[0]}.csv`)
+    toast.success(t('export_success'))
+  }
+
+  const bulkActionOptions = useMemo(() => {
+    const options: { value: OrderBulkAction; label: string }[] = []
+
+    if (hasNonCompletedSelection) {
+      options.push({ value: 'completed', label: t('bulk_mark_completed') })
+    }
+    if (hasNonFailedSelection) {
+      options.push({ value: 'failed', label: t('bulk_mark_failed') })
+    }
+    if (hasNonRefundedSelection) {
+      options.push({ value: 'refunded', label: t('bulk_mark_refunded') })
+    }
+
+    // Only show delete if all selected orders are failed
+    const allFailed = selectedOrders.every(o => o.status === 'failed')
+    if (allFailed && selectedCount > 0) {
+      options.push({ value: 'delete', label: t('bulk_delete') })
+    }
+
+    return options
+  }, [hasNonCompletedSelection, hasNonFailedSelection, hasNonRefundedSelection, selectedOrders, selectedCount, t])
+
+  const getBulkModalMessage = () => {
+    if (!pendingBulkAction) return ''
+    if (pendingBulkAction === 'completed') {
+      return t('bulk_mark_completed_confirm', { count: selectedCount })
+    }
+    if (pendingBulkAction === 'failed') {
+      return t('bulk_mark_failed_confirm', { count: selectedCount })
+    }
+    if (pendingBulkAction === 'refunded') {
+      return t('bulk_mark_refunded_confirm', { count: selectedCount })
+    }
+    return t('bulk_delete_confirm', { count: selectedCount })
+  }
+
   const columns: Column<Order>[] = [
+    {
+      key: 'select',
+      label: (
+        <input
+          type="checkbox"
+          className="checkbox checkbox-sm"
+          checked={allSelected}
+          onChange={handleToggleSelectAll}
+          aria-label={t('select_all')}
+        />
+      ),
+      className: 'w-12',
+      render: order => (
+        <input
+          type="checkbox"
+          className="checkbox checkbox-sm"
+          checked={selectedIds.includes(order.id)}
+          onChange={() => handleToggleSelect(order.id)}
+          aria-label={t('select_item', { name: truncateId(order.id) })}
+        />
+      ),
+    },
     {
       key: 'id',
       label: t('order_id'),
@@ -285,6 +408,31 @@ export function OrderList() {
         </div>
       </div>
 
+      {selectedCount > 0 && (
+        <div className="alert bg-base-200 border border-base-300 flex flex-wrap items-center gap-3">
+          <span className="font-medium">{t('selected_count', { count: selectedCount })}</span>
+          <div className="flex flex-wrap items-center gap-2 ml-auto">
+            <button className="btn btn-sm btn-outline" onClick={handleBulkExport}>
+              <Download className="w-4 h-4" />
+              {t('export')}
+            </button>
+            {bulkActionOptions.map(option => (
+              <button
+                key={option.value}
+                className={`btn btn-sm${option.value === 'delete' ? ' btn-error btn-outline' : ''}`}
+                onClick={() => requestBulkAction(option.value)}
+                disabled={bulkOrdersApi.loading}
+              >
+                {option.label}
+              </button>
+            ))}
+            <button className="btn btn-ghost btn-sm" onClick={() => setSelectedIds([])}>
+              {t('clear_selection')}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Filters */}
       <div className="flex gap-4">
         <div className="relative flex-1">
@@ -326,9 +474,10 @@ export function OrderList() {
         loading={ordersApi.loading}
         emptyMessage={t('no_orders')}
         pagination={pagination}
+        onPageSizeChange={handlePageSizeChange}
         onPageChange={handlePageChange}
         getRowKey={order => order.id}
-      />
+    />
 
       {/* Modal */}
       {selectedOrder && (
@@ -339,6 +488,37 @@ export function OrderList() {
           onUpdateStatus={handleUpdateStatus}
         />
       )}
+
+      <DeleteConfirmModal
+        isOpen={isBulkModalOpen}
+        onClose={resetBulkState}
+        onConfirm={() => {
+          if (pendingBulkAction) {
+            void handleBulkAction(pendingBulkAction)
+          }
+        }}
+        loading={bulkOrdersApi.loading}
+        title={
+          pendingBulkAction === 'delete'
+            ? t('bulk_delete')
+            : pendingBulkAction === 'completed'
+              ? t('bulk_mark_completed')
+              : pendingBulkAction === 'failed'
+                ? t('bulk_mark_failed')
+                : t('bulk_mark_refunded')
+        }
+        message={getBulkModalMessage()}
+        warning={pendingBulkAction === 'delete' ? t('delete_warning') : undefined}
+        confirmText={
+          pendingBulkAction === 'delete'
+            ? t('bulk_delete')
+            : pendingBulkAction === 'completed'
+              ? t('bulk_mark_completed')
+              : pendingBulkAction === 'failed'
+                ? t('bulk_mark_failed')
+                : t('bulk_mark_refunded')
+        }
+      />
     </>
   )
 }

@@ -1,10 +1,10 @@
 import { PostType } from '@/types/post'
 import { format } from 'date-fns'
 import { notFound } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 import { getPostBySlug } from '@/lib/auth/utils'
 import Image from 'next/image'
 import { PostContent } from '@/components/post/PostContent'
-import { siteConfig } from '@/config/site'
 
 const BASE_URL = process.env.NEXTAUTH_URL || ''
 
@@ -16,6 +16,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const title = post.seoTitle || post.title
   const description = post.seoDescription || post.excerpt || ''
   const images = post.featuredImage ? [{ url: post.featuredImage, alt: title }] : []
+  const t = await getTranslations({ namespace: 'site' })
+  const siteName = t('name')
 
   return {
     title,
@@ -31,7 +33,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       images,
       publishedTime: post.publishedAt ? new Date(post.publishedAt).toISOString() : undefined,
       modifiedTime: post.updatedAt ? new Date(post.updatedAt).toISOString() : undefined,
-      siteName: siteConfig.name,
+      siteName,
     },
     twitter: {
       card: 'summary_large_image',
@@ -45,6 +47,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function SinglePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
   const post = await getPostBySlug(slug, PostType.PAGE)
+  const siteT = await getTranslations({ namespace: 'site' })
+  const siteName = siteT('name')
 
   if (!post) {
     notFound()
@@ -60,7 +64,7 @@ export default async function SinglePage({ params }: { params: Promise<{ slug: s
     dateModified: post.updatedAt ? new Date(post.updatedAt).toISOString() : undefined,
     publisher: {
       '@type': 'Organization',
-      name: siteConfig.name,
+      name: siteName,
       url: BASE_URL,
     },
     mainEntityOfPage: {

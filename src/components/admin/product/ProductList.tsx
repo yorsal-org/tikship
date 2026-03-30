@@ -1,17 +1,20 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import { Plus, Edit, Search, Power, PowerOff, Package } from 'lucide-react'
 import { toast } from '@/lib/utils/toast'
 import { Table, Column } from '@/components/ui/Table'
+import { DeleteConfirmModal } from '@/components/admin/common/DeleteConfirmModal'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { useApi } from '@/hooks/useApi'
 import { useAdminPagination as usePagination } from '@/hooks/useAdminPagination'
 import { siteConfig } from '@/config/site'
 import type { Product, ProductsListResponse } from '@/types/product'
+
+type ProductBulkAction = 'activate' | 'deactivate' | 'delete'
 
 export function ProductList() {
   const t = useTranslations('admin.products')
@@ -23,24 +26,24 @@ export function ProductList() {
     searchInput,
     setSearchInput,
     handlePageChange,
+    handlePageSizeChange,
     handleFilterChange: syncFilters,
     getParam,
     pageSize,
-  } = usePagination({ pageSize: siteConfig.admin.pageSize })
+  } = usePagination()
 
   const statusParam = getParam('status')
 
   const [products, setProducts] = useState<Product[]>([])
-  const [pagination, setPagination] = useState({
-    page: 1,
-    pageSize: siteConfig.admin.pageSize as number,
-    total: 0,
-    totalPages: 0,
-  })
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [pendingBulkAction, setPendingBulkAction] = useState<ProductBulkAction | null>(null)
+  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false)
+  const [pagination, setPagination] = useState({})
 
   // API hooks
   const productsApi = useApi<ProductsListResponse>('/api/admin/products', 'GET')
   const toggleActiveApi = useApi('', 'POST')
+  const bulkProductsApi = useApi<{ count: number }>('/api/admin/products', 'PUT')
 
   const fetchData = useCallback(
     async (page: number) => {
@@ -76,6 +79,7 @@ export function ProductList() {
         )
         
         setProducts(productsWithMethods)
+        setSelectedIds(current => current.filter(id => productsWithMethods.some(product => product.id === id)))
         setPagination({
           page: productsRes.data.pagination.page,
           pageSize: productsRes.data.pagination.pageSize,
@@ -116,7 +120,114 @@ export function ProductList() {
     syncFilters({ status: value })
   }
 
+  const selectedProducts = useMemo(
+    () => products.filter(product => selectedIds.includes(product.id)),
+    [products, selectedIds]
+  )
+  const selectedCount = selectedIds.length
+  const allSelected = products.length > 0 && selectedIds.length === products.length
+  const hasActiveSelection = selectedProducts.some(product => product.isActive)
+  const hasInactiveSelection = selectedProducts.some(product => !product.isActive)
+
+  const handleToggleSelectAll = () => {
+    setSelectedIds(allSelected ? [] : products.map(product => product.id))
+  }
+
+  const handleToggleSelect = (productId: string) => {
+    setSelectedIds(current =>
+      current.includes(productId)
+        ? current.filter(id => id !== productId)
+        : [...current, productId]
+    )
+  }
+
+  const resetBulkState = () => {
+    setPendingBulkAction(null)
+    setIsBulkModalOpen(false)
+  }
+
+  const handleBulkAction = async (action: ProductBulkAction) => {
+    if (selectedIds.length === 0) return
+
+    const { success, data } = await bulkProductsApi.request(
+      { ids: selectedIds, action },
+      {
+        onError: (err: string) => toast.error(err),
+      }
+    )
+
+    if (success) {
+      toast.success(
+        t(action === 'delete' ? 'bulk_delete_success' : 'bulk_status_updated', {
+          count: data?.count ?? selectedIds.length,
+        })
+      )
+      setSelectedIds([])
+      resetBulkState()
+      router.refresh()
+      await fetchData(currentPage)
+    }
+  }
+
+  const requestBulkAction = (action: ProductBulkAction) => {
+    setPendingBulkAction(action)
+    setIsBulkModalOpen(true)
+  }
+
+  const bulkActionOptions = useMemo(() => {
+    const options: { value: ProductBulkAction; label: string }[] = []
+
+    if (hasInactiveSelection) {
+      options.push({ value: 'activate', label: t('bulk_activate') })
+    }
+
+    if (hasActiveSelection) {
+      options.push({ value: 'deactivate', label: t('bulk_deactivate') })
+    }
+
+    // Only show delete if all selected products are inactive
+    const allInactive = selectedProducts.every(p => !p.isActive)
+    if (allInactive && selectedCount > 0) {
+      options.push({ value: 'delete', label: t('bulk_delete') })
+    }
+
+    return options
+  }, [hasInactiveSelection, hasActiveSelection, selectedProducts, selectedCount, t])
+
+  const getBulkModalMessage = () => {
+    if (!pendingBulkAction) return ''
+    if (pendingBulkAction === 'activate') {
+      return t('bulk_activate_confirm', { count: selectedCount })
+    }
+    if (pendingBulkAction === 'deactivate') {
+      return t('bulk_deactivate_confirm', { count: selectedCount })
+    }
+    return t('bulk_delete_confirm', { count: selectedCount })
+  }
+
   const columns: Column<Product>[] = [
+    {
+      key: 'select',
+      label: (
+        <input
+          type="checkbox"
+          className="checkbox checkbox-sm"
+          checked={allSelected}
+          onChange={handleToggleSelectAll}
+          aria-label={t('select_all')}
+        />
+      ),
+      className: 'w-12',
+      render: product => (
+        <input
+          type="checkbox"
+          className="checkbox checkbox-sm"
+          checked={selectedIds.includes(product.id)}
+          onChange={() => handleToggleSelect(product.id)}
+          aria-label={t('select_item', { name: product.name })}
+        />
+      ),
+    },
     {
       key: 'name',
       label: t('name'),
@@ -247,6 +358,27 @@ export function ProductList() {
         </select>
       </div>
 
+      {selectedCount > 0 && (
+        <div className="alert bg-base-200 border border-base-300 flex flex-wrap items-center gap-3">
+          <span className="font-medium">{t('selected_count', { count: selectedCount })}</span>
+          <div className="flex flex-wrap items-center gap-2 ml-auto">
+            {bulkActionOptions.map(option => (
+              <button
+                key={option.value}
+                className={`btn btn-sm${option.value === 'delete' ? ' btn-error btn-outline' : ''}`}
+                onClick={() => requestBulkAction(option.value)}
+                disabled={bulkProductsApi.loading}
+              >
+                {option.label}
+              </button>
+            ))}
+            <button className="btn btn-ghost btn-sm" onClick={() => setSelectedIds([])}>
+              {t('clear_selection')}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Table */}
       <Table
         columns={columns}
@@ -254,8 +386,36 @@ export function ProductList() {
         loading={productsApi.loading}
         emptyMessage={t('no_products')}
         pagination={pagination}
+        onPageSizeChange={handlePageSizeChange}
         onPageChange={handlePageChange}
         getRowKey={product => product.id}
+      />
+
+      <DeleteConfirmModal
+        isOpen={isBulkModalOpen}
+        onClose={resetBulkState}
+        onConfirm={() => {
+          if (pendingBulkAction) {
+            void handleBulkAction(pendingBulkAction)
+          }
+        }}
+        loading={bulkProductsApi.loading}
+        title={
+          pendingBulkAction === 'delete'
+            ? t('bulk_delete')
+            : pendingBulkAction === 'activate'
+              ? t('bulk_activate')
+              : t('bulk_deactivate')
+        }
+        message={getBulkModalMessage()}
+        warning={pendingBulkAction === 'delete' ? t('delete_warning') : undefined}
+        confirmText={
+          pendingBulkAction === 'delete'
+            ? t('bulk_delete')
+            : pendingBulkAction === 'activate'
+              ? t('bulk_activate')
+              : t('bulk_deactivate')
+        }
       />
     </>
   )

@@ -352,8 +352,6 @@ export default function BlogPage() {
               hasMore={hasMore}
               renderData={renderPosts}
               loadMoreText={t('load_more')}
-              loadingText={t('load_more')}
-              noMoreText={t('load_more')}
               observerTarget={observerTarget}
             />
           </main>

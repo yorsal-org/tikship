@@ -10,6 +10,8 @@ import { siteConfig } from '@/config/site'
  
 import type { CreateAdminUserBody } from '@/types/api'
 
+type AdminUserBulkAction = 'activate' | 'deactivate' | 'delete'
+
 /**
  * Get admin users
  * @description Retrieve all admin users with their roles
@@ -170,6 +172,95 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    return await ApiResponse.adminError('server_error', 500)
+  }
+}
+
+/**
+ * Bulk update/delete admin users
+ * @description Perform bulk actions (activate/deactivate/delete) on multiple admin users
+ * @tag Admin - Users
+ * @auth bearerAuth
+ * @openapi
+ */
+export async function PUT(req: NextRequest) {
+  try {
+    const { adminUserId, error } = await requireAdminAuth(req, PERMISSIONS.ADMIN_USER_EDIT)
+    if (error) return error
+    if (!adminUserId) return await ApiResponse.adminError('unauthorized', 401)
+
+    const body = await req.json() as { ids?: unknown; action?: unknown }
+    const { ids, action } = body
+
+    if (!Array.isArray(ids) || ids.length === 0 || typeof action !== 'string') {
+      return await ApiResponse.adminError('required_fields_missing', 400)
+    }
+
+    const validActions: AdminUserBulkAction[] = ['activate', 'deactivate', 'delete']
+    if (!validActions.includes(action as AdminUserBulkAction)) {
+      return await ApiResponse.adminError('invalid_params', 400)
+    }
+
+    const bulkAction = action as AdminUserBulkAction
+
+    // Never touch superusers or the current user
+    const safeIds = (ids as string[]).filter(id => id !== adminUserId)
+    const superusers = await prisma.adminUser.findMany({
+      where: { id: { in: safeIds }, isSuperuser: true },
+      select: { id: true },
+    })
+    const superuserIds = new Set(superusers.map(u => u.id))
+    const targetIds = safeIds.filter(id => !superuserIds.has(id))
+
+    if (targetIds.length === 0) {
+      return await ApiResponse.adminError('cannot_modify_superuser', 400)
+    }
+
+    if (bulkAction === 'delete') {
+      const { error: deleteError } = await requireAdminAuth(req, PERMISSIONS.ADMIN_USER_DELETE)
+      if (deleteError) return deleteError
+
+      // Only allow deleting disabled non-superuser admins
+      const adminsToDelete = await prisma.adminUser.findMany({
+        where: { id: { in: targetIds } },
+        select: { id: true, isActive: true, isSuperuser: true },
+      })
+
+      const invalidAdmins = adminsToDelete.filter(a => a.isActive || a.isSuperuser)
+      if (invalidAdmins.length > 0) {
+        return await ApiResponse.adminError('cannot_delete_active_or_superuser', 400)
+      }
+
+      const { count } = await prisma.adminUser.deleteMany({
+        where: { id: { in: targetIds }, isActive: false, isSuperuser: false },
+      })
+
+      await logAudit({
+        adminUserId,
+        action: AUDIT_ACTIONS.ADMIN_USER_DELETE,
+        resource: 'admin_user',
+        details: { ids: targetIds, bulkCount: count },
+      })
+
+      return ApiResponse.success({ count })
+    }
+
+    const isActive = bulkAction === 'activate'
+    const { count } = await prisma.adminUser.updateMany({
+      where: { id: { in: targetIds } },
+      data: { isActive },
+    })
+
+    await logAudit({
+      adminUserId,
+      action: AUDIT_ACTIONS.ADMIN_USER_EDIT,
+      resource: 'admin_user',
+      details: { ids: targetIds, isActive, bulkCount: count },
+    })
+
+    return ApiResponse.success({ count })
+  } catch (error) {
+    console.error('Bulk update admin users error:', error)
     return await ApiResponse.adminError('server_error', 500)
   }
 }

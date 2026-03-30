@@ -6,6 +6,8 @@ import { PERMISSIONS } from '@/config/permissions'
 import { logAudit } from '@/lib/audit/service'
 import type { CreateProductBody } from '@/types/api'
 
+type ProductBulkAction = 'activate' | 'deactivate' | 'delete'
+
 /**
  * Get products list
  * @description Retrieve paginated list of products with filtering options
@@ -154,6 +156,76 @@ export async function POST(req: NextRequest) {
     return ApiResponse.success({ product }, 201)
   } catch (error) {
     console.error('Create product error:', error)
+    return await ApiResponse.adminError('operation_failed', 500)
+  }
+}
+
+/**
+ * Bulk update/delete products
+ * @tag Admin - Products
+ * @auth bearerAuth
+ * @openapi
+ */
+export async function PUT(req: NextRequest) {
+  try {
+    const { adminUserId, error } = await requireAdminAuth(req, PERMISSIONS.PRODUCT_EDIT)
+    if (error) return error
+
+    const body = await req.json() as { ids?: unknown; action?: unknown }
+    const { ids, action } = body
+
+    if (!Array.isArray(ids) || ids.length === 0 || typeof action !== 'string') {
+      return await ApiResponse.adminError('required_fields_missing', 400)
+    }
+
+    const validActions: ProductBulkAction[] = ['activate', 'deactivate', 'delete']
+    if (!validActions.includes(action as ProductBulkAction)) {
+      return await ApiResponse.adminError('invalid_params', 400)
+    }
+
+    const bulkAction = action as ProductBulkAction
+    const targetIds = ids as string[]
+
+    if (bulkAction === 'delete') {
+      // Only allow deleting disabled products
+      const productsToDelete = await prisma.product.findMany({
+        where: { id: { in: targetIds } },
+        select: { id: true, isActive: true },
+      })
+
+      const activeProducts = productsToDelete.filter(p => p.isActive)
+      if (activeProducts.length > 0) {
+        return await ApiResponse.adminError('cannot_delete_active_product', 400)
+      }
+
+      const { count } = await prisma.product.deleteMany({
+        where: { id: { in: targetIds }, isActive: false },
+      })
+      await logAudit({
+        adminUserId,
+        action: 'delete',
+        resource: 'product',
+        details: { ids: targetIds, bulkCount: count },
+      })
+      return ApiResponse.success({ count })
+    }
+
+    const isActive = bulkAction === 'activate'
+    const { count } = await prisma.product.updateMany({
+      where: { id: { in: targetIds } },
+      data: { isActive },
+    })
+
+    await logAudit({
+      adminUserId,
+      action: 'update',
+      resource: 'product',
+      details: { ids: targetIds, isActive, bulkCount: count },
+    })
+
+    return ApiResponse.success({ count })
+  } catch (error) {
+    console.error('Bulk update products error:', error)
     return await ApiResponse.adminError('operation_failed', 500)
   }
 }

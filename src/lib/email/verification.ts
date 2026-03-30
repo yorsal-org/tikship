@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/db/prisma'
 import { sendEmail } from '@/lib/email/service'
 import { verificationCodePlainText } from '@/lib/email/templates-verification'
-import { siteConfig } from '@/config/site'
+import { getDefaultSiteName } from '@/lib/i18n/site'
 
 /**
  * Check if email sending is rate limited
@@ -89,10 +89,9 @@ export async function sendVerificationCode(
     })
 
     // Send email via core service
+    const siteName = getDefaultSiteName()
     const subject =
-      type === 'REGISTER'
-        ? `[${siteConfig.name}] Verification Code`
-        : `[${siteConfig.name}] Password Reset Code`
+      type === 'REGISTER' ? `[${siteName}] Verification Code` : `[${siteName}] Password Reset Code`
 
     const result = await sendEmail({
       to: email,

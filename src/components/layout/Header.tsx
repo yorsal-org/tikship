@@ -23,6 +23,7 @@ interface NavItem {
 export function Header() {
   const { data: session, status } = useSession()
   const t = useTranslations('header')
+  const siteT = useTranslations('site')
   const pathname = usePathname()
   const isLoginPage = pathname === '/login'
   const isRegisterPage = pathname === '/register'
@@ -177,7 +178,7 @@ export function Header() {
               className="flex items-center hover:opacity-80"
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              {siteConfig.name}
+              {siteT('name')}
             </Link>
             <button
               className="btn btn-square btn-ghost btn-sm"

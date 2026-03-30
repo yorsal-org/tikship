@@ -2,6 +2,9 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { siteConfig } from '@/config/site'
+
+const PAGESIZE_STORAGE_KEY = 'admin_pageSize'
 
 export interface UsePaginationOptions {
   pageSize?: number
@@ -11,11 +14,30 @@ export interface UsePaginationOptions {
 /**
  * Hook to manage pagination and search state synchronized with URL parameters.
  */
-export function useAdminPagination({ pageSize = 20, debounceMs = 500 }: UsePaginationOptions = {}) {
+export function useAdminPagination({ pageSize: initialPageSize, debounceMs = 500 }: UsePaginationOptions = {}) {
   const router = useRouter()
   const searchParams = useSearchParams()
 
   const [searchInput, setSearchInput] = useState(searchParams.get('search') || '')
+  const [pageSize, setPageSize] = useState<number>(() => {
+    // Try to load from localStorage first, then fall back to initialPageSize or default
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem(PAGESIZE_STORAGE_KEY)
+      if (stored) {
+        const parsed = parseInt(stored, 10)
+        if (parsed >= 10 && parsed <= 100) {
+          return parsed
+        }
+      }
+    }
+    return initialPageSize || siteConfig.admin.pageSize
+  })
+  const [isHydrated, setIsHydrated] = useState(false)
+
+  // Mark as hydrated after mount
+  useEffect(() => {
+    setIsHydrated(true)
+  }, [])
 
   const page = parseInt(searchParams.get('page') || '1', 10)
   const search = searchParams.get('search') || ''
@@ -61,6 +83,25 @@ export function useAdminPagination({ pageSize = 20, debounceMs = 500 }: UsePagin
   )
 
   /**
+   * Update pageSize and persist to localStorage
+   */
+  const handlePageSizeChange = useCallback(
+    (newPageSize: number) => {
+      if (newPageSize >= 10 && newPageSize <= 100) {
+        setPageSize(newPageSize)
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(PAGESIZE_STORAGE_KEY, newPageSize.toString())
+        }
+        // Reset to page 1 when pageSize changes
+        const params = new URLSearchParams(searchParams.toString())
+        params.set('page', '1')
+        router.push(`?${params.toString()}`)
+      }
+    },
+    [router, searchParams]
+  )
+
+  /**
    * Update multiple filter parameters at once and reset to page 1
    */
   const handleFilterChange = useCallback(
@@ -95,9 +136,11 @@ export function useAdminPagination({ pageSize = 20, debounceMs = 500 }: UsePagin
     searchInput,
     setSearchInput,
     handlePageChange,
+    handlePageSizeChange,
     handleFilterChange,
     getParam,
     searchParams,
     pageSize,
+    isHydrated,
   }
 }

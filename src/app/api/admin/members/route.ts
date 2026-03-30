@@ -5,6 +5,8 @@ import { ApiResponse } from '@/lib/utils/api-response'
 import { PERMISSIONS } from '@/config/permissions'
 import { siteConfig } from '@/config/site'
 
+type MemberBulkAction = 'activate' | 'deactivate' | 'delete'
+
 
 /**
  * Get members list
@@ -75,6 +77,66 @@ export async function GET(req: NextRequest) {
     })
   } catch (error) {
     console.error('Get members error:', error)
+    return await ApiResponse.adminError('server_error', 500)
+  }
+}
+
+/**
+ * Bulk update/delete members
+ * @description Perform bulk actions (activate/deactivate/delete) on multiple members
+ * @tag Admin - Members
+ * @auth bearerAuth
+ * @openapi
+ */
+export async function PUT(req: NextRequest) {
+  try {
+    const { error } = await requireAdminAuth(req, PERMISSIONS.USER_EDIT)
+    if (error) return error
+
+    const body = await req.json() as { ids?: unknown; action?: unknown }
+    const { ids, action } = body
+
+    if (!Array.isArray(ids) || ids.length === 0 || typeof action !== 'string') {
+      return await ApiResponse.adminError('required_fields_missing', 400)
+    }
+
+    const validActions: MemberBulkAction[] = ['activate', 'deactivate', 'delete']
+    if (!validActions.includes(action as MemberBulkAction)) {
+      return await ApiResponse.adminError('invalid_params', 400)
+    }
+
+    const bulkAction = action as MemberBulkAction
+
+    if (bulkAction === 'delete') {
+      const { error: deleteError } = await requireAdminAuth(req, PERMISSIONS.USER_DELETE)
+      if (deleteError) return deleteError
+
+      // Only allow deleting disabled members
+      const membersToDelete = await prisma.user.findMany({
+        where: { id: { in: ids as string[] } },
+        select: { id: true, isActive: true },
+      })
+
+      const activeMembers = membersToDelete.filter(m => m.isActive)
+      if (activeMembers.length > 0) {
+        return await ApiResponse.adminError('cannot_delete_active_member', 400)
+      }
+
+      const { count } = await prisma.user.deleteMany({
+        where: { id: { in: ids as string[] }, isActive: false },
+      })
+      return ApiResponse.success({ count })
+    }
+
+    const isActive = bulkAction === 'activate'
+    const { count } = await prisma.user.updateMany({
+      where: { id: { in: ids as string[] } },
+      data: { isActive },
+    })
+
+    return ApiResponse.success({ count })
+  } catch (error) {
+    console.error('Bulk update members error:', error)
     return await ApiResponse.adminError('server_error', 500)
   }
 }

@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/db/prisma'
-import { siteConfig } from '@/config/site'
+import { getDefaultSiteName } from '@/lib/i18n/site'
 
 export interface CreatePayPalOrderRequest {
   productId: string
@@ -98,6 +98,7 @@ export class PayPalService {
 
     const amount = ((product.price * quantity) / 100).toFixed(2)
     const accessToken = await this.getAccessToken()
+    const siteName = getDefaultSiteName()
 
     const orderData = {
       intent: 'CAPTURE',
@@ -112,7 +113,7 @@ export class PayPalService {
         },
       ],
       application_context: {
-        brand_name: siteConfig.name,
+        brand_name: siteName,
         return_url: successUrl || `${process.env.NEXTAUTH_URL}/payment/success`,
         cancel_url: cancelUrl || `${process.env.NEXTAUTH_URL}/payment/cancel`,
       },
@@ -202,11 +203,12 @@ export class PayPalService {
     }
 
     const accessToken = await this.getAccessToken()
+    const siteName = getDefaultSiteName()
 
     const subscriptionData = {
       plan_id: planId,
       application_context: {
-        brand_name: siteConfig.name,
+        brand_name: siteName,
         user_action: 'SUBSCRIBE_NOW',
         return_url: successUrl || `${process.env.NEXTAUTH_URL}/payment/success`,
         cancel_url: cancelUrl || `${process.env.NEXTAUTH_URL}/payment/cancel`,

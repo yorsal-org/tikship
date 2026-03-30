@@ -20,9 +20,10 @@ export default function AuditLogsPage() {
     page: currentPage,
     handlePageChange,
     handleFilterChange: syncFilters,
+    handlePageSizeChange,
     getParam,
     pageSize,
-  } = usePagination({ pageSize: siteConfig.admin.pageSize })
+  } = usePagination()
 
   const actionParam = getParam('action')
   const resourceParam = getParam('resource')
@@ -32,12 +33,7 @@ export default function AuditLogsPage() {
     action: actionParam || '',
     resource: resourceParam || '',
   })
-  const [pagination, setPagination] = useState({
-    page: 1,
-    pageSize: siteConfig.admin.pageSize,
-    total: 0,
-    totalPages: 0,
-  })
+  const [pagination, setPagination] = useState({})
 
   const [cleanupModalOpen, setCleanupModalOpen] = useState(false)
   const [pendingDays, setPendingDays] = useState<number | null>(null)
@@ -121,12 +117,12 @@ export default function AuditLogsPage() {
 
       if (success && result) {
         setLogs(result.logs)
-        setPagination(prev => ({
-          ...prev,
+        setPagination({
           page: result.page,
+          pageSize: result.pageSize,
           total: result.total,
           totalPages: result.totalPages,
-        }))
+        })
       }
     },
     [auditLogsApi, pageSize, actionParam, resourceParam]
@@ -162,9 +158,7 @@ export default function AuditLogsPage() {
       key: 'action',
       label: t('action'),
       render: log => (
-        <span
-          className={`badge badge-sm ${getBadgeClassName(getAuditActionVariant(log.action))}`}
-        >
+        <span className={`badge badge-sm ${getBadgeClassName(getAuditActionVariant(log.action))}`}>
           {log.action}
         </span>
       ),
@@ -176,9 +170,7 @@ export default function AuditLogsPage() {
         <div className="flex flex-col">
           <span className="text-sm">{log.resource}</span>
           {log.resourceId && (
-            <span className="text-xs text-base-content/60">
-              ID: {truncateId(log.resourceId)}
-            </span>
+            <span className="text-xs text-base-content/60">ID: {truncateId(log.resourceId)}</span>
           )}
         </div>
       ),
@@ -251,7 +243,9 @@ export default function AuditLogsPage() {
           <div className="modal-box max-w-sm">
             <h3 className="text-lg font-bold text-error">{t('cleanup_title')}</h3>
             <p className="mt-2 text-sm">
-              {t('cleanup_confirm', { period: t(pendingOption.labelKey as Parameters<typeof t>[0]) })}
+              {t('cleanup_confirm', {
+                period: t(pendingOption.labelKey as Parameters<typeof t>[0]),
+              })}
             </p>
             <p className="mt-1 text-xs text-base-content/60">{t('cleanup_warning')}</p>
             <div className="modal-action">
@@ -273,7 +267,10 @@ export default function AuditLogsPage() {
               </Button>
             </div>
           </div>
-          <div className="modal-backdrop" onClick={() => !isDeleting && setConfirmModalOpen(false)} />
+          <div
+            className="modal-backdrop"
+            onClick={() => !isDeleting && setConfirmModalOpen(false)}
+          />
         </div>
       )}
 
@@ -300,6 +297,7 @@ export default function AuditLogsPage() {
         loading={auditLogsApi.loading}
         emptyMessage={t('no_logs')}
         pagination={pagination}
+        onPageSizeChange={handlePageSizeChange}
         onPageChange={handlePageChange}
         getRowKey={log => log.id}
       />

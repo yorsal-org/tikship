@@ -32,20 +32,16 @@ export function PostList({ type }: PostListProps) {
     searchInput,
     setSearchInput,
     handlePageChange,
+    handlePageSizeChange,
     handleFilterChange: syncFilters,
     getParam,
     pageSize,
-  } = usePagination({ pageSize: siteConfig.admin.pageSize })
+  } = usePagination()
 
   const statusParam = getParam('status')
   const categoryParam = getParam('categoryId')
 
-  const [pagination, setPagination] = useState({
-    page: 1,
-    pageSize: siteConfig.admin.pageSize as number,
-    total: 0,
-    totalPages: 0,
-  })
+  const [pagination, setPagination] = useState({})
 
   const [allCategories, setAllCategories] = useState<Category[]>([])
   const [posts, setPosts] = useState<Post[]>([])
@@ -509,6 +505,7 @@ export function PostList({ type }: PostListProps) {
         loading={loadingPosts}
         emptyMessage={t('no_posts')}
         pagination={pagination}
+        onPageSizeChange={handlePageSizeChange}
         onPageChange={handlePageChange}
         getRowKey={post => post.id}
       />

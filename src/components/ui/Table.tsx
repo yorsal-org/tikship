@@ -15,13 +15,14 @@ export interface TableProps<T> {
   data: T[]
   loading?: boolean
   emptyMessage?: string
-  pagination?: {
+  pagination?: Partial<{
     page: number
     pageSize: number
     total: number
     totalPages: number
-  }
+  }>
   onPageChange?: (page: number) => void
+  onPageSizeChange?: (pageSize: number) => void
   getRowKey: (item: T) => string
   variant?: 'card' | 'plain'
 }
@@ -33,6 +34,7 @@ export function Table<T>({
   emptyMessage = 'No data available',
   pagination,
   onPageChange,
+  onPageSizeChange,
   getRowKey,
   variant = 'card',
 }: TableProps<T>) {
@@ -74,11 +76,12 @@ export function Table<T>({
           {pagination && onPageChange && (
             <div className="mt-4">
               <Pagination
-                currentPage={pagination.page}
-                totalPages={pagination.totalPages}
-                pageSize={pagination.pageSize}
-                totalCount={pagination.total}
+                currentPage={pagination.page || 0}
+                totalPages={pagination.totalPages || 0}
+                pageSize={pagination.pageSize || 0}
+                totalCount={pagination.total || 0}
                 onPageChange={onPageChange}
+                onPageSizeChange={onPageSizeChange}
               />
             </div>
           )}

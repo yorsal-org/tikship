@@ -4,16 +4,16 @@ import '@/styles/datepicker.css'
 import { themeInitScript } from '@/lib/utils/theme'
 import { siteConfig } from '@/config/site'
 import { getLocale } from '@/lib/i18n/config'
+import { getTranslations } from 'next-intl/server'
 
 const BASE_URL = process.env.NEXTAUTH_URL || ''
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const messages: Record<string, any> = (await import(`../locales/${locale}.json`)).default
-  const siteName: string = messages?.site?.name ?? siteConfig.name
-  const siteDescription: string = messages?.site?.description ?? siteConfig.description
-  const siteKeywords: string = messages?.site?.keywords ?? siteConfig.keywords.join(', ')
+  const t = await getTranslations({ locale, namespace: 'site' })
+  const siteName = t('name')
+  const siteDescription = t('description')
+  const siteKeywords = t('keywords')
 
   return {
     metadataBase: new URL(BASE_URL),

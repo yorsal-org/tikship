@@ -12,6 +12,7 @@ import { Loader2, Lock, User, ShieldCheck, Terminal, Activity, Users } from 'luc
 export default function AdminLoginPage() {
   const router = useRouter()
   const t = useTranslations('admin.login')
+  const siteT = useTranslations('site')
   const { login } = useAdminAuth()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -39,7 +40,7 @@ export default function AdminLoginPage() {
           <div className="flex items-center gap-3 mb-3">
             <Logo className="h-12 w-auto text-primary" />
           </div>
-          <p className="text-sm">{siteConfig.description.split('.')[0]}.</p>
+          <p className="text-sm">{siteT('description').split('.')[0]}.</p>
         </div>
 
         {/* Middle: feature highlights */}
@@ -88,7 +89,7 @@ export default function AdminLoginPage() {
         {/* Bottom: copyright */}
         <div className="relative z-10">
           <p className="text-xs" style={{ color: 'oklch(38% 0.04 260)' }}>
-            &copy; {new Date().getFullYear()} {siteConfig.name} &mdash; Restricted Access
+            &copy; {new Date().getFullYear()} {siteT('name')} &mdash; Restricted Access
           </p>
         </div>
       </div>
@@ -164,7 +165,6 @@ export default function AdminLoginPage() {
             {/* Submit */}
             <button
               type="submit"
-              
               disabled={isLoading}
               className="w-full btn btn-primary"
             >
@@ -183,7 +183,7 @@ export default function AdminLoginPage() {
           </form>
 
           <p className="mt-8 text-center text-xs text-base-content/30">
-            {siteConfig.name} &mdash; Admin Panel
+            {siteT('name')} &mdash; Admin Panel
           </p>
         </div>
       </div>

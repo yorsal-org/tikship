@@ -140,6 +140,7 @@ export interface MemberStats {
 export interface MembersListResponse {
   users: Member[]
   page: number
+  pageSize: number
   total: number
   totalPages: number
 }
@@ -150,6 +151,7 @@ export interface MembersListResponse {
 export interface AuditLogsListResponse {
   logs: AuditLog[]
   page: number
+  pageSize: number
   total: number
   totalPages: number
 }
@@ -160,6 +162,7 @@ export interface AuditLogsListResponse {
 export interface AdminUsersListResponse {
   users: AdminUserWithRoles[]
   page: number
+  pageSize: number
   total: number
   totalPages: number
 }

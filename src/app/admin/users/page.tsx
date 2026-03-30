@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
@@ -13,6 +13,8 @@ import { useAdminAuth } from '@/components/providers/AdminAuthProvider'
 import { useApi } from '@/hooks/useApi'
 import { toast } from '@/lib/utils/toast'
 import { UserPlus, Search, Edit, Power, PowerOff, Shield, Trash2 } from 'lucide-react'
+
+type AdminUserBulkAction = 'activate' | 'deactivate' | 'delete'
 import { AdminUserWithRoles, AdminUsersListResponse } from '@/types/admin'
 import { siteConfig } from '@/config/site'
 import { useAdminPagination as usePagination } from '@/hooks/useAdminPagination'
@@ -28,18 +30,14 @@ export default function AdminUsersPage() {
     searchInput,
     setSearchInput,
     handlePageChange,
+    handlePageSizeChange,
     pageSize,
-  } = usePagination({ pageSize: siteConfig.admin.pageSize })
+  } = usePagination()
 
   const { handleSuccess, handleError } = useDataFetch()
   const { adminUser: currentUser } = useAdminAuth()
   const [users, setUsers] = useState<AdminUserWithRoles[]>([])
-  const [pagination, setPagination] = useState({
-    page: 1,
-    pageSize: siteConfig.admin.pageSize,
-    total: 0,
-    totalPages: 0,
-  })
+  const [pagination, setPagination] = useState({})
 
   // Modal states using custom hook
   const formModal = useModalState<AdminUserWithRoles>()
@@ -50,6 +48,12 @@ export default function AdminUsersPage() {
   const usersApi = useApi<AdminUsersListResponse>('/api/admin/users', 'GET')
   const deleteUserApi = useApi('', 'DELETE')
   const updateUserApi = useApi('', 'PUT')
+  const bulkUsersApi = useApi<{ count: number }>('/api/admin/users', 'PUT')
+
+  // Bulk selection state
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [pendingBulkAction, setPendingBulkAction] = useState<AdminUserBulkAction | null>(null)
+  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false)
 
   const fetchUsers = useCallback(
     async (page: number) => {
@@ -63,13 +67,15 @@ export default function AdminUsersPage() {
       })
 
       if (success && result) {
-        setUsers(result.users)
-        setPagination(prev => ({
-          ...prev,
+        const nextUsers = result.users
+        setUsers(nextUsers)
+        setSelectedIds(current => current.filter(id => nextUsers.some(u => u.id === id)))
+        setPagination({
           page: result.page,
+          pageSize: result.pageSize,
           total: result.total,
           totalPages: result.totalPages,
-        }))
+        })
       }
     },
     [usersApi, searchParam, pageSize]
@@ -136,15 +142,117 @@ export default function AdminUsersPage() {
     }
   }
 
+  // --- Bulk selection ---
+  const isSafeToSelect = (user: AdminUserWithRoles) =>
+    !user.isSuperuser && user.id !== currentUser?.id
+
+  const selectableUsers = users.filter(isSafeToSelect)
+  const allSelected = selectableUsers.length > 0 && selectedIds.length === selectableUsers.length
+  const selectedCount = selectedIds.length
+
+  const selectedUsers = useMemo(
+    () => users.filter(u => selectedIds.includes(u.id)),
+    [users, selectedIds]
+  )
+
+  const hasActiveSelection = selectedUsers.some(u => u.isActive)
+  const hasInactiveSelection = selectedUsers.some(u => !u.isActive)
+
+  const handleToggleSelectAll = () => {
+    setSelectedIds(allSelected ? [] : selectableUsers.map(u => u.id))
+  }
+
+  const handleToggleSelect = (id: string) => {
+    setSelectedIds(current =>
+      current.includes(id) ? current.filter(i => i !== id) : [...current, id]
+    )
+  }
+
+  const requestBulkAction = (action: AdminUserBulkAction) => {
+    setPendingBulkAction(action)
+    setIsBulkModalOpen(true)
+  }
+
+  const resetBulkState = () => {
+    setPendingBulkAction(null)
+    setIsBulkModalOpen(false)
+  }
+
+  const handleBulkConfirm = async () => {
+    if (!pendingBulkAction) return
+    const { success, data } = await bulkUsersApi.request(
+      { ids: selectedIds, action: pendingBulkAction },
+      { onError: handleError }
+    )
+    if (success) {
+      const count = data?.count ?? selectedIds.length
+      toast.success(
+        t(pendingBulkAction === 'delete' ? 'bulk_delete_success' : 'bulk_status_updated', { count })
+      )
+      setSelectedIds([])
+      resetBulkState()
+      router.refresh()
+      await fetchUsers(currentPage)
+    }
+  }
+
+  const bulkActionOptions = useMemo(() => {
+    const options: { value: AdminUserBulkAction; label: string }[] = []
+    if (hasInactiveSelection) options.push({ value: 'activate', label: t('bulk_activate') })
+    if (hasActiveSelection) options.push({ value: 'deactivate', label: t('bulk_deactivate') })
+
+    // Only show delete if all selected admins are inactive and not superusers
+    const canDelete = selectedUsers.every(u => !u.isActive && !u.isSuperuser)
+    if (canDelete && selectedCount > 0) {
+      options.push({ value: 'delete', label: t('bulk_delete') })
+    }
+
+    return options
+  }, [hasActiveSelection, hasInactiveSelection, selectedUsers, selectedCount, t])
+
+  const getBulkModalMessage = () => {
+    if (!pendingBulkAction) return ''
+    if (pendingBulkAction === 'activate')
+      return t('bulk_activate_confirm', { count: selectedCount })
+    if (pendingBulkAction === 'deactivate')
+      return t('bulk_deactivate_confirm', { count: selectedCount })
+    return t('bulk_delete_confirm', { count: selectedCount })
+  }
+
   const columns: Column<AdminUserWithRoles>[] = [
+    {
+      key: 'select',
+      label: (
+        <input
+          type="checkbox"
+          className="checkbox checkbox-sm"
+          checked={allSelected}
+          onChange={handleToggleSelectAll}
+          aria-label={t('select_all')}
+        />
+      ),
+      className: 'w-12',
+      render: user =>
+        isSafeToSelect(user) ? (
+          <input
+            type="checkbox"
+            className="checkbox checkbox-sm"
+            checked={selectedIds.includes(user.id)}
+            onChange={() => handleToggleSelect(user.id)}
+            aria-label={t('select_item', { name: user.username })}
+          />
+        ) : (
+          <span />
+        ),
+    },
     {
       key: 'username',
       label: t('username'),
       render: user => (
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <span className="text-sm font-medium">{user.username}</span>
           {user.isSuperuser && (
-            <span className="badge badge-primary badge-sm">{t('superuser')}</span>
+            <span className="shrink-0 badge badge-primary badge-sm">{t('superuser')}</span>
           )}
         </div>
       ),
@@ -255,6 +363,27 @@ export default function AdminUsersPage() {
         />
       </div>
 
+      {selectedCount > 0 && (
+        <div className="alert bg-base-200 border border-base-300 flex flex-wrap items-center gap-3 mb-4">
+          <span className="font-medium">{t('selected_count', { count: selectedCount })}</span>
+          <div className="flex flex-wrap items-center gap-2 ml-auto">
+            {bulkActionOptions.map(option => (
+              <button
+                key={option.value}
+                className={`btn btn-sm${option.value === 'delete' ? ' btn-error btn-outline' : ''}`}
+                onClick={() => requestBulkAction(option.value)}
+                disabled={bulkUsersApi.loading}
+              >
+                {option.label}
+              </button>
+            ))}
+            <button className="btn btn-ghost btn-sm" onClick={() => setSelectedIds([])}>
+              {t('clear_selection')}
+            </button>
+          </div>
+        </div>
+      )}
+
       <Table
         columns={columns}
         data={users}
@@ -262,6 +391,7 @@ export default function AdminUsersPage() {
         emptyMessage={t('no_users')}
         pagination={pagination}
         onPageChange={handlePageChange}
+        onPageSizeChange={handlePageSizeChange}
         getRowKey={user => user.id}
         variant="plain"
       />
@@ -296,6 +426,30 @@ export default function AdminUsersPage() {
           username: deleteModal.selectedItem?.username || '',
         })}
         warning={t('delete_warning')}
+      />
+
+      {/* Bulk action confirm */}
+      <DeleteConfirmModal
+        isOpen={isBulkModalOpen}
+        onClose={resetBulkState}
+        onConfirm={handleBulkConfirm}
+        loading={bulkUsersApi.loading}
+        title={
+          pendingBulkAction === 'delete'
+            ? t('bulk_delete')
+            : pendingBulkAction === 'activate'
+              ? t('bulk_activate')
+              : t('bulk_deactivate')
+        }
+        message={getBulkModalMessage()}
+        warning={pendingBulkAction === 'delete' ? t('delete_warning') : undefined}
+        confirmText={
+          pendingBulkAction === 'delete'
+            ? t('bulk_delete')
+            : pendingBulkAction === 'activate'
+              ? t('bulk_activate')
+              : t('bulk_deactivate')
+        }
       />
     </div>
   )

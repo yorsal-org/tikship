@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { prisma } from '@/lib/db/prisma'
-import { siteConfig } from '@/config/site'
+import { getTranslations } from 'next-intl/server'
 import ProductDetailClient from './ProductDetailClient'
 
 const BASE_URL = process.env.NEXTAUTH_URL || ''
@@ -42,11 +42,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     style: 'currency',
     currency: product.currency.toUpperCase(),
   }).format(product.price / 100)
+  const t = await getTranslations({ namespace: 'site' })
+  const siteName = t('name')
 
   const title = product.name
-  const description =
-    product.description ||
-    `${product.name} — ${priceFormatted}. Available on ${siteConfig.name}.`
+  const description = product.description || `${product.name} — ${priceFormatted}. Available on ${siteName}.`
 
   return {
     title,
@@ -55,7 +55,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       canonical: `/products/${slug}`,
     },
     openGraph: {
-      title: `${title} | ${siteConfig.name}`,
+      title: `${title} | ${siteName}`,
       description,
       url: `/products/${slug}`,
       type: 'website',
@@ -63,7 +63,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${title} | ${siteConfig.name}`,
+      title: `${title} | ${siteName}`,
       description,
       images: product.image ? [product.image] : [],
     },
@@ -73,6 +73,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ProductDetailPage({ params }: Props) {
   const { slug } = await params
   const product = await getProduct(slug)
+  const t = await getTranslations({ namespace: 'site' })
+  const siteName = t('name')
 
   const jsonLd = product
     ? {
@@ -91,7 +93,7 @@ export default async function ProductDetailPage({ params }: Props) {
         },
         brand: {
           '@type': 'Brand',
-          name: siteConfig.name,
+          name: siteName,
         },
       }
     : null

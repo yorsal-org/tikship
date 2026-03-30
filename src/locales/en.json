@@ -6,7 +6,8 @@
   },
   "common": {
     "pagination": {
-      "showing_results": "Showing {from} to {to} of {total} results"
+      "showing_results": "Showing {from} to {to} of {total} results",
+      "per_page": "Per page"
     },
     "tagline": "Turn Ideas into Products, Launches into Cash. \n The Rapid-Start Platform for One-Person Company.",
     "footer": {
@@ -424,7 +425,20 @@
       "update_success": "Admin user updated successfully",
       "delete_success": "Admin user deleted successfully",
       "status_updated": "User status updated successfully",
-      "roles_updated": "User roles updated successfully"
+      "roles_updated": "User roles updated successfully",
+      "select_all": "Select all",
+      "select_item": "Select {name}",
+      "selected_count": "{count} selected",
+      "clear_selection": "Clear selection",
+      "bulk_activate": "Bulk Activate",
+      "bulk_deactivate": "Bulk Deactivate",
+      "bulk_delete": "Bulk Delete",
+      "bulk_activate_confirm": "Activate {count} selected admin users?",
+      "bulk_deactivate_confirm": "Deactivate {count} selected admin users?",
+      "bulk_delete_confirm": "Permanently delete {count} selected admin users?",
+      "bulk_status_updated": "Updated {count} admin users",
+      "bulk_delete_success": "Deleted {count} admin users",
+      "cannot_delete_active_or_superuser": "Only disabled non-superuser admins can be deleted"
     },
     "posts": {
       "title": "Content Management",
@@ -725,6 +739,18 @@
       "oauth_password_notice": "This user is using a third-party login and hasn't set a password yet. After setting a password, the user can log in using their email and password.",
       "save": "Save",
       "cancel": "Cancel",
+      "select_all": "Select all",
+      "select_item": "Select {name}",
+      "selected_count": "{count} selected",
+      "clear_selection": "Clear selection",
+      "bulk_activate": "Bulk Activate",
+      "bulk_deactivate": "Bulk Deactivate",
+      "bulk_delete": "Bulk Delete",
+      "bulk_activate_confirm": "Activate {count} selected users?",
+      "bulk_deactivate_confirm": "Deactivate {count} selected users?",
+      "bulk_delete_confirm": "Permanently delete {count} selected users?",
+      "bulk_status_updated": "Updated {count} users",
+      "bulk_delete_success": "Deleted {count} users",
       "stats": {
         "total": "Total Users",
         "new_today": "New Today",
@@ -842,7 +868,20 @@
       "price_hint": "Price in cents (e.g., 1000 = $10.00)",
       "quantity": "Stock Quantity",
       "quantity_placeholder": "Leave empty for unlimited stock",
-      "quantity_hint": "Leave empty for unlimited stock"
+      "quantity_hint": "Leave empty for unlimited stock",
+      "select_all": "Select all",
+      "select_item": "Select {name}",
+      "selected_count": "{count} selected",
+      "clear_selection": "Clear selection",
+      "bulk_activate": "Bulk Activate",
+      "bulk_deactivate": "Bulk Deactivate",
+      "bulk_delete": "Bulk Delete",
+      "bulk_activate_confirm": "Activate {count} selected products?",
+      "bulk_deactivate_confirm": "Deactivate {count} selected products?",
+      "bulk_delete_confirm": "Permanently delete {count} selected products?",
+      "bulk_status_updated": "Updated {count} products",
+      "bulk_delete_success": "Deleted {count} products",
+      "cannot_delete_active_product": "Only disabled products can be deleted"
     },
     "orders": {
       "title": "Order Management",
@@ -879,6 +918,7 @@
       "update_error": "Failed to update order",
       "export_success": "Export successful",
       "export_error": "Export failed",
+      "delete_warning": "This action cannot be undone.",
       "order_details": "Order Details",
       "order_info": "Order Information",
       "product_info": "Product Information",
@@ -894,7 +934,22 @@
       "user_id": "User ID",
       "guest_order": "Guest Order (Not logged in)",
       "save": "Save",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "select_all": "Select all",
+      "select_item": "Select {name}",
+      "selected_count": "{count} selected",
+      "clear_selection": "Clear selection",
+      "bulk_mark_completed": "Bulk Mark Completed",
+      "bulk_mark_failed": "Bulk Mark Failed",
+      "bulk_mark_refunded": "Bulk Mark Refunded",
+      "bulk_delete": "Bulk Delete",
+      "bulk_mark_completed_confirm": "Mark {count} selected orders as completed?",
+      "bulk_mark_failed_confirm": "Mark {count} selected orders as failed?",
+      "bulk_mark_refunded_confirm": "Mark {count} selected orders as refunded?",
+      "bulk_delete_confirm": "Permanently delete {count} selected orders?",
+      "bulk_status_updated": "Updated {count} orders",
+      "bulk_delete_success": "Deleted {count} orders",
+      "cannot_delete_non_failed_order": "Only failed orders can be deleted"
     }
   },
   "auth_error": {
