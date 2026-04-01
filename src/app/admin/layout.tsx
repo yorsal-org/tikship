@@ -145,7 +145,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
         {/* Top Bar */}
         <header className="navbar bg-base-100 border-b border-base-200 px-4 lg:px-6 h-16 shrink-0 sticky top-0 z-30">
           <div className="flex-none lg:hidden">
-            <button className="btn btn-square btn-ghost" onClick={() => setIsMobileMenuOpen(true)}>
+            <button className="btn btn-square size-10 p-0 btn-ghost" onClick={() => setIsMobileMenuOpen(true)}>
               <Menu size={24} />
             </button>
           </div>

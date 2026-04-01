@@ -278,14 +278,14 @@ export default function AuditLogsPage() {
         <input
           type="text"
           placeholder={t('filter_action')}
-          className="input input-bordered w-full h-10"
+          className="input w-full h-10"
           value={filters.action}
           onChange={e => updateFilterState('action', e.target.value)}
         />
         <input
           type="text"
           placeholder={t('filter_resource')}
-          className="input input-bordered w-full h-10"
+          className="input w-full h-10"
           value={filters.resource}
           onChange={e => updateFilterState('resource', e.target.value)}
         />

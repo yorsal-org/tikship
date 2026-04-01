@@ -31,12 +31,12 @@ export const Default: Story = {}
 export const InForm: Story = {
   render: () => (
     <div className="w-96 space-y-4">
-      <div className="form-control">
-        <label className="label">
-          <span className="label-text">Choose Theme</span>
+      <fieldset className="fieldset">
+        <label className="label" htmlFor="theme-select">
+          <span>Choose Theme</span>
         </label>
         <ThemeSelector />
-      </div>
+      </fieldset>
     </div>
   ),
 }
@@ -44,14 +44,14 @@ export const InForm: Story = {
 export const WithCard: Story = {
   render: () => (
     <div className="card bg-base-100 shadow-xl w-96">
-      <div className="card-body">
+      <div className="card-body p-6">
         <h2 className="card-title">Appearance Settings</h2>
-        <div className="form-control">
-          <label className="label">
-            <span className="label-text">Theme</span>
+        <fieldset className="fieldset">
+          <label className="label" htmlFor="theme-card-select">
+            <span>Theme</span>
           </label>
           <ThemeSelector />
-        </div>
+        </fieldset>
         <p className="text-sm opacity-60 mt-2">
           Choose your preferred theme. Changes will be applied immediately.
         </p>

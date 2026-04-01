@@ -123,14 +123,14 @@ export default function RolesPage() {
 
                 <div className="card-actions mt-4 items-center justify-end gap-1">
                   <button
-                    className="btn btn-ghost btn-sm btn-square"
+                    className="btn btn-ghost btn-sm size-7 p-0"
                     onClick={() => handleEditRole(role)}
                     title={t('edit')}
                   >
                     <Edit className="w-4 h-4" />
                   </button>
                   <button
-                    className="btn btn-ghost btn-sm btn-square"
+                    className="btn btn-ghost btn-sm size-7 p-0"
                     onClick={() => handleManagePermissions(role)}
                     title={t('manage_permissions')}
                   >
@@ -138,7 +138,7 @@ export default function RolesPage() {
                   </button>
                   <div className="flex items-center">
                     <button
-                      className="btn btn-ghost btn-sm btn-square text-error disabled:opacity-50"
+                      className="btn btn-ghost btn-sm size-7 p-0 text-error disabled:opacity-50"
                       onClick={() => handleDeleteRole(role)}
                       disabled={!canDeleteRole(role)}
                       title={

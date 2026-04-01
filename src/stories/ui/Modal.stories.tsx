@@ -137,18 +137,18 @@ export const WithForm: Story = {
   render: args => (
     <ModalWrapper title="Edit Profile" showCloseButton maxWidth="lg" {...args}>
       <div className="space-y-4">
-        <div className="form-control">
-          <label className="label">
-            <span className="label-text">Name</span>
+        <fieldset className="fieldset">
+          <label className="label" htmlFor="modal-name">
+            <span>Name</span>
           </label>
-          <input type="text" placeholder="John Doe" className="input input-bordered" />
-        </div>
-        <div className="form-control">
-          <label className="label">
-            <span className="label-text">Email</span>
+          <input id="modal-name" type="text" placeholder="John Doe" className="input" />
+        </fieldset>
+        <fieldset className="fieldset">
+          <label className="label" htmlFor="modal-email">
+            <span>Email</span>
           </label>
-          <input type="email" placeholder="john@example.com" className="input input-bordered" />
-        </div>
+          <input id="modal-email" type="email" placeholder="john@example.com" className="input" />
+        </fieldset>
         <div className="flex justify-end gap-2 mt-6">
           <Button variant="ghost">Cancel</Button>
           <Button variant="primary">Save Changes</Button>

@@ -300,7 +300,7 @@ export default function AdminUsersPage() {
           {(!user.isSuperuser || user.id === currentUser?.id) && (
             <button
               onClick={() => handleEditUser(user)}
-              className="btn btn-ghost btn-sm btn-square"
+              className="btn btn-ghost btn-sm size-7 p-0"
               title={t('edit')}
             >
               <Edit className="w-4 h-4" />
@@ -309,7 +309,7 @@ export default function AdminUsersPage() {
           <button
             onClick={() => handleToggleStatus(user)}
             disabled={user.isSuperuser || user.id === currentUser?.id}
-            className={`btn btn-ghost btn-sm btn-square ${user.isActive ? 'text-warning' : 'text-success'}`}
+            className={`btn btn-ghost btn-sm size-7 p-0 ${user.isActive ? 'text-warning' : 'text-success'}`}
             title={t(user.isActive ? 'deactivate' : 'activate')}
           >
             {user.isActive ? <PowerOff className="w-4 h-4" /> : <Power className="w-4 h-4" />}
@@ -317,7 +317,7 @@ export default function AdminUsersPage() {
           {(!user.isSuperuser || user.id === currentUser?.id) && (
             <button
               onClick={() => handleRolesClick(user)}
-              className="btn btn-ghost btn-sm btn-square"
+              className="btn btn-ghost btn-sm size-7 p-0"
               title={t('manage_roles')}
             >
               <Shield className="w-4 h-4" />
@@ -326,7 +326,7 @@ export default function AdminUsersPage() {
           <button
             onClick={() => handleDeleteClick(user)}
             disabled={user.isSuperuser || user.id === currentUser?.id}
-            className="btn btn-ghost btn-sm btn-square text-error disabled:text-base-content/30"
+            className="btn btn-ghost btn-sm size-7 p-0 text-error disabled:text-base-content/30"
             title={
               user.isSuperuser
                 ? t('superuser_cannot_delete')
@@ -357,7 +357,7 @@ export default function AdminUsersPage() {
         <input
           type="text"
           placeholder={t('search_placeholder')}
-          className="input input-bordered w-full pl-10 h-10"
+          className="input w-full pl-10 h-10"
           value={searchInput}
           onChange={e => setSearchInput(e.target.value)}
         />

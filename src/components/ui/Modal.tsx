@@ -39,7 +39,7 @@ export function Modal({
           <div className="flex justify-between items-center mb-4">
             {title && <h3 className="text-lg font-bold">{title}</h3>}
             {showCloseButton && (
-              <button className="btn btn-sm btn-circle btn-ghost ml-auto" onClick={onClose}>
+              <button className="btn btn-sm btn-circle size-8 p-0 ml-auto" onClick={onClose}>
                 <X size={20} />
               </button>
             )}

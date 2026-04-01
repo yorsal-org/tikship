@@ -109,7 +109,7 @@ function SortableCategoryRow({ node, depth, onDelete, onEdit, onReorderChildren,
               <GripVertical size={14} />
             </span>
             {hasChildren ? (
-              <button onClick={() => setExpanded(!expanded)} className="btn btn-ghost btn-xs btn-square">
+              <button onClick={() => setExpanded(!expanded)} className="btn btn-ghost btn-xs size-6 p-0">
                 {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
               </button>
             ) : (
@@ -131,10 +131,10 @@ function SortableCategoryRow({ node, depth, onDelete, onEdit, onReorderChildren,
         <td><span className="text-sm">{node._count?.posts || 0}</span></td>
         <td className="text-right">
           <div className="flex items-center justify-end gap-1">
-            <button className="btn btn-ghost btn-xs btn-square" onClick={() => onEdit(node)} title={t('edit')}>
+            <button className="btn btn-ghost btn-xs size-7 p-0" onClick={() => onEdit(node)} title={t('edit')}>
               <Pencil size={14} />
             </button>
-            <button className="btn btn-ghost btn-xs text-error btn-square" onClick={() => onDelete(node)}>
+            <button className="btn btn-ghost btn-xs text-error size-7 p-0" onClick={() => onDelete(node)}>
               <Trash2 size={16} />
             </button>
           </div>
@@ -241,19 +241,20 @@ function EditCategoryModal({ cat, onClose, onSaved, t }: EditModalProps) {
       <div className="modal-box max-w-md">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-bold text-lg">{t('edit_title')}</h3>
-          <button className="btn btn-ghost btn-sm btn-square" onClick={onClose}>
+          <button className="btn btn-ghost btn-sm size-8 p-0" onClick={onClose}>
             <X size={16} />
           </button>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
 
           {/* Locale selector */}
-          <div className="form-control">
-            <label className="label block text-xs uppercase font-bold opacity-60 px-0">
+          <fieldset className="fieldset">
+            <label className="label block text-xs uppercase font-bold opacity-60 px-0" htmlFor="edit-locale">
               {t('locale')}
             </label>
             <select
-              className="select select-bordered h-10 min-h-0 text-sm"
+              id="edit-locale"
+              className="select h-10 min-h-0 text-sm"
               value={locale}
               onChange={e => setLocale(e.target.value)}
             >
@@ -263,41 +264,43 @@ function EditCategoryModal({ cat, onClose, onSaved, t }: EditModalProps) {
                 </option>
               ))}
             </select>
-          </div>
+          </fieldset>
 
           {/* Name */}
-          <div className="form-control">
-            <label className="label block text-xs uppercase font-bold opacity-60 px-0">
+          <fieldset className="fieldset">
+            <label className="label block text-xs uppercase font-bold opacity-60 px-0" htmlFor="edit-name">
               {t('name')}
               <span className="text-xs font-normal opacity-50 ml-auto">
                 {name.length}/{validationConfig.category.name.maxLength}
               </span>
             </label>
             <input
-              className="input input-bordered h-10 min-h-0"
+              id="edit-name"
+              className="input h-10 min-h-0"
               value={name}
               onChange={e => setName(e.target.value)}
               minLength={validationConfig.category.name.minLength}
               maxLength={validationConfig.category.name.maxLength}
               required
             />
-          </div>
+          </fieldset>
 
           {/* Description */}
-          <div className="form-control">
-            <label className="label block text-xs uppercase font-bold opacity-60 px-0">
+          <fieldset className="fieldset">
+            <label className="label block text-xs uppercase font-bold opacity-60 px-0" htmlFor="edit-description">
               {t('description')}
               <span className="text-xs font-normal opacity-50 ml-auto">
                 {description.length}/{validationConfig.category.description.maxLength}
               </span>
             </label>
             <textarea
-              className="textarea textarea-bordered min-h-20"
+              id="edit-description"
+              className="textarea min-h-20"
               value={description}
               onChange={e => setDescription(e.target.value)}
               maxLength={validationConfig.category.description.maxLength}
             />
-          </div>
+          </fieldset>
 
           <div className="modal-action mt-2">
             <Button type="submit" variant="primary" className="btn-sm" loading={saving}>
@@ -445,12 +448,13 @@ export default function CategoriesPage() {
           <h2 className="text-xl font-bold mb-4">{t('add_new')}</h2>
           <form onSubmit={handleCreate} className="space-y-4">
             {/* Locale selector */}
-            <div className="form-control">
-              <label className="label text-xs uppercase font-bold opacity-60 px-0">
+            <fieldset className="fieldset">
+              <label className="label text-xs uppercase font-bold opacity-60 px-0" htmlFor="create-locale">
                 {t('locale')}
               </label>
               <select
-                className="select select-bordered h-10 min-h-0 text-sm"
+                id="create-locale"
+                className="select h-10 min-h-0 text-sm"
                 value={locale}
                 onChange={e => setLocale(e.target.value)}
               >
@@ -460,15 +464,16 @@ export default function CategoriesPage() {
                   </option>
                 ))}
               </select>
-            </div>
+            </fieldset>
 
             {/* Parent selector */}
-            <div className="form-control">
-              <label className="label text-xs uppercase font-bold opacity-60 px-0">
+            <fieldset className="fieldset">
+              <label className="label text-xs uppercase font-bold opacity-60 px-0" htmlFor="parent-id">
                 {t('parent')}
               </label>
               <select
-                className="select select-bordered h-10 min-h-0 text-sm"
+                id="parent-id"
+                className="select h-10 min-h-0 text-sm"
                 value={parentId}
                 onChange={e => setParentId(e.target.value)}
               >
@@ -481,41 +486,43 @@ export default function CategoriesPage() {
                   </option>
                 ))}
               </select>
-            </div>
+            </fieldset>
 
             {/* Name */}
-            <div className="form-control">
-              <label className="label text-xs uppercase font-bold opacity-60 px-0">
+            <fieldset className="fieldset">
+              <label className="label text-xs uppercase font-bold opacity-60 px-0" htmlFor="create-name">
                 {t('name')}
                 <span className="text-xs font-normal opacity-50 ml-auto">
                   {name.length}/{validationConfig.category.name.maxLength}
                 </span>
               </label>
               <input
-                className="input input-bordered h-10 min-h-0"
+                id="create-name"
+                className="input h-10 min-h-0"
                 value={name}
                 onChange={e => setName(e.target.value)}
                 minLength={validationConfig.category.name.minLength}
                 maxLength={validationConfig.category.name.maxLength}
                 required
               />
-            </div>
+            </fieldset>
 
             {/* Description */}
-            <div className="form-control">
-              <label className="label text-xs uppercase font-bold opacity-60 px-0">
+            <fieldset className="fieldset">
+              <label className="label text-xs uppercase font-bold opacity-60 px-0" htmlFor="create-description">
                 {t('description')}
                 <span className="text-xs font-normal opacity-50 ml-auto">
                   {description.length}/{validationConfig.category.description.maxLength}
                 </span>
               </label>
               <textarea
-                className="textarea textarea-bordered min-h-20"
+                id="create-description"
+                className="textarea min-h-20"
                 value={description}
                 onChange={e => setDescription(e.target.value)}
                 maxLength={validationConfig.category.description.maxLength}
               />
-            </div>
+            </fieldset>
 
             <Button type="submit" variant="primary" className="w-full btn-sm" loading={creating}>
               <Plus size={16} /> {t('add_btn')}

@@ -15,10 +15,10 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ label, error, hint, leftIcon, rightIcon, containerClassName, className, ...props }, ref) => {
     return (
-      <div className={cn('form-control w-full', containerClassName)}>
+      <fieldset className={cn('fieldset w-full', containerClassName)}>
         {label && (
-          <label className="label">
-            <span className="label-text font-medium">{label}</span>
+          <label className="label flex justify-between" htmlFor={props.id}>
+            <span className="font-medium">{label}</span>
           </label>
         )}
         <div
@@ -34,6 +34,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           )}
           <input
             ref={ref}
+            id={props.id}
             className={cn(
               'input border-none focus:ring-0 focus:outline-none grow bg-transparent h-10',
               className
@@ -45,7 +46,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           )}
         </div>
         {(error || hint) && (
-          <label className="label">
+          <label className="label flex justify-between">
             {error ? (
               <span className="label-text-alt text-error">{error}</span>
             ) : (
@@ -53,7 +54,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             )}
           </label>
         )}
-      </div>
+      </fieldset>
     )
   }
 )

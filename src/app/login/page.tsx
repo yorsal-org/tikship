@@ -75,7 +75,7 @@ export default function LoginPage() {
   return (
     <div className="grow flex items-center justify-center bg-linear-to-br from-primary/10 via-base-100 to-secondary/10 px-4 py-12">
       <div className="card w-full max-w-md bg-base-100 shadow-xl">
-        <div className="card-body">
+        <div className="card-body p-8">
           <div className="text-center">
             <h1 className="text-4xl justify-center font-bold flex items-center gap-2">
               {t('welcome')} <Logo className="h-12 w-auto" />
@@ -85,14 +85,15 @@ export default function LoginPage() {
 
           {/* Email/Password Login Form */}
           <form onSubmit={handleEmailLogin} className="mt-8 space-y-4">
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">{t('email_label')}</span>
+            <fieldset className="fieldset">
+              <label className="label" htmlFor="login-email">
+                <span>{t('email_label')}</span>
               </label>
               <div className="relative">
                 <label className="input flex items-center gap-2 w-full focus-within:input-primary">
                   <Mail className="w-4 h-4 text-base-content/40" />
                   <input
+                    id="login-email"
                     type="email"
                     placeholder={t('email_placeholder')}
                     className="grow"
@@ -103,16 +104,17 @@ export default function LoginPage() {
                   />
                 </label>
               </div>
-            </div>
+            </fieldset>
 
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">{t('password_label')}</span>
+            <fieldset className="fieldset">
+              <label className="label" htmlFor="login-password">
+                <span>{t('password_label')}</span>
               </label>
               <div className="relative">
                 <label className="input flex items-center gap-2 w-full focus-within:input-primary">
                   <Lock className="w-4 h-4 text-base-content/40" />
                   <input
+                    id="login-password"
                     type={showPassword ? 'text' : 'password'}
                     placeholder={t('password_placeholder')}
                     className="grow"
@@ -123,7 +125,7 @@ export default function LoginPage() {
                   />
                   <button
                     type="button"
-                    className="btn btn-ghost btn-xs btn-circle"
+                    className="btn btn-ghost btn-xs size-6 p-0"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
@@ -134,7 +136,7 @@ export default function LoginPage() {
                   </button>
                 </label>
               </div>
-            </div>
+            </fieldset>
 
             {error && (
               <div className="alert alert-error">

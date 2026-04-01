@@ -38,12 +38,12 @@ export const Default: Story = {}
 export const InForm: Story = {
   render: () => (
     <div className="w-96 space-y-4">
-      <div className="form-control">
-        <label className="label">
-          <span className="label-text">Language</span>
+      <fieldset className="fieldset">
+        <label className="label" htmlFor="language-select">
+          <span>Language</span>
         </label>
         <LanguageSelector />
-      </div>
+      </fieldset>
     </div>
   ),
 }
@@ -51,14 +51,14 @@ export const InForm: Story = {
 export const WithCard: Story = {
   render: () => (
     <div className="card bg-base-100 shadow-xl w-96">
-      <div className="card-body">
+      <div className="card-body p-6">
         <h2 className="card-title">Language Settings</h2>
-        <div className="form-control">
-          <label className="label">
-            <span className="label-text">Preferred Language</span>
+        <fieldset className="fieldset">
+          <label className="label" htmlFor="language-card-select">
+            <span>Preferred Language</span>
           </label>
           <LanguageSelector />
-        </div>
+        </fieldset>
         <p className="text-sm opacity-60 mt-2">
           Select your preferred language. The page will reload to apply changes.
         </p>

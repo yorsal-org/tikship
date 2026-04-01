@@ -293,28 +293,28 @@ export default function AdminMembersPage() {
         <div className="flex gap-1">
           <button
             onClick={() => openDetails(user)}
-            className="btn btn-ghost btn-sm btn-square"
+            className="btn btn-ghost btn-sm size-7 p-0"
             title={t('details')}
           >
             <Eye className="w-4 h-4" />
           </button>
           <button
             onClick={() => passwordModal.open(user)}
-            className="btn btn-ghost btn-sm btn-square text-info"
+            className="btn btn-ghost btn-sm size-7 p-0 text-info"
             title={t('change_password')}
           >
             <KeyRound className="w-4 h-4" />
           </button>
           <button
             onClick={() => handleToggleStatus(user)}
-            className={`btn btn-ghost btn-sm btn-square ${user.isActive ? 'text-warning' : 'text-success'}`}
+            className={`btn btn-ghost btn-sm size-7 p-0 ${user.isActive ? 'text-warning' : 'text-success'}`}
             title={t(user.isActive ? 'deactivate' : 'activate')}
           >
             {user.isActive ? <PowerOff className="w-4 h-4" /> : <Power className="w-4 h-4" />}
           </button>
           <button
             onClick={() => deleteModal.open(user)}
-            className="btn btn-ghost btn-sm btn-square text-error"
+            className="btn btn-ghost btn-sm size-7 p-0 text-error"
             title={t('delete')}
           >
             <Trash2 className="w-4 h-4" />
@@ -338,7 +338,7 @@ export default function AdminMembersPage() {
           <input
             type="text"
             placeholder={t('search_placeholder')}
-            className="input input-bordered w-full pl-10 h-10"
+            className="input w-full pl-10 h-10"
             value={searchInput}
             onChange={e => setSearchInput(e.target.value)}
           />
@@ -346,7 +346,7 @@ export default function AdminMembersPage() {
         <select
           value={statusParam || ''}
           onChange={e => handleStatusFilterChange(e.target.value)}
-          className="select select-bordered w-40 h-10 min-h-0"
+          className="select w-40 h-10 min-h-0"
         >
           <option value="">{t('all_status')}</option>
           <option value="active">{t('active')}</option>

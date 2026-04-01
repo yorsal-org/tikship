@@ -112,23 +112,24 @@ export const InForm: Story = {
     const [date, setDate] = useState<Date | null>(null)
     return (
       <div className="w-96 space-y-4">
-        <div className="form-control">
-          <label className="label">
-            <span className="label-text">Event Name</span>
+        <fieldset className="fieldset">
+          <label className="label" htmlFor="event-name">
+            <span>Event Name</span>
           </label>
-          <input type="text" placeholder="Enter event name" className="input input-bordered" />
-        </div>
-        <div className="form-control">
-          <label className="label">
-            <span className="label-text">Event Date & Time</span>
+          <input id="event-name" type="text" placeholder="Enter event name" className="input" />
+        </fieldset>
+        <fieldset className="fieldset">
+          <label className="label" htmlFor="event-date">
+            <span>Event Date & Time</span>
           </label>
           <DateTimePicker
+            id="event-date"
             selected={date}
             onChange={setDate}
             placeholder="Select date and time"
             {...args}
           />
-        </div>
+        </fieldset>
       </div>
     )
   },

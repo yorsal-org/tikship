@@ -184,14 +184,14 @@ export default function PermissionsPage() {
             <div className="flex gap-1 shrink-0">
               <button
                 onClick={() => handleEdit(permission)}
-                className="btn btn-ghost btn-sm btn-square hover:btn-primary"
+                className="btn btn-ghost btn-sm size-7 p-0 hover:btn-primary"
                 title={t('edit')}
               >
                 <Edit className="w-4 h-4" />
               </button>
               <button
                 onClick={() => handleDelete(permission)}
-                className="btn btn-ghost btn-sm btn-square hover:btn-error text-error"
+                className="btn btn-ghost btn-sm size-7 p-0 hover:btn-error text-error"
                 disabled={deletingId === permission.id}
                 title={t('delete')}
               >
@@ -329,14 +329,14 @@ export default function PermissionsPage() {
           <div className="join border border-base-content/20 rounded-lg">
             <button
               onClick={() => setSortMode('group')}
-              className={`btn btn-sm btn-square join-item ${sortMode === 'group' ? 'btn-primary' : 'btn-ghost'}`}
+              className={`btn btn-sm size-8 p-0 join-item ${sortMode === 'group' ? 'btn-primary' : 'btn-ghost'}`}
               title={t('sort_by_group')}
             >
               <LayoutGrid className="w-4 h-4" />
             </button>
             <button
               onClick={() => setSortMode('time')}
-              className={`btn btn-sm btn-square join-item ${sortMode === 'time' ? 'btn-primary' : 'btn-ghost'}`}
+              className={`btn btn-sm size-8 p-0 join-item ${sortMode === 'time' ? 'btn-primary' : 'btn-ghost'}`}
               title={t('sort_by_time')}
             >
               <Clock className="w-4 h-4" />
