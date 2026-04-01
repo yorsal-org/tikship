@@ -58,8 +58,10 @@ storybook-static
 /public/upload
 
 # AI
+/.claude
 /.agent
 /.cursor
+/.qoder
 
 
 
