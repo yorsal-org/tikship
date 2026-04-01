@@ -71,7 +71,7 @@ export function PublishCard({
           </div>
         </div>
 
-        <div className="form-control">
+        <fieldset className="fieldset">
           <select
             className="select select-bordered select-sm w-full font-medium"
             value={status}
@@ -91,10 +91,10 @@ export function PublishCard({
 
             <option value={PostStatus.SCHEDULED}>Scheduled</option>
           </select>
-        </div>
+        </fieldset>
 
         {isScheduled && (
-          <div className="form-control">
+          <fieldset className="fieldset">
             <label className="label text-[10px] uppercase font-bold opacity-50 pb-1">
               {t('editor.scheduled_at')}
             </label>
@@ -104,7 +104,7 @@ export function PublishCard({
               minDate={new Date()}
               placeholder={t('editor.select_date_time')}
             />
-          </div>
+          </fieldset>
         )}
 
         <div className="divider my-0 opacity-10"></div>

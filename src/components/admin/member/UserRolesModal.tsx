@@ -83,7 +83,7 @@ export function UserRolesModal({ isOpen, onClose, onSuccess, user }: UserRolesMo
       maxWidth="md"
     >
       <form onSubmit={handleSubmit} className="mt-4">
-        <div className="form-control">
+        <fieldset className="fieldset">
           <div className="border rounded-lg p-2 max-h-80 overflow-y-auto">
             <div className="space-y-1">
               {roles.map(role => (
@@ -114,7 +114,7 @@ export function UserRolesModal({ isOpen, onClose, onSuccess, user }: UserRolesMo
               )}
             </div>
           </div>
-        </div>
+        </fieldset>
 
         <div className="modal-action">
           <Button

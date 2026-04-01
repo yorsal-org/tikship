@@ -130,7 +130,7 @@ export default function PermissionFormModal({
         )}
 
         {/* 权限代码 */}
-        <div className="form-control">
+        <fieldset className="fieldset">
           <label className="label">
             <span className="label-text font-semibold flex items-center gap-2">
               <svg
@@ -208,10 +208,10 @@ export default function PermissionFormModal({
               </span>
             </label>
           )}
-        </div>
+        </fieldset>
 
         {/* 权限名称 */}
-        <div className="form-control">
+        <fieldset className="fieldset">
           <label className="label">
             <span className="label-text font-semibold flex items-center gap-2">
               <svg
@@ -245,10 +245,10 @@ export default function PermissionFormModal({
             maxLength={validationConfig.permission.name.maxLength}
             required
           />
-        </div>
+        </fieldset>
 
         {/* 权限描述 */}
-        <div className="form-control">
+        <fieldset className="fieldset">
           <label className="label">
             <span className="label-text font-semibold flex items-center gap-2">
               <svg
@@ -280,7 +280,7 @@ export default function PermissionFormModal({
             maxLength={validationConfig.permission.description.maxLength}
             rows={3}
           />
-        </div>
+        </fieldset>
 
         {/* 操作按钮 */}
         <div className="modal-action">

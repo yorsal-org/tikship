@@ -95,7 +95,7 @@ export function RoleFormModal({ isOpen, onClose, onSuccess, role }: RoleFormModa
       maxWidth="md"
     >
       <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-        <div className="form-control">
+        <fieldset className="fieldset">
           <label className="label">
             <span className="label-text">
               {t('role_name')} <span className="text-error">*</span>
@@ -114,9 +114,9 @@ export function RoleFormModal({ isOpen, onClose, onSuccess, role }: RoleFormModa
             required
             disabled={submitApi.loading}
           />
-        </div>
+        </fieldset>
 
-        <div className="form-control">
+        <fieldset className="fieldset">
           <label className="label">
             <span className="label-text">{t('description')}</span>
             <span className="label-text-alt opacity-50">
@@ -132,9 +132,9 @@ export function RoleFormModal({ isOpen, onClose, onSuccess, role }: RoleFormModa
             rows={3}
             placeholder={t('description_placeholder')}
           />
-        </div>
+        </fieldset>
 
-        <div className="form-control">
+        <fieldset className="fieldset">
           <label className="label cursor-pointer justify-start gap-4">
             <input
               type="checkbox"
@@ -146,7 +146,7 @@ export function RoleFormModal({ isOpen, onClose, onSuccess, role }: RoleFormModa
             <span className="label-text">{t('is_default')}</span>
           </label>
           <p className="text-xs text-base-content/60 mt-1">{t('is_default_hint')}</p>
-        </div>
+        </fieldset>
 
         <div className="alert alert-info">
           <span className="text-sm">{t('permissions_hint')}</span>

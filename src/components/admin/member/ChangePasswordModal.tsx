@@ -112,7 +112,7 @@ export function ChangePasswordModal({
           </div>
         )}
 
-        <div className="form-control">
+        <fieldset className="fieldset">
           <label className="label">
             <span className="label-text">
               {t('new_password')} <span className="text-error">*</span>
@@ -139,9 +139,9 @@ export function ChangePasswordModal({
             </button>
           </div>
           {formData.newPassword && <PasswordStrengthIndicator password={formData.newPassword} />}
-        </div>
+        </fieldset>
 
-        <div className="form-control">
+        <fieldset className="fieldset">
           <label className="label">
             <span className="label-text">
               {t('confirm_password')} <span className="text-error">*</span>
@@ -172,7 +172,7 @@ export function ChangePasswordModal({
               <span className="label-text-alt text-error">{t('password_mismatch')}</span>
             </label>
           )}
-        </div>
+        </fieldset>
 
         <div className="modal-action">
           <Button

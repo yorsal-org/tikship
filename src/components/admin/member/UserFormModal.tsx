@@ -134,7 +134,7 @@ export function UserFormModal({ isOpen, onClose, onSuccess, user }: UserFormModa
       maxWidth="2xl"
     >
       <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-        <div className="form-control">
+        <fieldset className="fieldset">
           <label className="label">
             <span className="label-text">
               {t('username')} <span className="text-error">*</span>
@@ -153,9 +153,9 @@ export function UserFormModal({ isOpen, onClose, onSuccess, user }: UserFormModa
             required
             disabled={submitApi.loading}
           />
-        </div>
+        </fieldset>
 
-        <div className="form-control">
+        <fieldset className="fieldset">
           <label className="label">
             <span className="label-text">
               {t('email')} <span className="text-error">*</span>
@@ -174,9 +174,9 @@ export function UserFormModal({ isOpen, onClose, onSuccess, user }: UserFormModa
             required
             disabled={submitApi.loading}
           />
-        </div>
+        </fieldset>
 
-        <div className="form-control">
+        <fieldset className="fieldset">
           <label className="label">
             <span className="label-text">
               {t('password')} {!isEditMode && <span className="text-error">*</span>}
@@ -206,9 +206,9 @@ export function UserFormModal({ isOpen, onClose, onSuccess, user }: UserFormModa
             </button>
           </div>
           {formData.password && <PasswordStrengthIndicator password={formData.password} />}
-        </div>
+        </fieldset>
 
-        <div className="form-control">
+        <fieldset className="fieldset">
           <label className="label">
             <span className="label-text">{t('name')}</span>
             <span className="label-text-alt opacity-50">
@@ -223,11 +223,11 @@ export function UserFormModal({ isOpen, onClose, onSuccess, user }: UserFormModa
             maxLength={validationConfig.user.name.maxLength}
             disabled={submitApi.loading}
           />
-        </div>
+        </fieldset>
 
         {!user?.isSuperuser && (
           <>
-            <div className="form-control">
+            <fieldset className="fieldset">
               <label className="label cursor-pointer justify-start gap-4">
                 <input
                   type="checkbox"
@@ -238,7 +238,7 @@ export function UserFormModal({ isOpen, onClose, onSuccess, user }: UserFormModa
                 />
                 <span className="label-text">{t('is_active')}</span>
               </label>
-            </div>
+            </fieldset>
           </>
         )}
 

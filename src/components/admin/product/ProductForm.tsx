@@ -466,7 +466,7 @@ export function ProductForm({ product }: ProductFormProps) {
       {/* Main Content */}
       <div className="flex-1 space-y-6">
         {/* Product Name */}
-        <div className="form-control">
+        <fieldset className="fieldset">
           <input
             type="text"
             placeholder={t('name_placeholder')}
@@ -479,7 +479,7 @@ export function ProductForm({ product }: ProductFormProps) {
           <div className="text-xs opacity-50 mt-1 text-right">
             {name.length}/{validationConfig.product.name.maxLength}
           </div>
-        </div>
+        </fieldset>
 
         {/* Slug */}
         <div className="flex items-center gap-2 text-sm opacity-70">
@@ -499,7 +499,7 @@ export function ProductForm({ product }: ProductFormProps) {
         </div>
 
         {/* Description */}
-        <div className="form-control">
+        <fieldset className="fieldset">
           <label className="label">
             <span className="label-text font-medium">{t('description')}</span>
             <span className="label-text-alt opacity-50">
@@ -514,7 +514,7 @@ export function ProductForm({ product }: ProductFormProps) {
             maxLength={validationConfig.product.description.maxLength}
             rows={3}
           />
-        </div>
+        </fieldset>
 
         {/* Rich Text Content */}
         <div>
@@ -582,7 +582,7 @@ export function ProductForm({ product }: ProductFormProps) {
 
               {stripeMethod && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="form-control md:col-span-2">
+                  <fieldset className="fieldset md:col-span-2">
                     <label className="label">
                       <span className="label-text">
                         {t('stripe_price_id')} <span className="text-error">*</span>
@@ -609,9 +609,9 @@ export function ProductForm({ product }: ProductFormProps) {
                         <span className="label-text-alt text-error">{stripePriceIdError}</span>
                       </label>
                     )}
-                  </div>
+                  </fieldset>
 
-                  <div className="form-control md:col-span-2">
+                  <fieldset className="fieldset md:col-span-2">
                     <label className="label">
                       <span className="label-text">{t('stripe_product_id')}</span>
                     </label>
@@ -623,9 +623,9 @@ export function ProductForm({ product }: ProductFormProps) {
                       className="input input-bordered w-full"
                       maxLength={validationConfig.product.stripeProductId.maxLength}
                     />
-                  </div>
+                  </fieldset>
 
-                  <div className="form-control">
+                  <fieldset className="fieldset">
                     <label className="label">
                       <span className="label-text">{t('mode')}</span>
                     </label>
@@ -640,11 +640,11 @@ export function ProductForm({ product }: ProductFormProps) {
                         </option>
                       ))}
                     </select>
-                  </div>
+                  </fieldset>
 
                   {stripeMethod.mode === 'subscription' && (
                     <>
-                      <div className="form-control">
+                      <fieldset className="fieldset">
                         <label className="label">
                           <span className="label-text">{t('interval')}</span>
                         </label>
@@ -659,9 +659,9 @@ export function ProductForm({ product }: ProductFormProps) {
                             </option>
                           ))}
                         </select>
-                      </div>
+                      </fieldset>
 
-                      <div className="form-control">
+                      <fieldset className="fieldset">
                         <label className="label">
                           <span className="label-text">{t('interval_count')}</span>
                         </label>
@@ -672,7 +672,7 @@ export function ProductForm({ product }: ProductFormProps) {
                           className="input input-bordered w-full"
                           min="1"
                         />
-                      </div>
+                      </fieldset>
                     </>
                   )}
                 </div>
@@ -726,7 +726,7 @@ export function ProductForm({ product }: ProductFormProps) {
               {paypalMethod && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {paypalMethod.mode === 'subscription' && (
-                    <div className="form-control md:col-span-2">
+                    <fieldset className="fieldset md:col-span-2">
                       <label className="label">
                         <span className="label-text">
                           {t('paypal_plan_id')} <span className="text-error">*</span>
@@ -753,10 +753,10 @@ export function ProductForm({ product }: ProductFormProps) {
                           <span className="label-text-alt text-error">{paypalPlanIdError}</span>
                         </label>
                       )}
-                    </div>
+                    </fieldset>
                   )}
 
-                  <div className="form-control md:col-span-2">
+                  <fieldset className="fieldset md:col-span-2">
                     <label className="label">
                       <span className="label-text">{t('paypal_product_id')}</span>
                     </label>
@@ -768,9 +768,9 @@ export function ProductForm({ product }: ProductFormProps) {
                       className="input input-bordered w-full"
                       maxLength={validationConfig.product.paypalProductId.maxLength}
                     />
-                  </div>
+                  </fieldset>
 
-                  <div className="form-control">
+                  <fieldset className="fieldset">
                     <label className="label">
                       <span className="label-text">{t('mode')}</span>
                     </label>
@@ -785,11 +785,11 @@ export function ProductForm({ product }: ProductFormProps) {
                         </option>
                       ))}
                     </select>
-                  </div>
+                  </fieldset>
 
                   {paypalMethod.mode === 'subscription' && (
                     <>
-                      <div className="form-control">
+                      <fieldset className="fieldset">
                         <label className="label">
                           <span className="label-text">{t('interval')}</span>
                         </label>
@@ -804,9 +804,9 @@ export function ProductForm({ product }: ProductFormProps) {
                             </option>
                           ))}
                         </select>
-                      </div>
+                      </fieldset>
 
-                      <div className="form-control">
+                      <fieldset className="fieldset">
                         <label className="label">
                           <span className="label-text">{t('interval_count')}</span>
                         </label>
@@ -817,7 +817,7 @@ export function ProductForm({ product }: ProductFormProps) {
                           className="input input-bordered w-full"
                           min="1"
                         />
-                      </div>
+                      </fieldset>
                     </>
                   )}
                 </div>
@@ -834,7 +834,7 @@ export function ProductForm({ product }: ProductFormProps) {
             {t('additional_settings')}
           </div>
           <div className="collapse-content">
-            <div className="form-control">
+            <fieldset className="fieldset">
               <label className="label">
                 <span className="label-text">{t('metadata')}</span>
                 <span className="label-text-alt opacity-50">
@@ -849,7 +849,7 @@ export function ProductForm({ product }: ProductFormProps) {
                 maxLength={validationConfig.product.metadata.maxLength}
                 rows={3}
               />
-            </div>
+            </fieldset>
           </div>
         </div>
       </div>
@@ -860,7 +860,7 @@ export function ProductForm({ product }: ProductFormProps) {
         <div className="card bg-base-100 shadow-xl border border-base-content/10">
           <div className="card-body">
             <h3 className="card-title text-base">{t('status')}</h3>
-            <div className="form-control">
+            <fieldset className="fieldset">
               <label className="label cursor-pointer justify-start gap-2">
                 <input
                   type="checkbox"
@@ -870,7 +870,7 @@ export function ProductForm({ product }: ProductFormProps) {
                 />
                 <span className="label-text">{t('is_active')}</span>
               </label>
-            </div>
+            </fieldset>
             <div className="divider my-2"></div>
             <Button
               onClick={handleSave}
@@ -887,7 +887,7 @@ export function ProductForm({ product }: ProductFormProps) {
           <div className="card-body">
             <h3 className="card-title text-base">{t('price_inventory')}</h3>
             
-            <div className="form-control">
+            <fieldset className="fieldset">
               <label className="label">
                 <span className="label-text">
                   {t('price')} <span className="text-error">*</span>
@@ -905,9 +905,9 @@ export function ProductForm({ product }: ProductFormProps) {
               <label className="label">
                 <span className="label-text-alt">{t('price_hint')}</span>
               </label>
-            </div>
+            </fieldset>
 
-            <div className="form-control">
+            <fieldset className="fieldset">
               <label className="label">
                 <span className="label-text">{t('currency')}</span>
               </label>
@@ -922,9 +922,9 @@ export function ProductForm({ product }: ProductFormProps) {
                   </option>
                 ))}
               </select>
-            </div>
+            </fieldset>
 
-            <div className="form-control">
+            <fieldset className="fieldset">
               <label className="label">
                 <span className="label-text">{t('quantity')}</span>
               </label>
@@ -939,7 +939,7 @@ export function ProductForm({ product }: ProductFormProps) {
               <label className="label">
                 <span className="label-text-alt">{t('quantity_hint')}</span>
               </label>
-            </div>
+            </fieldset>
           </div>
         </div>
 

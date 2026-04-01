@@ -171,7 +171,7 @@ export function PostEditor({ initialData, type }: PostEditorProps) {
           {t('editor.back')}
         </button>
 
-        <div className="form-control">
+        <fieldset className="fieldset">
           <input
             type="text"
             placeholder={t('editor.title_placeholder')}
@@ -184,7 +184,7 @@ export function PostEditor({ initialData, type }: PostEditorProps) {
           <div className="text-xs opacity-50 mt-1 text-right">
             {title.length}/{validationConfig.post.title.maxLength}
           </div>
-        </div>
+        </fieldset>
 
         <div className="flex items-center gap-2 text-sm opacity-70">
           <span className="font-mono">{t('editor.permalink')}:</span>
@@ -263,7 +263,7 @@ export function PostEditor({ initialData, type }: PostEditorProps) {
             <div className="divider opacity-10 my-0"></div>
 
             <div className="grid grid-cols-1 gap-6">
-              <div className="form-control">
+              <fieldset className="fieldset">
                 <div className="flex justify-between items-end mb-2">
                   <label className="text-xs uppercase font-bold opacity-60">
                     {t('editor.seo_title')}
@@ -288,9 +288,9 @@ export function PostEditor({ initialData, type }: PostEditorProps) {
                   onChange={e => setSeoTitle(e.target.value)}
                   maxLength={validationConfig.post.seoTitle.maxLength}
                 />
-              </div>
+              </fieldset>
 
-              <div className="form-control">
+              <fieldset className="fieldset">
                 <div className="flex justify-between items-end mb-2">
                   <label className="text-xs uppercase font-bold opacity-60">
                     {t('editor.seo_description')}
@@ -314,7 +314,7 @@ export function PostEditor({ initialData, type }: PostEditorProps) {
                   onChange={e => setSeoDescription(e.target.value)}
                   maxLength={validationConfig.post.seoDescription.maxLength}
                 />
-              </div>
+              </fieldset>
             </div>
           </div>
         </div>

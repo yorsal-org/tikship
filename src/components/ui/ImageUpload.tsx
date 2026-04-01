@@ -110,7 +110,7 @@ export function ImageUpload({
   const allowedTypesDisplay = allowedTypes.map(type => type.split('/')[1].toUpperCase()).join(', ')
 
   return (
-    <div className="form-control">
+    <fieldset className="fieldset">
       {label && (
         <label className="label">
           <span className="label-text">{label}</span>
@@ -182,6 +182,6 @@ export function ImageUpload({
           />
         </div>
       )}
-    </div>
+    </fieldset>
   )
 }

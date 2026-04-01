@@ -93,7 +93,7 @@ export default function AvatarUpload({ value, onUpload }: AvatarUploadProps) {
   }
 
   return (
-    <div className="form-control">
+    <fieldset className="fieldset">
       <label className="label">
         <span className="label-text">{t('avatar_upload.label')}</span>
       </label>
@@ -149,6 +149,6 @@ export default function AvatarUpload({ value, onUpload }: AvatarUploadProps) {
           <span className="text-sm">{error}</span>
         </div>
       )}
-    </div>
+    </fieldset>
   )
 }
