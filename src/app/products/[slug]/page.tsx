@@ -42,7 +42,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     style: 'currency',
     currency: product.currency.toUpperCase(),
   }).format(product.price / 100)
-  const t = await getTranslations({ namespace: 'site' })
+  const t = await getTranslations('site')
   const siteName = t('name')
 
   const title = product.name
@@ -73,7 +73,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ProductDetailPage({ params }: Props) {
   const { slug } = await params
   const product = await getProduct(slug)
-  const t = await getTranslations({ namespace: 'site' })
+  const t = await getTranslations('site')
   const siteName = t('name')
 
   const jsonLd = product

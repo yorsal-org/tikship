@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const title = post.seoTitle || post.title
   const description = post.seoDescription || post.excerpt || ''
   const images = post.featuredImage ? [{ url: post.featuredImage, alt: title }] : []
-  const t = await getTranslations({ namespace: 'site' })
+  const t = await getTranslations('site')
   const siteName = t('name')
 
   return {
@@ -51,7 +51,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   const { slug } = await params
   const post = await getPostBySlug(slug, PostType.ARTICLE)
   const t = await getTranslations('posts_public')
-  const siteT = await getTranslations({ namespace: 'site' })
+  const siteT = await getTranslations('site')
   const siteName = siteT('name')
 
   if (!post) {

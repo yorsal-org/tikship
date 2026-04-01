@@ -3,7 +3,7 @@ import { getTranslations } from 'next-intl/server'
 import ProductsClient from './ProductsClient'
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations({ namespace: 'site' })
+  const t = await getTranslations('site')
   const siteName = t('name')
 
   return {

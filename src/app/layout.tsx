@@ -10,7 +10,7 @@ const BASE_URL = process.env.NEXTAUTH_URL || ''
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale()
-  const t = await getTranslations({ locale, namespace: 'site' })
+  const t = await getTranslations('site')
   const siteName = t('name')
   const siteDescription = t('description')
   const siteKeywords = t('keywords')
