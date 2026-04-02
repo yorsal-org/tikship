@@ -1,11 +1,12 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/db/prisma'
-import { requireAdminAuth } from '@/lib/auth/admin'
+import { requireAdminAuth } from '@/lib/admin'
 import { ApiResponse } from '@/lib/utils/api-response'
 import { PERMISSIONS } from '@/config/permissions'
 import { logAudit } from '@/lib/audit/service'
 import type { UpdateOrderStatusBody } from '@/types/api'
 import { OrderStatus } from '@/types/order'
+import { getModuleState } from '@/lib/module-state'
 
 /**
  * Get order details
@@ -23,17 +24,22 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const { error } = await requireAdminAuth(req, PERMISSIONS.ORDER_VIEW)
     if (error) return error
 
+    const moduleState = getModuleState()
+    const userInclude = moduleState.user ? {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+    } : {}
+
     const order = await prisma.order.findUnique({
       where: { id },
       include: {
         product: true,
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
+        ...userInclude,
       },
     })
 
@@ -82,19 +88,24 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       return await ApiResponse.adminError('not_found', 404)
     }
 
+    const moduleState = getModuleState()
+    const userInclude = moduleState.user ? {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+    } : {}
+
     // Update order
     const order = await prisma.order.update({
       where: { id },
       data: { status },
       include: {
         product: true,
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
+        ...userInclude,
       },
     })
 

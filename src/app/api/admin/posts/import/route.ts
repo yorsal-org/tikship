@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { requireAdminAuth } from '@/lib/auth/admin'
+import { requireAdminAuth } from '@/lib/admin'
 import { ApiResponse } from '@/lib/utils/api-response'
 import { postService } from '@/lib/post/service'
 import { PERMISSIONS } from '@/config/permissions'

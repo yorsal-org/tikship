@@ -106,7 +106,7 @@ export default function PermissionFormModal({
       maxWidth="2xl"
     >
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* 权限代码说明 */}
+        {/* Permission code description */}
         {!isEdit && (
           <div className="alert alert-info">
             <svg
@@ -129,7 +129,7 @@ export default function PermissionFormModal({
           </div>
         )}
 
-        {/* 权限代码 */}
+        {/* Permission code */}
         <fieldset className="fieldset">
           <label className="label">
             <span className="label-text font-semibold flex items-center gap-2">
@@ -210,7 +210,7 @@ export default function PermissionFormModal({
           )}
         </fieldset>
 
-        {/* 权限名称 */}
+        {/* Permission name */}
         <fieldset className="fieldset">
           <label className="label">
             <span className="label-text font-semibold flex items-center gap-2">
@@ -247,7 +247,7 @@ export default function PermissionFormModal({
           />
         </fieldset>
 
-        {/* 权限描述 */}
+        {/* Permission description */}
         <fieldset className="fieldset">
           <label className="label">
             <span className="label-text font-semibold flex items-center gap-2">
@@ -282,7 +282,7 @@ export default function PermissionFormModal({
           />
         </fieldset>
 
-        {/* 操作按钮 */}
+        {/* Action buttons */}
         <div className="modal-action">
           <button
             type="button"

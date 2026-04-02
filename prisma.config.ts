@@ -13,7 +13,7 @@ if (databaseUrl.startsWith('file:') || databaseUrl.includes('.db')) {
 }
 
 export default defineConfig({
-  schema: 'prisma/schema.prisma',
+  schema: 'prisma/models',
   migrations: {
     path: `prisma/migrations-${provider}`,
   },

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { adminAuthMiddleware } from '@/lib/auth/middleware'
+import { adminAuthMiddleware } from '@/lib/admin/middleware'
 import { corsMiddleware, applyCorsHeaders } from '@/lib/security/cors'
 import { siteConfig } from '@/config/site'
 

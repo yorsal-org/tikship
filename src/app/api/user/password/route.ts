@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/db/prisma'
-import { verifyPassword, hashPassword } from '@/lib/auth/password'
+import { verifyPassword, hashPassword } from '@/lib/utils/password'
 import { getApiTranslations } from '@/lib/i18n/config'
 import { ApiResponse } from '@/lib/utils/api-response'
 import { getAuthenticatedUser } from '@/lib/auth/utils'

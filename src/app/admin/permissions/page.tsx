@@ -122,7 +122,7 @@ export default function PermissionsPage() {
   }
 
   const getResourceIcon = (resource: string) => {
-    // 根据资源类型返回不同的图标颜色
+    // Return different icon colors based on resource type
     const colors: Record<string, string> = {
       user: 'text-blue-500',
       role: 'text-purple-500',
@@ -136,7 +136,7 @@ export default function PermissionsPage() {
   }
 
   const getActionBadgeColor = (action: string) => {
-    // 根据操作类型返回不同的徽章颜色
+    // Return different badge colors based on action type
     const colors: Record<string, string> = {
       view: 'badge-info',
       create: 'badge-success',
@@ -208,7 +208,7 @@ export default function PermissionsPage() {
     )
   }
 
-  // 定义表格列
+  // Define table columns
   const tableColumns: Column<Permission>[] = [
     {
       key: 'name',
@@ -319,7 +319,7 @@ export default function PermissionsPage() {
 
   return (
     <div className="space-y-6">
-      {/* 页面头部 */}
+      {/* Page header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">{t('title')}</h1>
@@ -349,7 +349,7 @@ export default function PermissionsPage() {
         </div>
       </div>
 
-      {/* 信息提示卡片 */}
+      {/* Info alert card */}
       <div className="alert alert-info shadow-lg">
         <Info className="w-5 h-5 shrink-0" />
         <div className="flex-1">
@@ -361,7 +361,7 @@ export default function PermissionsPage() {
         </div>
       </div>
 
-      {/* 统计信息 */}
+      {/* Statistics */}
       {!loading && permissions.length > 0 && (
         <div className="stats stats-vertical sm:stats-horizontal shadow w-full">
           <div className="stat">
@@ -392,7 +392,7 @@ export default function PermissionsPage() {
         </div>
       )}
 
-      {/* 权限列表 */}
+      {/* Permission list */}
       {loading ? (
         <div className="flex flex-col items-center justify-center py-16">
           <span className="loading loading-spinner loading-lg text-primary"></span>

@@ -5,7 +5,7 @@
 
 import 'dotenv/config'
 import { prisma } from '../src/lib/db/prisma'
-import { hashPassword } from '../src/lib/auth/password'
+import { hashPassword } from '../src/lib/utils/password'
 import { createInterface } from 'node:readline/promises'
 import { stdin as input, stdout as output } from 'node:process'
 

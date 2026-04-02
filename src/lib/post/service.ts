@@ -592,7 +592,7 @@ export class PostService {
     }
 
     if (postIdsByCategoryId) {
-      // 去重聚合：自底向上收集唯一 postId，避免同一篇文章被多个分类重复计数
+      // Deduplication aggregation: bottom-up collection of unique postIds to avoid counting the same post multiple times across categories
       const collectPostIds = (node: CategoryTree): Set<string> => {
         const ids = new Set<string>(postIdsByCategoryId.get(node.id) ?? [])
         for (const child of node.children) {
@@ -607,7 +607,7 @@ export class PostService {
         collectPostIds(root)
       }
     } else {
-      // 简单数字累加（可能重复计数跨分类的文章）
+      // Simple numeric addition (may have duplicate counts for posts across categories)
       const aggregateCount = (node: CategoryTree): number => {
         const direct = node._count?.posts ?? 0
         const childTotal = node.children.reduce((sum, child) => sum + aggregateCount(child), 0)

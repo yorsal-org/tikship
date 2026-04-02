@@ -11,6 +11,7 @@ const eslintConfig = defineConfig([
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:
+    'prisma/generated/**',
     '.next/**',
     'out/**',
     'build/**',

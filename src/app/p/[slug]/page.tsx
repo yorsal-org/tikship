@@ -2,7 +2,7 @@ import { PostType } from '@/types/post'
 import { format } from 'date-fns'
 import { notFound } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
-import { getPostBySlug } from '@/lib/auth/utils'
+import { getPostBySlug } from '@/lib/post/utils'
 import Image from 'next/image'
 import { PostContent } from '@/components/post/PostContent'
 

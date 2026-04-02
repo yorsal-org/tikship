@@ -4,7 +4,7 @@ import GithubProvider from 'next-auth/providers/github'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { PrismaAdapter } from '@next-auth/prisma-adapter'
 import { prisma } from '@/lib/db/prisma'
-import { verifyPassword } from '@/lib/auth/password'
+import { verifyPassword } from '@/lib/utils/password'
 import { siteConfig } from '@/config/site'
 import { getApiTranslations } from '@/lib/i18n/config'
 

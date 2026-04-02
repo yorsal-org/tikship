@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { extractToken, verifyToken } from '@/lib/auth/utils'
+import { extractToken, verifyToken } from '@/lib/utils/token'
 
 export async function adminAuthMiddleware(req: NextRequest) {
   // Only intercept /api/admin/*

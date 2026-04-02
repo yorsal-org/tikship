@@ -1,7 +1,7 @@
 // Load environment variables
 import 'dotenv/config'
 import { prisma } from '../src/lib/db/prisma'
-import { hashPassword } from '../src/lib/auth/password'
+import { hashPassword } from '../src/lib/utils/password'
 import { ALL_PERMISSIONS } from '../prisma/data/permissionGroup'
 
 export async function seed() {

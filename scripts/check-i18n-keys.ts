@@ -3,8 +3,8 @@
 /**
  * i18n Keys Checker
  *
- * 检查所有语言文件与 en.json 的键差异
- * 用法: tsx scripts/check-i18n-keys.ts
+ * Check key differences between all language files and en.json
+ * Usage: tsx scripts/check-i18n-keys.ts
  */
 
 import fs from 'fs'
@@ -14,7 +14,7 @@ import { fileURLToPath } from 'url'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-// 颜色输出
+// Color output
 const colors = {
   reset: '\x1b[0m',
   bright: '\x1b[1m',
@@ -47,7 +47,7 @@ interface LanguageSummary {
   error?: string
 }
 
-// 获取所有键（扁平化）
+// Get all keys (flattened)
 function getKeys(obj: Record<string, unknown>, prefix = ''): string[] {
   let keys: string[] = []
   for (const key in obj) {
@@ -62,7 +62,7 @@ function getKeys(obj: Record<string, unknown>, prefix = ''): string[] {
   return keys
 }
 
-// 查找缺失的键
+// Find missing keys
 function findMissingKeys(
   baseObj: Record<string, unknown>,
   targetObj: Record<string, unknown>,
@@ -95,7 +95,7 @@ function findMissingKeys(
   return missing
 }
 
-// 查找多余的键
+// Find extra keys
 function findExtraKeys(
   baseObj: Record<string, unknown>,
   targetObj: Record<string, unknown>,
@@ -132,7 +132,7 @@ function findExtraKeys(
   return extra
 }
 
-// 主函数
+// Main function
 function main(): void {
   const localesDir = path.join(__dirname, '../src/locales')
   const baseFile = 'en.json'
@@ -142,7 +142,7 @@ function main(): void {
   console.log(colorize(`📁 Locales directory: ${localesDir}`, 'cyan'))
   console.log(colorize(`📄 Base file: ${baseFile}\n`, 'cyan'))
 
-  // 读取基准文件
+  // Read base file
   const basePath = path.join(localesDir, baseFile)
   if (!fs.existsSync(basePath)) {
     console.error(colorize(`❌ Base file not found: ${basePath}`, 'red'))
@@ -162,7 +162,7 @@ function main(): void {
   const baseKeys = getKeys(baseContent)
   console.log(colorize(`✅ Base file (${baseFile}) loaded: ${baseKeys.length} keys\n`, 'green'))
 
-  // 获取所有语言文件
+  // Get all language files
   const files = fs
     .readdirSync(localesDir)
     .filter(file => file.endsWith('.json') && file !== baseFile)
@@ -176,7 +176,7 @@ function main(): void {
   let hasIssues = false
   const summary: LanguageSummary[] = []
 
-  // 检查每个语言文件
+  // Check each language file
   files.forEach(file => {
     const filePath = path.join(localesDir, file)
     const lang = file.replace('.json', '')
@@ -201,7 +201,7 @@ function main(): void {
     const missingKeys = findMissingKeys(baseContent, content)
     const extraKeys = findExtraKeys(baseContent, content)
 
-    // 显示统计
+    // Display statistics
     console.log(colorize(`  📊 Statistics:`, 'cyan'))
     console.log(`     Total keys: ${targetKeys.length}`)
     console.log(
@@ -211,7 +211,7 @@ function main(): void {
       `     Extra keys: ${colorize(extraKeys.length, extraKeys.length > 0 ? 'yellow' : 'green')}`
     )
 
-    // 显示缺失的键
+    // Display missing keys
     if (missingKeys.length > 0) {
       console.log(colorize(`\n  ❌ Missing keys (${missingKeys.length}):`, 'red'))
       missingKeys.forEach(({ key, value, type }) => {
@@ -225,7 +225,7 @@ function main(): void {
       hasIssues = true
     }
 
-    // 显示多余的键
+    // Display extra keys
     if (extraKeys.length > 0) {
       console.log(colorize(`\n  ⚠️  Extra keys (${extraKeys.length}):`, 'yellow'))
       extraKeys.forEach(({ key, value, type }) => {
@@ -239,12 +239,12 @@ function main(): void {
       hasIssues = true
     }
 
-    // 完美匹配
+    // Perfect match
     if (missingKeys.length === 0 && extraKeys.length === 0) {
       console.log(colorize(`\n  ✅ Perfect! All keys match with ${baseFile}`, 'green'))
     }
 
-    // 添加到摘要
+    // Add to summary
     summary.push({
       lang,
       status: missingKeys.length === 0 && extraKeys.length === 0 ? 'perfect' : 'issues',
@@ -254,7 +254,7 @@ function main(): void {
     })
   })
 
-  // 显示总结
+  // Display summary
   console.log(colorize(`\n${'='.repeat(60)}`, 'gray'))
   console.log(colorize('📋 Summary', 'bright'))
   console.log(colorize('='.repeat(60), 'gray'))
@@ -291,5 +291,5 @@ function main(): void {
   }
 }
 
-// 运行
+// Run
 main()

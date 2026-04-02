@@ -1,8 +1,9 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/db/prisma'
-import { requireAdminAuth } from '@/lib/auth/admin'
+import { requireAdminAuth } from '@/lib/admin'
 import { ApiResponse } from '@/lib/utils/api-response'
 import { PERMISSIONS } from '@/config/permissions'
+import { getModuleState } from '@/lib/module-state'
 
 type OrderBulkAction = 'completed' | 'failed' | 'refunded' | 'delete'
 
@@ -31,6 +32,9 @@ export async function GET(req: NextRequest) {
     const isExport = searchParams.get('export') === 'true'
     const skip = (page - 1) * limit
 
+    // Check module state for conditional user relation
+    const moduleState = getModuleState()
+
     // Build where clause
     interface WhereClause {
       status?: string
@@ -55,16 +59,32 @@ export async function GET(req: NextRequest) {
       where.paymentProvider = paymentProvider
     }
     if (search) {
-      where.OR = [
+      const searchConditions: WhereClause['OR'] = [
         { id: { contains: search, mode: 'insensitive' } },
         { stripeSessionId: { contains: search, mode: 'insensitive' } },
-        { user: { email: { contains: search, mode: 'insensitive' } } },
-        { user: { name: { contains: search, mode: 'insensitive' } } },
         { product: { name: { contains: search, mode: 'insensitive' } } },
       ]
+      // Only search by user if user module is enabled
+      if (moduleState.user) {
+        searchConditions.push(
+          { user: { email: { contains: search, mode: 'insensitive' } } },
+          { user: { name: { contains: search, mode: 'insensitive' } } }
+        )
+      }
+      where.OR = searchConditions
     }
 
     // For export, get all matching orders without pagination
+    const userInclude = moduleState.user ? {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+    } : {}
+
     if (isExport) {
       const orders = await prisma.order.findMany({
         where,
@@ -77,13 +97,7 @@ export async function GET(req: NextRequest) {
               image: true,
             },
           },
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
-          },
+          ...userInclude,
         },
       })
 
@@ -106,13 +120,7 @@ export async function GET(req: NextRequest) {
               description: true,
             },
           },
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
-          },
+          ...userInclude,
         },
       }),
       prisma.order.count({ where }),

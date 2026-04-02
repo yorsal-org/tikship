@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { cookies } from 'next/headers'
 import { SignJWT } from 'jose'
-import { adminLogin } from '@/lib/auth/admin'
+import { adminLogin } from '@/lib/admin'
 import { ApiResponse } from '@/lib/utils/api-response'
 import type { AdminLoginBody } from '@/types/api'
 

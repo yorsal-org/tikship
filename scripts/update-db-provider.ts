@@ -5,7 +5,7 @@ import dotenv from 'dotenv'
 // Load environment variables
 dotenv.config()
 
-const SCHEMA_PATH = path.join(process.cwd(), 'prisma/schema.prisma')
+const SCHEMA_PATH = path.join(process.cwd(), 'prisma/models/schema.prisma')
 const DATABASE_URL = process.env.DATABASE_URL || ''
 
 function setupDbProvider() {

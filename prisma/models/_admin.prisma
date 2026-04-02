@@ -1,0 +1,92 @@
+// Admin System Models - RBAC (Not deletable)
+
+model AdminUser {
+  id              String              @id @default(cuid())
+  username        String              @unique
+  email           String              @unique
+  password        String
+  name            String?
+  avatar          String?
+  isSuperuser     Boolean             @default(false)
+  isActive        Boolean             @default(true)
+  lastLoginAt     DateTime?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @default(now()) @updatedAt
+  roles           AdminUserRole[]
+  auditLogs       AdminAuditLog[]
+  posts           Post[]              // Relation to Content Management module
+
+  @@index([username])
+  @@index([email])
+}
+
+model AdminRole {
+  id          String                @id @default(cuid())
+  name        String                @unique
+  description String?
+  isDefault   Boolean               @default(false)
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @default(now()) @updatedAt
+  adminUsers  AdminUserRole[]
+  permissions AdminRolePermission[]
+
+  @@index([name])
+}
+
+model AdminPermission {
+  id          String                @id @default(cuid())
+  code        String                @unique
+  name        String
+  description String?
+  resource    String
+  action      String
+  isSystem    Boolean               @default(false)
+  createdAt   DateTime              @default(now())
+  roles       AdminRolePermission[]
+
+  @@index([code])
+  @@index([resource])
+}
+
+model AdminUserRole {
+  adminUserId String
+  roleId      String
+  assignedAt  DateTime  @default(now())
+  assignedBy  String?
+  adminUser   AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+  role        AdminRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([adminUserId, roleId])
+  @@index([adminUserId])
+  @@index([roleId])
+}
+
+model AdminRolePermission {
+  roleId       String
+  permissionId String
+  assignedAt   DateTime          @default(now())
+  role         AdminRole         @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   AdminPermission   @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@index([roleId])
+  @@index([permissionId])
+}
+
+model AdminAuditLog {
+  id          String    @id @default(cuid())
+  adminUserId String
+  action      String
+  resource    String
+  resourceId  String?
+  details     String?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime  @default(now())
+  adminUser   AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+
+  @@index([adminUserId])
+  @@index([action])
+  @@index([resource])
+  @@index([createdAt])
+}

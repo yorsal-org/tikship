@@ -233,7 +233,7 @@ npm run dev
 
 ```typescript
 // 检查权限
-import { requireAdminAuth } from '@/lib/auth/admin'
+import { requireAdminAuth } from '@/lib/admin'
 import { PERMISSIONS } from '@/config/permissions'
 
 export async function GET(req: NextRequest) {

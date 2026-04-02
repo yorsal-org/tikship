@@ -12,7 +12,7 @@
 // Load environment variables first
 import 'dotenv/config'
 import { PrismaClient } from '../prisma/generated/client'
-import { hashPassword } from '../src/lib/auth/password'
+import { hashPassword } from '../src/lib/utils/password'
 import { validationConfig } from '../src/config/validation'
 
 // ─────────────────────────────────────────────────────────────────────────────

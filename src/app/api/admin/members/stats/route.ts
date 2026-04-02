@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/db/prisma'
-import { requireAdminAuth } from '@/lib/auth/admin'
+import { requireAdminAuth } from '@/lib/admin'
 import { ApiResponse } from '@/lib/utils/api-response'
 import { PERMISSIONS } from '@/config/permissions'
 import { startOfDay, subDays } from 'date-fns'

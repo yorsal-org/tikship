@@ -1,8 +1,7 @@
 import { NextRequest } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth/options'
 import { ApiResponse } from '@/lib/utils/api-response'
 import { paypalService } from '@/lib/payment/paypal-service'
+import { getUserSessionId } from '@/lib/utils/token'
 import type { CreateCheckoutBody } from '@/types/api'
 
 /**
@@ -24,9 +23,8 @@ export async function POST(req: NextRequest) {
       return ApiResponse.error('Product ID is required', 400)
     }
 
-    // Get current user session
-    const session = await getServerSession(authOptions)
-    const userId = session?.user?.id
+    // Get current user session (only if user module is enabled)
+    const userId = await getUserSessionId()
 
     // For now, always create PayPal order for one-time payment
     // You can fetch product from DB to determine if it's subscription

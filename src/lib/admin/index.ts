@@ -1,10 +1,10 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/db/prisma'
-import { hashPassword, verifyPassword } from '@/lib/auth/password'
+import { hashPassword, verifyPassword } from '@/lib/utils/password'
 import { logAudit, AUDIT_ACTIONS } from '@/lib/audit/service'
 import { AdminUser } from '@/types/admin'
 import { ApiResponse } from '@/lib/utils/api-response'
-import { hasAnyPermission } from '@/lib/auth/rbac'
+import { hasAnyPermission } from '@/lib/admin/rbac'
 
 import { cookies } from 'next/headers'
 

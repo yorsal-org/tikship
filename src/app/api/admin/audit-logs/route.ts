@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { requireAdminAuth } from '@/lib/auth/admin'
+import { requireAdminAuth } from '@/lib/admin'
 import { ApiResponse } from '@/lib/utils/api-response'
 import { PERMISSIONS } from '@/config/permissions'
 import { getAuditLogs, deleteOldAuditLogs } from '@/lib/audit/service'

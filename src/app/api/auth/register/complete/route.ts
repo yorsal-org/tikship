@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { jwtVerify } from 'jose'
 import { validateName, validatePasswordStrength, getNameErrorKey } from '@/lib/utils/validators'
-import { hashPassword } from '@/lib/auth/password'
+import { hashPassword } from '@/lib/utils/password'
 import { prisma } from '@/lib/db/prisma'
 import { getApiTranslations } from '@/lib/i18n/config'
 import { siteConfig } from '@/config/site'

@@ -1,0 +1,15 @@
+// Main Prisma Schema Configuration
+// Prisma automatically merges all .prisma files in this directory
+
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+  output = "../generated"
+  
+}
+
+
+// Models are split into separate files in ./models/

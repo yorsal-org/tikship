@@ -2,8 +2,46 @@ import { stripe } from '@/lib/payment/stripe'
 import { CreateCheckoutSessionRequest } from '@/types/stripe'
 import { prisma } from '@/lib/db/prisma'
 import Stripe from 'stripe'
+import { getModuleState } from '@/lib/module-state'
 
 export class StripeService {
+  /**
+   * Get user include clause based on module state
+   */
+  private getUserInclude() {
+    const moduleState = getModuleState()
+    return moduleState.user ? {
+      user: {
+        select: { id: true, name: true, email: true },
+      },
+    } : {}
+  }
+
+  /**
+   * Get typed user from order if available
+   */
+  private getUser(order: { user?: { id: string; name: string | null; email: string | null } | null }) {
+    const moduleState = getModuleState()
+    if (moduleState.user && order.user) {
+      return order.user as { id: string; name: string | null; email: string | null }
+    }
+    return null
+  }
+
+  /**
+   * Decrease product quantity if it has stock limit
+   */
+  private async decreaseProductQuantity(productId: string, quantity: number | null) {
+    if (quantity !== null && quantity !== undefined) {
+      const newQuantity = Math.max(0, quantity - 1)
+      await prisma.product.update({
+        where: { id: productId },
+        data: { quantity: newQuantity },
+      })
+      console.log(`Product ${productId} quantity decreased to ${newQuantity}`)
+    }
+  }
+
   /**
    * Create a Stripe checkout session
    */
@@ -105,7 +143,7 @@ export class StripeService {
         where: { stripeSessionId: session.id },
         include: {
           product: true,
-          user: true,
+          ...this.getUserInclude(),
         },
       })
 
@@ -171,21 +209,15 @@ export class StripeService {
         console.log('Order updated with payment info:', order.id)
 
         // Decrease product quantity if it has stock limit
-        if (order.product.quantity !== null && order.product.quantity !== undefined) {
-          const newQuantity = Math.max(0, order.product.quantity - 1)
-          await prisma.product.update({
-            where: { id: order.productId },
-            data: { quantity: newQuantity },
-          })
-          console.log(`Product ${order.productId} quantity decreased to ${newQuantity}`)
-        }
+        await this.decreaseProductQuantity(order.productId, order.product.quantity)
 
         // Send success email notification
-        if (order.user?.email) {
+        const user = this.getUser(order)
+        if (user?.email) {
           const { sendOrderSuccessEmail } = await import('@/lib/email/order')
           await sendOrderSuccessEmail({
-            to: order.user.email,
-            userName: order.user.name || 'Customer',
+            to: user.email,
+            userName: user.name || 'Customer',
             orderId: order.id,
             productName: order.product.name,
             amount: order.amount,
@@ -208,8 +240,8 @@ export class StripeService {
       const order = await prisma.order.findUnique({
         where: { stripeSessionId: session.id },
         include: {
-          user: true,
           product: true,
+          ...this.getUserInclude(),
         },
       })
 
@@ -221,11 +253,12 @@ export class StripeService {
         console.log('Order marked as expired:', order.id)
 
         // Send expiration email notification
-        if (order.user?.email) {
+        const user = this.getUser(order)
+        if (user?.email) {
           const { sendOrderExpiredEmail } = await import('@/lib/email/order')
           await sendOrderExpiredEmail({
-            to: order.user.email,
-            userName: order.user.name || 'Customer',
+            to: user.email,
+            userName: user.name || 'Customer',
             orderId: order.id,
             productName: order.product.name,
           })
@@ -247,7 +280,7 @@ export class StripeService {
         where: { stripeSessionId: session.id },
         include: {
           product: true,
-          user: true,
+          ...this.getUserInclude(),
         },
       })
 
@@ -314,21 +347,15 @@ export class StripeService {
         console.log('Order completed after async payment with payment info:', order.id)
 
         // Decrease product quantity if it has stock limit
-        if (order.product.quantity !== null && order.product.quantity !== undefined) {
-          const newQuantity = Math.max(0, order.product.quantity - 1)
-          await prisma.product.update({
-            where: { id: order.productId },
-            data: { quantity: newQuantity },
-          })
-          console.log(`Product ${order.productId} quantity decreased to ${newQuantity}`)
-        }
+        await this.decreaseProductQuantity(order.productId, order.product.quantity)
 
         // Send success email notification
-        if (order.user?.email) {
+        const user = this.getUser(order)
+        if (user?.email) {
           const { sendOrderSuccessEmail } = await import('@/lib/email/order')
           await sendOrderSuccessEmail({
-            to: order.user.email,
-            userName: order.user.name || 'Customer',
+            to: user.email,
+            userName: user.name || 'Customer',
             orderId: order.id,
             productName: order.product.name,
             amount: order.amount,
@@ -352,7 +379,7 @@ export class StripeService {
         where: { stripeSessionId: session.id },
         include: {
           product: true,
-          user: true,
+          ...this.getUserInclude(),
         },
       })
 
@@ -364,11 +391,12 @@ export class StripeService {
         console.log('Order marked as failed:', order.id)
 
         // Send failure email notification
-        if (order.user?.email) {
+        const user = this.getUser(order)
+        if (user?.email) {
           const { sendOrderFailedEmail } = await import('@/lib/email/order')
           await sendOrderFailedEmail({
-            to: order.user.email,
-            userName: order.user.name || 'Customer',
+            to: user.email,
+            userName: user.name || 'Customer',
             orderId: order.id,
             productName: order.product.name,
           })

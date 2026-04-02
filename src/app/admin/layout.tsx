@@ -20,7 +20,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const { adminUser, isLoading, logout } = useAdminAuth()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
-    // 从 localStorage 读取初始状态
+    // Read initial state from localStorage
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('admin-sidebar-collapsed')
       return saved === 'true'
@@ -28,7 +28,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     return false
   })
 
-  // 当收缩状态改变时，保存到 localStorage
+  // Save to localStorage when collapse state changes
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('admin-sidebar-collapsed', String(isSidebarCollapsed))
@@ -105,7 +105,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
         <button
           onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
           className="absolute -right-3 top-20 bg-base-100 border border-base-300 rounded-full p-1.5 shadow-lg hover:bg-base-200 transition-colors z-10"
-          title={isSidebarCollapsed ? '展开侧边栏' : '收起侧边栏'}
+          title={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           {isSidebarCollapsed ? (
             <ChevronRight size={16} className="text-base-content" />

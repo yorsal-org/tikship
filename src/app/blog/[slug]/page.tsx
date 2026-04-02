@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import Link from 'next/link'
 import { ChevronLeft, Calendar, User, Hash } from 'lucide-react'
-import { getPostBySlug } from '@/lib/auth/utils'
+import { getPostBySlug } from '@/lib/post/utils'
 import Image from 'next/image'
 import { PostContent } from '@/components/post/PostContent'
 

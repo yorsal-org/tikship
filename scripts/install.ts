@@ -13,7 +13,7 @@ const __dirname = path.dirname(__filename)
 const rootDir = path.join(__dirname, '..')
 const envPath = path.join(rootDir, '.env')
 const nodeModulesPath = path.join(rootDir, 'node_modules')
-const schemaPath = path.join(rootDir, 'prisma/schema.prisma')
+const schemaPath = path.join(rootDir, 'prisma/models/schema.prisma')
 
 // ANSI color codes
 const colors = {

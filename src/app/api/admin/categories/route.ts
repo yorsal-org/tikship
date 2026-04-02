@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { ApiResponse } from '@/lib/utils/api-response'
 import { postService } from '@/lib/post/service'
-import { requireAdminAuth } from '@/lib/auth/admin'
+import { requireAdminAuth } from '@/lib/admin'
 import { PERMISSIONS } from '@/config/permissions'
 import { logAudit } from '@/lib/audit/service'
 import type { CreateCategoryBody } from '@/types/api'

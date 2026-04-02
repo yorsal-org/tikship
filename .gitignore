@@ -57,6 +57,9 @@ storybook-static
 # upload files
 /public/upload
 
+# modules backup
+/.modules-logs
+
 # AI
 /.claude
 /.agent
