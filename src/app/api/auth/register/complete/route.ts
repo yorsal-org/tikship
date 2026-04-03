@@ -4,8 +4,8 @@ import { validateName, validatePasswordStrength, getNameErrorKey } from '@/lib/u
 import { hashPassword } from '@/lib/utils/password'
 import { prisma } from '@/lib/db/prisma'
 import { getApiTranslations } from '@/lib/i18n/config'
-import { siteConfig } from '@/config/site'
 import { ApiResponse } from '@/lib/utils/api-response'
+import { settingsService } from '@/lib/settings/service'
 import type { CompleteRegistrationBody } from '@/types/api'
 
 const JWT_SECRET = new TextEncoder().encode(process.env.NEXTAUTH_SECRET || 'your-secret-key')
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
 
     // Validate password
     const passwordValidation = validatePasswordStrength(password)
-    const minStrength = siteConfig.auth.password.minStrength as 'weak' | 'medium' | 'strong'
+    const authSettings = await settingsService.getAuthSettings()
     const strengthWeight: Record<string, number> = {
       none: 0,
       weak: 1,
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
       strong: 3,
     }
 
-    if (strengthWeight[passwordValidation.level] < strengthWeight[minStrength]) {
+    if (strengthWeight[passwordValidation.level] < strengthWeight[authSettings.passwordMinStrength]) {
       const errorMessages = passwordValidation.errors.map((err: string) => t(err))
       return ApiResponse.error(
         errorMessages.length > 0 ? errorMessages.join(', ') : t('register.password_weak')

@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import { ThemeToggler } from '@/components/theme/ThemeToggler'
+import { ThemeSelector } from '@/components/theme/ThemeSelector'
 import { LanguageSwitcher } from '@/components/locale/LanguageSwitcher'
 import { UserProfile } from '@/components/auth/user/Profile'
 import { useTranslations } from 'next-intl'
@@ -31,26 +31,24 @@ export function Header() {
 
   // Close mobile menu on route change
   useEffect(() => {
-    Promise.resolve().then(() => {
-      setIsMobileMenuOpen(false)
-    })
+    setIsMobileMenuOpen(false)
   }, [pathname])
 
   const navItems: NavItem[] = [
     {
       href: '/',
       labelKey: 'home',
-      matchPath: (path) => path === '/',
+      matchPath: path => path === '/',
     },
     {
       href: '/blog',
       labelKey: 'blog',
-      matchPath: (path) => path.startsWith('/blog'),
+      matchPath: path => path.startsWith('/blog'),
     },
     {
       href: '/products',
       labelKey: 'products',
-      matchPath: (path) => path.startsWith('/products'),
+      matchPath: path => path.startsWith('/products'),
     },
     ...(siteConfig.enable_api_docs
       ? [
@@ -83,13 +81,16 @@ export function Header() {
               <Menu size={22} />
             </button>
 
-            <Link href="/" className="hidden lg:flex items-center transition-opacity hover:opacity-80">
+            <Link
+              href="/"
+              className="hidden lg:flex items-center transition-opacity hover:opacity-80"
+            >
               <Logo className="h-12 w-auto text-primary" />
             </Link>
 
             {/* Desktop nav */}
             <nav className="ml-8 hidden lg:flex items-center gap-6 font-medium">
-              {navItems.map((item) => {
+              {navItems.map(item => {
                 const isActive = item.matchPath?.(pathname) || false
                 const linkProps = item.external
                   ? {
@@ -117,7 +118,7 @@ export function Header() {
 
           <div className="navbar-end gap-2">
             <div className="flex items-center gap-1 sm:gap-2">
-              <ThemeToggler />
+              <ThemeSelector />
               <LanguageSwitcher />
 
               {status === 'loading' ? (
@@ -149,12 +150,7 @@ export function Header() {
       </div>
 
       {/* Mobile Drawer */}
-      <div
-        className={cn(
-          'fixed inset-0 lg:hidden',
-          isMobileMenuOpen ? '' : 'pointer-events-none'
-        )}
-      >
+      <div className={cn('fixed inset-0 lg:hidden', isMobileMenuOpen ? '' : 'pointer-events-none')}>
         {/* Overlay */}
         <div
           className={cn(
@@ -192,7 +188,7 @@ export function Header() {
           {/* Drawer nav links */}
           <nav className="flex-1 overflow-y-auto px-4 py-4">
             <ul className="menu menu-md p-0 gap-1">
-              {navItems.map((item) => {
+              {navItems.map(item => {
                 const isActive = item.matchPath?.(pathname) || false
                 const linkProps = item.external
                   ? { target: '_blank', rel: 'noopener noreferrer' }
@@ -229,10 +225,7 @@ export function Header() {
               </Link>
               <Link
                 href="/register"
-                className={cn(
-                  'btn btn-sm w-full',
-                  isRegisterPage ? 'btn-primary' : 'btn-outline'
-                )}
+                className={cn('btn btn-sm w-full', isRegisterPage ? 'btn-primary' : 'btn-outline')}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {t('register')}

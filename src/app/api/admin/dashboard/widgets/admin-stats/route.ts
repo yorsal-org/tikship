@@ -5,8 +5,10 @@ import { ApiResponse } from '@/lib/utils/api-response'
 import { PERMISSIONS } from '@/config/permissions'
 
 /**
- * Get admin system stats (always available)
- * Admin users, roles, permissions, audit logs
+ * Get admin system stats
+ * @description Admin users, roles, permissions, audit logs
+ * @tag Admin - Dashboard
+ * @auth bearerAuth
  */
 export async function GET(req: NextRequest) {
   try {

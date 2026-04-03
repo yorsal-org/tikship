@@ -103,6 +103,17 @@ export async function POST(req: NextRequest) {
   }
 }
 
+
+/**
+ * bulk update post
+ * @description bulk update a post (article or page)
+ * @tag Admin - Posts
+ * @auth bearerAuth
+ * @body BulkUpdatePostsBody
+ * @response 201:Post updated successfully
+ * @responseSet auth
+ * @openapi
+ */
 export async function PUT(req: NextRequest) {
   try {
     const body = (await req.json()) as BulkUpdatePostsBody

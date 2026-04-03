@@ -80,6 +80,9 @@ export async function seed() {
     'product:edit',
     'order:view',
     'order:edit',
+    'comment:manage',
+    'settings:view',
+    'settings:edit'
   ]
 
   const basicPermissions = await prisma.adminPermission.findMany({

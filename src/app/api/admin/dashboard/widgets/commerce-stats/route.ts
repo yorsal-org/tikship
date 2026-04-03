@@ -6,7 +6,9 @@ import { PERMISSIONS } from '@/config/permissions'
 
 /**
  * Get commerce stats (only when commerce module enabled)
- * Products, orders, revenue
+ * @description Products, orders, revenue
+ * @tag Admin - Dashboard
+ * @auth bearerAuth
  */
 export async function GET(req: NextRequest) {
   try {

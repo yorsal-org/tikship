@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Alert } from '@/components/ui/Alert'
 import { useApi } from '@/hooks/useApi'
-import { siteConfig } from '@/config/site'
+import { useAuthSettings } from '@/hooks/useSettings'
 
 interface StepUserInfoProps {
   email: string
@@ -27,10 +27,11 @@ export default function StepUserInfo({ email, token, onNext }: StepUserInfoProps
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const t = useTranslations('register')
+  const { auth } = useAuthSettings()
 
   const completeApi = useApi('/api/auth/register/complete')
 
-  const minStrength = siteConfig.auth.password.minStrength as 'weak' | 'medium' | 'strong'
+  const minStrength = auth.passwordMinStrength
   const passwordResult = validatePasswordStrength(password)
   const strengthWeight: Record<string, number> = {
     none: 0,

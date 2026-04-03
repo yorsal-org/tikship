@@ -5,8 +5,8 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import { PrismaAdapter } from '@next-auth/prisma-adapter'
 import { prisma } from '@/lib/db/prisma'
 import { verifyPassword } from '@/lib/utils/password'
-import { siteConfig } from '@/config/site'
 import { getApiTranslations } from '@/lib/i18n/config'
+import { settingsService } from '@/lib/settings/service'
 
 /**
  * Utility to record login attempts
@@ -24,7 +24,9 @@ async function recordLoginAttempt({
   userAgent: string
   userId?: string
 }) {
-  if (!siteConfig.auth.loginLimits.enabled) return
+  const authSettings = await settingsService.getAuthSettings()
+
+  if (!authSettings.loginLimitsEnabled) return
 
   await prisma.loginAttempt.create({
     data: {
@@ -83,8 +85,10 @@ export const authOptions: NextAuthOptions = {
         const userAgent = (req.headers?.['user-agent'] || '').toString()
 
         // Check login attempts in last window duration if enabled
-        if (siteConfig.auth.loginLimits.enabled) {
-          const windowMs = siteConfig.auth.loginLimits.windowMinutes * 60 * 1000
+        const authSettings = await settingsService.getAuthSettings()
+
+        if (authSettings.loginLimitsEnabled) {
+          const windowMs = authSettings.loginLimitsWindowMinutes * 60 * 1000
           const windowStart = new Date(Date.now() - windowMs)
           const recentFailedAttempts = await prisma.loginAttempt.count({
             where: {
@@ -96,7 +100,7 @@ export const authOptions: NextAuthOptions = {
             },
           })
 
-          if (recentFailedAttempts >= siteConfig.auth.loginLimits.maxAttempts) {
+          if (recentFailedAttempts >= authSettings.loginLimitsMaxAttempts) {
             throw new Error(t('login.rate_limit'))
           }
         }

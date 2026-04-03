@@ -9,8 +9,15 @@ import { toast } from '@/lib/utils/toast'
 import type { Product, PaymentMethod } from '@/types/product'
 import { Loader2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { CommentSection } from '@/components/social/CommentSection'
+import { LikeButton } from '@/components/social/LikeButton'
 
-export default function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+interface Props {
+  params: Promise<{ slug: string }>
+  isSocialEnabled: boolean
+}
+
+export default function ProductDetailPage({ params, isSocialEnabled }: Props) {
   const { slug } = use(params)
   const router = useRouter()
   const t = useTranslations('products')
@@ -241,6 +248,25 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           <div
             className="prose prose-base max-w-none"
             dangerouslySetInnerHTML={{ __html: product.content }}
+          />
+        </div>
+      )}
+
+      {/* Social Features: Like Button & Comments */}
+      {isSocialEnabled && (
+        <div className="mt-12 pt-8 border-t border-base-200">
+          {/* Like Button */}
+          <div className="mb-8">
+            <LikeButton
+              targetType="product"
+              targetId={product.id}
+            />
+          </div>
+
+          {/* Comments Section */}
+          <CommentSection
+            targetType="product"
+            targetId={product.id}
           />
         </div>
       )}

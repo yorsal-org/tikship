@@ -1,20 +1,20 @@
 // Admin System Models - RBAC (Not deletable)
 
 model AdminUser {
-  id              String              @id @default(cuid())
-  username        String              @unique
-  email           String              @unique
-  password        String
-  name            String?
-  avatar          String?
-  isSuperuser     Boolean             @default(false)
-  isActive        Boolean             @default(true)
-  lastLoginAt     DateTime?
-  createdAt       DateTime            @default(now())
-  updatedAt       DateTime            @default(now()) @updatedAt
-  roles           AdminUserRole[]
-  auditLogs       AdminAuditLog[]
-  posts           Post[]              // Relation to Content Management module
+  id          String          @id @default(cuid())
+  username    String          @unique
+  email       String          @unique
+  password    String
+  name        String?
+  avatar      String?
+  isSuperuser Boolean         @default(false)
+  isActive    Boolean         @default(true)
+  lastLoginAt DateTime?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @default(now()) @updatedAt
+  roles       AdminUserRole[]
+  auditLogs   AdminAuditLog[]
+  posts       Post[] // Relation to Content Management module
 
   @@index([username])
   @@index([email])
@@ -64,9 +64,9 @@ model AdminUserRole {
 model AdminRolePermission {
   roleId       String
   permissionId String
-  assignedAt   DateTime          @default(now())
-  role         AdminRole         @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  permission   AdminPermission   @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  assignedAt   DateTime        @default(now())
+  role         AdminRole       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   AdminPermission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
 
   @@id([roleId, permissionId])
   @@index([roleId])
@@ -89,4 +89,17 @@ model AdminAuditLog {
   @@index([action])
   @@index([resource])
   @@index([createdAt])
+}
+
+// System Settings - Key-Value Store
+// Categories: system, social, theme, locale, upload, auth, admin, payment
+model Settings {
+  id        String   @id @default(cuid())
+  category  String   // Settings category (system, social, theme, etc.)
+  key       String   // Configuration key
+  value     String   // Configuration value (stored as string, serialize/deserialize in service)
+  updatedAt DateTime @updatedAt
+
+  @@unique([category, key])
+  @@index([category])
 }

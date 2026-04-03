@@ -11,7 +11,8 @@ import { useApi } from '@/hooks/useApi'
 import { toast } from '@/lib/utils/toast'
 import { generateSlug } from '@/lib/utils/common'
 import { validationConfig } from '@/config/validation'
-import { siteConfig } from '@/config/site'
+import { useAdminSettings } from '@/hooks/useSettings'
+import { usePaymentSettings } from '@/hooks/useSettings'
 import type { Product, PaymentMethod } from '@/types/product'
 
 interface ProductFormProps {
@@ -35,6 +36,8 @@ interface PaymentMethodForm {
 export function ProductForm({ product }: ProductFormProps) {
   const t = useTranslations('admin.products')
   const router = useRouter()
+  const { admin } = useAdminSettings()
+  const { payment } = usePaymentSettings()
   const isEditing = !!product
 
   const [name, setName] = useState(product?.name || '')
@@ -43,7 +46,7 @@ export function ProductForm({ product }: ProductFormProps) {
   const [slug, setSlug] = useState(product?.slug || '')
   const [image, setImage] = useState(product?.image || '')
   const [price, setPrice] = useState(product?.price?.toString() || '')
-  const [currency, setCurrency] = useState(product?.currency || (siteConfig.payment.defaultCurrency as string))
+  const [currency, setCurrency] = useState(product?.currency || (payment.defaultCurrency as string))
   const [quantity, setQuantity] = useState(product?.quantity?.toString() || '')
   const [isActive, setIsActive] = useState(product?.isActive ?? true)
   const [metadata, setMetadata] = useState(product?.metadata || '')
@@ -89,7 +92,7 @@ export function ProductForm({ product }: ProductFormProps) {
               paypalPlanId: m.paypalPlanId || '',
               paypalProductId: m.paypalProductId || '',
               mode: m.mode,
-              interval: m.interval || (siteConfig.payment.defaultInterval as string),
+              interval: m.interval || (payment.defaultInterval as string),
               intervalCount: m.intervalCount?.toString() || '1',
               isActive: m.isActive,
               metadata: m.metadata || '',
@@ -385,7 +388,7 @@ export function ProductForm({ product }: ProductFormProps) {
 
       console.log('All payment methods saved successfully')
       toast.success(t(isEditing ? 'update_success' : 'create_success'))
-      router.push(`${siteConfig.admin.path}/products`)
+      router.push(`${admin.path}/products`)
       router.refresh()
     } catch (error) {
       console.error('Save payment methods error:', error)
@@ -400,9 +403,9 @@ export function ProductForm({ product }: ProductFormProps) {
       stripeProductId: '',
       paypalPlanId: '',
       paypalProductId: '',
-      mode: siteConfig.payment.defaultMode as string,
-      interval: siteConfig.payment.defaultInterval as string,
-      intervalCount: siteConfig.payment.defaultIntervalCount.toString(),
+      mode: payment.defaultMode as string,
+      interval: payment.defaultInterval as string,
+      intervalCount: payment.defaultIntervalCount.toString(),
       isActive: true,
       metadata: '',
     })
@@ -415,9 +418,9 @@ export function ProductForm({ product }: ProductFormProps) {
       stripeProductId: '',
       paypalPlanId: '',
       paypalProductId: '',
-      mode: siteConfig.payment.defaultMode as string,
-      interval: siteConfig.payment.defaultInterval as string,
-      intervalCount: siteConfig.payment.defaultIntervalCount.toString(),
+      mode: payment.defaultMode as string,
+      interval: payment.defaultInterval as string,
+      intervalCount: payment.defaultIntervalCount.toString(),
       isActive: true,
       metadata: '',
     })
@@ -634,7 +637,7 @@ export function ProductForm({ product }: ProductFormProps) {
                       onChange={e => updateStripeMethod('mode', e.target.value)}
                       className="select select-bordered w-full"
                     >
-                      {siteConfig.payment.modes.map(mode => (
+                      {payment.modes.map(mode => (
                         <option key={mode.value} value={mode.value}>
                           {t(`mode_${mode.value}`)}
                         </option>
@@ -653,7 +656,7 @@ export function ProductForm({ product }: ProductFormProps) {
                           onChange={e => updateStripeMethod('interval', e.target.value)}
                           className="select select-bordered w-full"
                         >
-                          {siteConfig.payment.intervals.map(interval => (
+                          {payment.intervals.map(interval => (
                             <option key={interval.value} value={interval.value}>
                               {t(`interval_${interval.value}`)}
                             </option>
@@ -779,7 +782,7 @@ export function ProductForm({ product }: ProductFormProps) {
                       onChange={e => updatePaypalMethod('mode', e.target.value)}
                       className="select select-bordered w-full"
                     >
-                      {siteConfig.payment.modes.map(mode => (
+                      {payment.modes.map(mode => (
                         <option key={mode.value} value={mode.value}>
                           {t(`mode_${mode.value}`)}
                         </option>
@@ -798,7 +801,7 @@ export function ProductForm({ product }: ProductFormProps) {
                           onChange={e => updatePaypalMethod('interval', e.target.value)}
                           className="select select-bordered w-full"
                         >
-                          {siteConfig.payment.intervals.map(interval => (
+                          {payment.intervals.map(interval => (
                             <option key={interval.value} value={interval.value}>
                               {t(`interval_${interval.value}`)}
                             </option>
@@ -916,7 +919,7 @@ export function ProductForm({ product }: ProductFormProps) {
                 onChange={e => setCurrency(e.target.value)}
                 className="select select-bordered w-full"
               >
-                {siteConfig.payment.currencies.map(curr => (
+                {payment.currencies.map(curr => (
                   <option key={curr.value} value={curr.value}>
                     {curr.label}
                   </option>

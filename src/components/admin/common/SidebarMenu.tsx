@@ -21,6 +21,7 @@ interface ModuleState {
   content: boolean
   commerce: boolean
   user: boolean
+  social: boolean
 }
 
 function MenuLink({
@@ -109,6 +110,7 @@ export function SidebarMenu({ isActive, isCollapsed = false }: SidebarMenuProps)
           if (group.groupKey === 'group_content' && !result.data!.content) return false
           if (group.groupKey === 'group_commerce' && !result.data!.commerce) return false
           if (group.groupKey === 'group_user' && !result.data!.user) return false
+          if (group.groupKey === 'group_social' && !result.data!.social) return false
           return true
         })
         setEnabledGroups(filtered)

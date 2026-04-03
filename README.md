@@ -25,6 +25,9 @@
 - **Product Management** - Support for one-time payment and subscription models
 - **Order Management** - Complete order lifecycle management
 - **Dashboard** - Real-time statistics and chart displays
+- **Social Management** - Comments and replies management with moderation capabilities
+- **System Settings** - Global configuration for site name, logo, contact info, and SEO
+- **Theme Configuration** - Customizable themes with light/dark mode and preset themes
 
 ### User-Facing Features
 
@@ -33,6 +36,7 @@
 - **Blog System** - Article list, detail pages, category filtering
 - **Product Purchase** - Support for both Stripe and PayPal payment methods
 - **Order Center** - View order history and status tracking
+- **Social Interactions** - Like and comment on articles/products with threaded replies
 
 ### Payment Integration
 
@@ -45,13 +49,15 @@
 ### Technical Highlights
 
 - **Multi-language Support** - Chinese, English, Spanish (based on next-intl)
-- **Theme System** - 33 DaisyUI themes with light/dark mode switching
+- **Theme System** - 33 DaisyUI themes with light/dark mode switching, customizable brand colors
 - **File Upload** - Support for local storage and ImgBB hosting
 - **Email Service** - Resend email delivery (verification codes, password reset, order notifications)
 - **API Documentation** - OpenAPI 3.0 specification with interactive API docs
 - **Component Documentation** - Storybook component library with 100+ interactive examples
 - **Security Protection** - CORS, CSRF, rate limiting, input validation
 - **Multi-database Support** - PostgreSQL / MySQL / SQLite
+- **Social System** - Like, comment, and reply functionality with user interaction tracking
+- **System Settings** - Dynamic site configuration API for global settings management
 
 ## 📦 Tech Stack
 
@@ -214,7 +220,76 @@ Access:
 
 ## 📚 Core Features Explained
 
-### 1. RBAC Permission System
+### 1. Social System
+
+Complete social interaction system for user engagement:
+
+**Comment System**:
+
+- Nested replies with threaded conversations
+- Comment moderation (admin can delete inappropriate comments)
+- User mention support
+- Automatic author attribution
+
+**Like System**:
+
+- Like articles and products
+- Like comments and replies
+- Duplicate like prevention
+- Real-time like count updates
+
+**Social API Endpoints**:
+
+- `POST /api/social/comments` - Create comment
+- `GET /api/social/comments` - List comments
+- `POST /api/social/likes` - Toggle like
+- `POST /api/social/replies` - Create reply
+- Admin endpoints for comment management
+
+### 2. System Settings
+
+Dynamic global configuration management:
+
+**Configurable Settings**:
+
+- Site name and logo
+- Contact information (email, phone, address)
+- Social media links
+- SEO defaults (meta title, description, keywords)
+- Copyright text
+- Custom branding colors
+
+**Settings API**:
+
+- `GET /api/settings` - Public site settings
+- `GET /api/admin/settings` - Admin settings management
+- `PUT /api/admin/settings` - Update settings
+- Real-time settings synchronization
+
+### 3. Theme Configuration
+
+Enhanced theme system with brand customization:
+
+**Theme Modes**:
+
+- `light` - Light mode
+- `dark` - Dark mode
+- `system` - Follow system preference
+
+**Custom Brand Colors**:
+
+- Primary color
+- Secondary color
+- Accent color
+- Neutral colors
+
+**Preset Themes**:
+
+- 33 DaisyUI preset themes
+- Custom light/dark theme selection
+- Brand color inheritance
+
+### 4. RBAC Permission System
 
 Complete role-based access control system:
 
@@ -242,7 +317,7 @@ export async function GET(req: NextRequest) {
 }
 ```
 
-### 2. Payment System
+### 5. Payment System
 
 Support for both Stripe and PayPal payment methods:
 
@@ -268,7 +343,7 @@ Payment providers (Stripe, PayPal) are managed dynamically via the admin panel. 
 - Stripe: `checkout.session.completed`, `checkout.session.expired`, etc.
 - PayPal: `PAYMENT.CAPTURE.COMPLETED`, `BILLING.SUBSCRIPTION.ACTIVATED`, etc.
 
-### 3. Content Management System
+### 6. Content Management System
 
 Feature-complete CMS:
 
@@ -297,7 +372,7 @@ Feature-complete CMS:
 - Support for images, links, lists, etc.
 - Real-time preview
 
-### 4. File Upload System
+### 7. File Upload System
 
 Flexible file upload solution:
 
@@ -319,7 +394,7 @@ Flexible file upload solution:
 - File size limit (default 5MB)
 - User authentication check
 
-### 5. Email Notification System
+### 8. Email Notification System
 
 Email service based on Resend:
 
@@ -337,7 +412,7 @@ Email service based on Resend:
 - Plain text fallback version
 - Brand-consistent design
 
-### 6. Multi-language System
+### 9. Multi-language System
 
 Internationalization solution based on next-intl:
 
@@ -365,23 +440,7 @@ function MyComponent() {
 }
 ```
 
-### 7. Theme System
-
-Custom theme management system:
-
-**Theme Modes**:
-
-- `light` - Light mode
-- `dark` - Dark mode
-- `system` - Follow system
-
-**DaisyUI Themes**:
-
-- 33 preset themes
-- Customizable light/dark themes
-- Configured via environment variables
-
-### 8. API Documentation System
+### 10. API Documentation System
 
 Interactive documentation based on OpenAPI 3.0:
 
@@ -404,7 +463,7 @@ npm run openapi:generate
 - Online docs: http://localhost:3000/api-docs
 - OpenAPI JSON: http://localhost:3000/openapi.json
 
-### 9. Storybook Component Library
+### 11. Storybook Component Library
 
 Complete component documentation system:
 
@@ -430,7 +489,7 @@ npm run storybook
 
 Visit: http://localhost:6006
 
-### 10. Security Features
+### 12. Security Features
 
 Multi-layer security protection:
 

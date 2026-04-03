@@ -3,8 +3,11 @@ import { format } from 'date-fns'
 import { notFound } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import { getPostBySlug } from '@/lib/post/utils'
+import { getModuleState } from '@/lib/module-state'
 import Image from 'next/image'
 import { PostContent } from '@/components/post/PostContent'
+import { CommentSection } from '@/components/social/CommentSection'
+import { LikeButton } from '@/components/social/LikeButton'
 
 const BASE_URL = process.env.NEXTAUTH_URL || ''
 
@@ -49,6 +52,7 @@ export default async function SinglePage({ params }: { params: Promise<{ slug: s
   const post = await getPostBySlug(slug, PostType.PAGE)
   const siteT = await getTranslations('site')
   const siteName = siteT('name')
+  const { social: isSocialEnabled } = getModuleState()
 
   if (!post) {
     notFound()
@@ -101,8 +105,35 @@ export default async function SinglePage({ params }: { params: Promise<{ slug: s
 
           {/* Content */}
           <PostContent content={post.content} />
+
+          {/* Footer info: Categories */}
+          <div className="mt-16 pt-8 border-t border-base-200 flex flex-col gap-6">
+            {post.categories && post.categories.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {post.categories.map(c => (
+                  <span key={c.category.id} className="badge badge-primary badge-outline">
+                    {c.category.name}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Like Button */}
+            {isSocialEnabled && (
+              <div className="flex items-center gap-4">
+                <LikeButton targetType="page" targetId={post.id} />
+              </div>
+            )}
+          </div>
         </div>
       </article>
+
+      {/* Comments Section */}
+      {isSocialEnabled && (
+        <div className="container mx-auto px-4 max-w-4xl pb-16">
+          <CommentSection targetType="page" targetId={post.id} />
+        </div>
+      )}
     </>
   )
 }

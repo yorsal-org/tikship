@@ -1,10 +1,10 @@
 import { NextRequest } from 'next/server'
 import { uploadService } from '@/lib/upload/service'
-import { siteConfig } from '@/config/site'
 import { getApiTranslations } from '@/lib/i18n/config'
 import { requireAdminAuth } from '@/lib/admin'
 import { ApiResponse } from '@/lib/utils/api-response'
 import { PERMISSIONS } from '@/config/permissions'
+import { settingsService } from '@/lib/settings/service'
 import { mimeTypesToFormatNames } from '@/lib/utils/common'
 
 /**
@@ -30,6 +30,9 @@ export async function POST(req: NextRequest) {
     ])
     if (error) return error
 
+    // Get upload settings
+    const uploadSettings = await settingsService.getUploadSettings()
+
     const formData = await req.formData()
     const file = formData.get('file') as File
 
@@ -38,16 +41,16 @@ export async function POST(req: NextRequest) {
     }
 
     // Get format names from allowed types
-    const formatNames = mimeTypesToFormatNames(siteConfig.upload.image.allowedTypes)
+    const formatNames = mimeTypesToFormatNames(uploadSettings.imageAllowedTypes)
     const formatsText = formatNames.join(', ')
 
     // Validate file type
-    if (!(siteConfig.upload.image.allowedTypes as readonly string[]).includes(file.type)) {
+    if (!uploadSettings.imageAllowedTypes.includes(file.type)) {
       return ApiResponse.error(t('upload.invalid_type', { formats: formatsText }))
     }
 
     // Validate file size
-    if (file.size > siteConfig.upload.image.maxSize) {
+    if (file.size > uploadSettings.imageMaxSizeMB * 1024 * 1024) {
       return ApiResponse.error(t('upload.max_size'))
     }
 

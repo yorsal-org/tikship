@@ -2,17 +2,9 @@
 
 import { Sun, Moon } from 'lucide-react'
 import { useTheme } from '@/components/providers/ThemeProvider'
-import { useEffect, useState } from 'react'
 
 export function ThemeToggler() {
   const { resolvedTheme, setTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    // Use setTimeout to avoid setState during render
-    const timer = setTimeout(() => setMounted(true), 0)
-    return () => clearTimeout(timer)
-  }, [])
 
   // Handle theme toggle
   const handleThemeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -20,8 +12,6 @@ export function ThemeToggler() {
     const newTheme = checked ? 'dark' : 'light'
     setTheme(newTheme)
   }
-
-  if (!mounted) return null
 
   const isDark = resolvedTheme === 'dark'
 

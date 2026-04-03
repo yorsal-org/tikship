@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { prisma } from '@/lib/db/prisma'
 import { getTranslations } from 'next-intl/server'
+import { getModuleState } from '@/lib/module-state'
 import ProductDetailClient from './ProductDetailClient'
 
 const BASE_URL = process.env.NEXTAUTH_URL || ''
@@ -75,6 +76,7 @@ export default async function ProductDetailPage({ params }: Props) {
   const product = await getProduct(slug)
   const t = await getTranslations('site')
   const siteName = t('name')
+  const { social: isSocialEnabled } = getModuleState()
 
   const jsonLd = product
     ? {
@@ -106,7 +108,7 @@ export default async function ProductDetailPage({ params }: Props) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       )}
-      <ProductDetailClient params={params} />
+      <ProductDetailClient params={params} isSocialEnabled={isSocialEnabled} />
     </>
   )
 }

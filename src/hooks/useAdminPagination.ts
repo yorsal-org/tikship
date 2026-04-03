@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { siteConfig } from '@/config/site'
+import { useAdminSettings } from '@/hooks/useSettings'
 
 const PAGESIZE_STORAGE_KEY = 'admin_pageSize'
 
@@ -17,6 +17,7 @@ export interface UsePaginationOptions {
 export function useAdminPagination({ pageSize: initialPageSize, debounceMs = 500 }: UsePaginationOptions = {}) {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { admin } = useAdminSettings()
 
   const [searchInput, setSearchInput] = useState(searchParams.get('search') || '')
   const [pageSize, setPageSize] = useState<number>(() => {
@@ -30,7 +31,7 @@ export function useAdminPagination({ pageSize: initialPageSize, debounceMs = 500
         }
       }
     }
-    return initialPageSize || siteConfig.admin.pageSize
+    return initialPageSize || admin.pageSize
   })
   const [isHydrated, setIsHydrated] = useState(false)
 

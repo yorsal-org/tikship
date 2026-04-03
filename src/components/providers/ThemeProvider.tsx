@@ -1,15 +1,14 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState } from 'react'
-import { siteConfig } from '@/config/site'
-
-const LIGHT_THEME = siteConfig.theme.lightTheme
-const DARK_THEME = siteConfig.theme.darkTheme
+import { useThemeSettings } from '@/hooks/useSettings'
 
 interface ThemeContextType {
   theme: string
-  setTheme: (theme: string) => void
+  setTheme: (theme: string, custom?: boolean) => void
   resolvedTheme: string
+  lightTheme: string
+  darkTheme: string
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
@@ -23,6 +22,12 @@ export function useTheme() {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const { theme: themeSettings } = useThemeSettings()
+
+  const lightTheme = themeSettings.lightTheme
+  const darkTheme = themeSettings.darkTheme
+  const defaultTheme = themeSettings.default
+
   // Get system theme preference
   const getSystemTheme = (): string => {
     if (typeof window === 'undefined') return 'light'
@@ -38,15 +43,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }
 
   const [theme, setThemeState] = useState(() => {
-    if (typeof window === 'undefined') return siteConfig.theme.default
+    if (typeof window === 'undefined') return defaultTheme
     const storedTheme = localStorage.getItem('theme') as string | null
-    return storedTheme || siteConfig.theme.default
+    return storedTheme || defaultTheme
   })
 
   const [resolvedTheme, setResolvedTheme] = useState(() => {
     if (typeof window === 'undefined') return 'light'
     const storedTheme = localStorage.getItem('theme') as string | null
-    const initialTheme = storedTheme || siteConfig.theme.default
+    const initialTheme = storedTheme || defaultTheme
     if (initialTheme === 'system') {
       return getSystemTheme()
     }
@@ -54,18 +59,17 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   })
 
   // Apply theme to document
-  const applyTheme = (actualTheme: string) => {
+  const applyTheme = (actualTheme: string, custom?: boolean) => {
     if (typeof window === 'undefined') return
-
-    const themeValue = actualTheme === 'dark' ? DARK_THEME : LIGHT_THEME
-    document.documentElement.setAttribute('data-theme', themeValue)
+    const themeValue = actualTheme === 'dark' ? darkTheme : lightTheme
+    document.documentElement.setAttribute('data-theme', custom ? actualTheme : themeValue)
   }
 
-  // Apply theme on mount
+  // Apply theme on mount and when theme settings change
   useEffect(() => {
     applyTheme(resolvedTheme)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [resolvedTheme, lightTheme, darkTheme])
 
   // Listen to system theme changes
   useEffect(() => {
@@ -80,21 +84,22 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     mediaQuery.addEventListener('change', handleChange)
     return () => mediaQuery.removeEventListener('change', handleChange)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [theme])
 
   // Set theme function
-  const setTheme = (newTheme: string) => {
+  const setTheme = (newTheme: string, custom?: boolean) => {
     setThemeState(newTheme)
     localStorage.setItem('theme', newTheme)
 
     const resolved = resolveTheme(newTheme)
     setResolvedTheme(resolved)
-    applyTheme(resolved)
+    applyTheme(resolved, custom)
   }
 
   // Always provide context to avoid "useTheme must be used within ThemeProvider" error
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, resolvedTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme, resolvedTheme, lightTheme, darkTheme }}>
       {children}
     </ThemeContext.Provider>
   )

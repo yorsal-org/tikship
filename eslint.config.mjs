@@ -20,6 +20,12 @@ const eslintConfig = defineConfig([
     '.source/**'
   ]),
   ...storybook.configs['flat/recommended'],
+  {
+    rules: {
+      'react-hooks/set-state-in-effect': 'warn',
+    },
+  },
+
 ])
 
 export default eslintConfig

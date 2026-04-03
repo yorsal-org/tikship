@@ -101,7 +101,7 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
       },
       {
         code: PERMISSIONS.AUDIT_LOG_DELETE,
-        name: 'delete Audit Logs',
+        name: 'Delete Audit Logs',
         description: 'Delete system operation logs',
       },
     ],
@@ -213,6 +213,33 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
         code: PERMISSIONS.ORDER_EDIT,
         name: 'Edit Orders',
         description: 'Edit order information',
+      },
+    ],
+  },
+  {
+    name: 'Social Management',
+    description: 'Manage comments, replies, likes',
+    permissions: [
+      {
+        code: PERMISSIONS.COMMENT_MANAGE,
+        name: 'Manage Comments',
+        description: 'View, approve, reject and delete comments and replies',
+      },
+    ],
+  },
+  {
+    name: 'System Settings',
+    description: 'Manage system settings',
+    permissions: [
+      {
+        code: PERMISSIONS.SETTINGS_VIEW,
+        name: 'View Settings',
+        description: 'View system settings',
+      },
+      {
+        code: PERMISSIONS.SETTINGS_EDIT,
+        name: 'Edit Settings',
+        description: 'Edit system settings including social, theme, payment and more',
       },
     ],
   },

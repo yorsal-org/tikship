@@ -47,4 +47,11 @@ export const PERMISSIONS = {
   // Order Management
   ORDER_VIEW: 'order:view',
   ORDER_EDIT: 'order:edit',
+
+  // Social Module (Comments, Replies, Likes)
+  COMMENT_MANAGE: 'comment:manage', // Manages comments and replies together
+
+  // System Settings (Unified Settings Management)
+  SETTINGS_VIEW: 'settings:view',
+  SETTINGS_EDIT: 'settings:edit',
 } as const

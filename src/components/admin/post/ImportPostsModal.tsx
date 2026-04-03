@@ -6,7 +6,7 @@ import { X, Upload, CheckCircle, XCircle } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { useApi } from '@/hooks/useApi'
 import { toast } from '@/lib/utils/toast'
-import { siteConfig } from '@/config/site'
+import { useAdminSettings } from '@/hooks/useSettings'
 
 interface ImportResult {
   title: string
@@ -28,6 +28,7 @@ interface ImportPostsModalProps {
 
 export function ImportPostsModal({ isOpen, onClose, onSuccess }: ImportPostsModalProps) {
   const t = useTranslations('admin.posts')
+  const { admin } = useAdminSettings()
   const [jsonText, setJsonText] = useState('')
   const [parseError, setParseError] = useState<string | null>(null)
   const [importResults, setImportResults] = useState<ImportResult[] | null>(null)
@@ -60,7 +61,7 @@ export function ImportPostsModal({ isOpen, onClose, onSuccess }: ImportPostsModa
       return
     }
 
-    const limit = siteConfig.admin.articlesImportLimits
+    const limit = admin.articlesImportLimits
     if (parsed.length > limit) {
       setParseError(t('import_error_limit_exceeded', { limit }))
       return
@@ -142,7 +143,7 @@ export function ImportPostsModal({ isOpen, onClose, onSuccess }: ImportPostsModa
             <div className="flex items-center justify-between">
               <p className="text-sm opacity-60">{t('import_hint')}</p>
               <p className="text-xs opacity-50">
-                {t('import_limit', { limit: siteConfig.admin.articlesImportLimits })}
+                {t('import_limit', { limit: admin.articlesImportLimits })}
               </p>
             </div>
             <div className="bg-base-200 p-3 rounded text-xs font-mono overflow-x-auto">

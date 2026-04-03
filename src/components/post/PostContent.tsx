@@ -16,9 +16,7 @@ export function PostContent({ content }: { content: string }) {
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    // Use setTimeout to avoid setState during render
-    const timer = setTimeout(() => setMounted(true), 0)
-    return () => clearTimeout(timer)
+    setMounted(true)
   }, [])
 
   useEffect(() => {

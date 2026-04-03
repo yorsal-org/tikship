@@ -1,51 +1,51 @@
 // Commerce Models
 
 model Product {
-  id              String          @id @default(cuid())
-  name            String
-  description     String?         @db.Text
-  content         String?         @db.Text // Rich text content for product details
-  image           String?
-  slug            String          @unique
-  price           Int             // Price in cents
-  currency        String          @default("usd")
-  quantity        Int?            // Stock quantity, null means unlimited
-  isActive        Boolean         @default(true)
-  metadata        String?         @db.Text // JSON string for additional data
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  
-  paymentMethods  PaymentMethod[]
-  orders          Order[]
+  id          String   @id @default(cuid())
+  name        String
+  description String?  @db.Text
+  content     String?  @db.Text // Rich text content for product details
+  image       String?
+  slug        String   @unique
+  price       Int // Price in cents
+  currency    String   @default("usd")
+  quantity    Int? // Stock quantity, null means unlimited
+  isActive    Boolean  @default(true)
+  metadata    String?  @db.Text // JSON string for additional data
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  paymentMethods PaymentMethod[]
+  orders         Order[]
 
   @@index([slug])
   @@index([isActive])
 }
 
 model PaymentMethod {
-  id              String    @id @default(cuid())
-  productId       String
-  
+  id        String @id @default(cuid())
+  productId String
+
   // Payment provider: stripe or paypal
-  provider        String    // stripe, paypal
-  
+  provider String // stripe, paypal
+
   // Stripe fields
-  stripePriceId   String?   @unique
+  stripePriceId   String? @unique
   stripeProductId String?
-  
+
   // PayPal fields
-  paypalPlanId    String?   @unique
+  paypalPlanId    String? @unique
   paypalProductId String?
-  
-  mode            String    @default("payment") // payment or subscription
-  interval        String?   // For subscriptions: day, week, month, year
-  intervalCount   Int?      // For subscriptions: billing cycle count
-  isActive        Boolean   @default(true)
-  metadata        String?   @db.Text // JSON string for additional data
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  
-  product         Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  mode          String   @default("payment") // payment or subscription
+  interval      String? // For subscriptions: day, week, month, year
+  intervalCount Int? // For subscriptions: billing cycle count
+  isActive      Boolean  @default(true)
+  metadata      String?  @db.Text // JSON string for additional data
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@index([productId])
   @@index([provider])
@@ -54,31 +54,31 @@ model PaymentMethod {
 }
 
 model Order {
-  id                String    @id @default(cuid())
-  userId            String?
-  productId         String
-  paymentMethodId   String?   // Reference to the payment method used
-  
+  id              String  @id @default(cuid())
+  userId          String?
+  productId       String
+  paymentMethodId String? // Reference to the payment method used
+
   // Payment provider: stripe or paypal
-  paymentProvider   String    @default("stripe") // stripe, paypal
-  
+  paymentProvider String @default("stripe") // stripe, paypal
+
   // Stripe fields
-  stripeSessionId   String?   @unique
-  stripeCustomerId  String?
-  
+  stripeSessionId  String? @unique
+  stripeCustomerId String?
+
   // PayPal fields
-  paypalOrderId     String?   @unique
+  paypalOrderId        String? @unique
   paypalSubscriptionId String? @unique
-  
-  status            String    @default("pending") // pending, completed, failed, refunded, expired
-  amount            Int       // Amount in cents
-  currency          String    @default("usd")
-  metadata          String?   @db.Text // JSON string
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  
-  product           Product   @relation(fields: [productId], references: [id])
-  user              User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  status    String   @default("pending") // pending, completed, failed, refunded, expired
+  amount    Int // Amount in cents
+  currency  String   @default("usd")
+  metadata  String?  @db.Text // JSON string
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id])
+  user    User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([userId])
   @@index([productId])

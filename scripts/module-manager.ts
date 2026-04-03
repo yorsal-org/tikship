@@ -22,7 +22,7 @@ const projectRoot = path.join(__dirname, '..')
 
 // Module definition
 interface ModuleConfig {
-  key: 'content' | 'commerce' | 'user'
+  key: 'content' | 'commerce' | 'user' | 'social'
   name: string
   description: string
   keyFiles: string[] // Key files to detect if module exists
@@ -38,6 +38,7 @@ const MODULE_MODELS: Record<string, string[]> = {
   content: ['Post', 'Category', 'Tag'],
   commerce: ['Product', 'Order', 'PaymentMethod'],
   user: ['User'],
+  social: ['Comment', 'Reply', 'Like', 'SensitiveWord', 'SocialSettings'],
 }
 
 const modules: ModuleConfig[] = [
@@ -115,6 +116,23 @@ const modules: ModuleConfig[] = [
       ],
       prisma: ['prisma/models/user_management.prisma'],
       schemaName: 'user_management',
+    },
+  },
+  {
+    key: 'social',
+    name: 'Social Features',
+    description: 'Comments, replies, likes, and sensitive word filtering',
+    keyFiles: ['src/lib/social/index.ts'],
+    backupFiles: {
+      src: [
+        'src/app/admin/social',
+        'src/app/api/social',
+        'src/app/api/admin/social',
+        'src/components/admin/social',
+        'src/lib/social',
+      ],
+      prisma: ['prisma/models/social.prisma'],
+      schemaName: 'social',
     },
   },
 ]
@@ -198,18 +216,18 @@ function syncSchemaDependencies(): void {
   console.log(colorize('='.repeat(60), 'gray'))
 
   const enabledModels = getEnabledModels()
-  console.log(colorize(`  📋 Enabled models: ${Array.from(enabledModels).join(', ') || '(none)'}`, 'gray'))
+  console.log(colorize(`  📋 Enabled models: ${Array.from(enabledModels).join(', ') || '(none)'}`, 'green'))
 
   const modelsDir = path.join(projectRoot, 'prisma', 'models')
 
   // Get all .prisma files in models directory
   if (!fs.existsSync(modelsDir)) {
-    console.log(colorize('  ℹ️  No models directory found', 'gray'))
+    console.log(colorize('  ℹ️  No models directory found', 'red'))
     return
   }
 
   const prismaFiles = fs.readdirSync(modelsDir).filter(f => f.endsWith('.prisma'))
-  console.log(colorize(`  📁 Found ${prismaFiles.length} prisma files`, 'gray'))
+  console.log(colorize(`  📁 Found ${prismaFiles.length} prisma files`, 'green'))
 
   for (const file of prismaFiles) {
     const filePath = path.join(modelsDir, file)
@@ -265,7 +283,8 @@ function syncSchemaDependencies(): void {
         // Check if this type is in the known model list (any module's models)
         const isKnownModel = MODULE_MODELS.content.includes(cleanTypeName) ||
             MODULE_MODELS.commerce.includes(cleanTypeName) ||
-            MODULE_MODELS.user.includes(cleanTypeName)
+            MODULE_MODELS.user.includes(cleanTypeName) ||
+            MODULE_MODELS.social.includes(cleanTypeName)
 
         if (isKnownModel) {
           const isEnabled = enabledModels.has(cleanTypeName)
@@ -719,12 +738,13 @@ function main(): void {
   }
 
   const command = args[0]
-  const moduleKey = args[1] as 'content' | 'commerce' | 'user' | undefined
+  const moduleKey = args[1] as 'content' | 'commerce' | 'user' | 'social' | undefined
 
   const moduleMap: Record<string, ModuleConfig> = {
     content: modules[0],
     commerce: modules[1],
     user: modules[2],
+    social: modules[3],
   }
 
   // --status: show status only
@@ -736,7 +756,7 @@ function main(): void {
   // --delete <module>: delete module
   if (command === '--delete') {
     if (!moduleKey || !moduleMap[moduleKey]) {
-      console.error(colorize('❌ Invalid module. Use: content, commerce, or user', 'red'))
+      console.error(colorize('❌ Invalid module. Use: content, commerce, user, or social', 'red'))
       process.exit(1)
     }
     const mod = moduleMap[moduleKey]
@@ -751,7 +771,7 @@ function main(): void {
   // --restore <module>: restore module
   if (command === '--restore') {
     if (!moduleKey || !moduleMap[moduleKey]) {
-      console.error(colorize('❌ Invalid module. Use: content, commerce, or user', 'red'))
+      console.error(colorize('❌ Invalid module. Use: content, commerce, user, or social', 'red'))
       process.exit(1)
     }
     const mod = moduleMap[moduleKey]
@@ -778,6 +798,7 @@ ${colorize('Modules:', 'cyan')}
   content  - Content Management (articles, pages, categories)
   commerce - Commerce (products, orders)
   user     - User Management (members)
+  social   - Social Features (comments, replies, likes)
 
 ${colorize('Examples:', 'cyan')}
   tsx scripts/module-manager.ts --delete content

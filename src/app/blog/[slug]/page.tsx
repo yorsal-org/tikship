@@ -5,8 +5,11 @@ import { getTranslations } from 'next-intl/server'
 import Link from 'next/link'
 import { ChevronLeft, Calendar, User, Hash } from 'lucide-react'
 import { getPostBySlug } from '@/lib/post/utils'
+import { getModuleState } from '@/lib/module-state'
 import Image from 'next/image'
 import { PostContent } from '@/components/post/PostContent'
+import { CommentSection } from '@/components/social/CommentSection'
+import { LikeButton } from '@/components/social/LikeButton'
 
 const BASE_URL = process.env.NEXTAUTH_URL || ''
 
@@ -53,6 +56,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   const t = await getTranslations('posts_public')
   const siteT = await getTranslations('site')
   const siteName = siteT('name')
+  const { social: isSocialEnabled } = getModuleState()
 
   if (!post) {
     notFound()
@@ -158,8 +162,28 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
               </div>
             </div>
           )}
+
+          {/* Like Button */}
+          {isSocialEnabled && (
+            <div className="flex items-center gap-4">
+              <LikeButton
+                targetType="blog"
+                targetId={post.id}
+              />
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Comments Section */}
+      {isSocialEnabled && (
+        <div className="container mx-auto px-4 max-w-4xl pb-16">
+          <CommentSection
+            targetType="blog"
+            targetId={post.id}
+          />
+        </div>
+      )}
     </article>
     </>
   )

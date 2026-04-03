@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl'
 import { validatePasswordStrength } from '@/lib/utils/validators'
-import { siteConfig } from '@/config/site'
+import { useAuthSettings } from '@/hooks/useSettings'
 
 interface PasswordStrengthIndicatorProps {
   password: string
@@ -12,7 +12,8 @@ export default function PasswordStrengthIndicator({
   password,
 }: PasswordStrengthIndicatorProps) {
   const t = useTranslations('register')
-  const minStrength = siteConfig.auth.password.minStrength as 'weak' | 'medium' | 'strong'
+  const { auth } = useAuthSettings()
+  const minStrength = auth.passwordMinStrength
 
   const strength = validatePasswordStrength(password)
 

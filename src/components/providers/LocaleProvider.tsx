@@ -3,7 +3,7 @@
 import { NextIntlClientProvider } from 'next-intl'
 import { ReactNode, useState, createContext, useContext } from 'react'
 import { setLocale as setLocaleCookie } from '@/lib/i18n/locale-cookie'
-import { defaultLocale } from '@/config/site'
+import { useLocaleSettings } from '@/hooks/useSettings'
 
 interface LocaleContextType {
   locale: string
@@ -29,10 +29,13 @@ interface LocaleProviderProps {
 
 export function LocaleProvider({
   children,
-  initialLocale = defaultLocale,
+  initialLocale,
   initialMessages = {},
 }: LocaleProviderProps) {
-  const [locale, setLocaleState] = useState<string>(initialLocale)
+  const { locale: localeSettings } = useLocaleSettings()
+  const defaultLocale = initialLocale ?? localeSettings.default
+
+  const [locale, setLocaleState] = useState<string>(defaultLocale)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [messages, setMessages] = useState<Record<string, any>>(initialMessages)
 

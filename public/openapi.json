@@ -277,17 +277,51 @@
             "description": "Post status",
             "nullable": true
           },
-          "categoryId": {
-            "type": "string",
-            "description": "Category ID",
-            "nullable": true
-          },
-          "tagIds": {
+          "categoryIds": {
             "type": "array",
             "items": {
               "type": "string"
             },
-            "description": "Tag IDs",
+            "description": "Category IDs",
+            "nullable": true
+          },
+          "tagNames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tag names",
+            "nullable": true
+          }
+        }
+      },
+      "ImportPostItem": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "nullable": false
+          },
+          "content_html": {
+            "type": "string",
+            "nullable": false
+          },
+          "cover_image": {
+            "type": "string",
+            "nullable": true
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
             "nullable": true
           }
         }
@@ -395,17 +429,50 @@
             ],
             "nullable": true
           },
-          "categoryId": {
-            "type": "string",
-            "description": "Category ID",
-            "nullable": true
-          },
-          "tagIds": {
+          "categoryIds": {
             "type": "array",
             "items": {
               "type": "string"
             },
-            "description": "Tag IDs",
+            "description": "Category IDs",
+            "nullable": true
+          },
+          "tagNames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tag names",
+            "nullable": true
+          }
+        }
+      },
+      "BulkUpdatePostsBody": {
+        "type": "object",
+        "properties": {
+          "ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": false
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "publish",
+              "trash",
+              "delete",
+              "restore"
+            ],
+            "nullable": false
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ARTICLE",
+              "PAGE"
+            ],
             "nullable": true
           }
         }
@@ -1029,6 +1096,14 @@
       "description": "Admin user management"
     },
     {
+      "name": "Admin - Social",
+      "description": "Admin social (comment, reply, like) endpoints"
+    },
+    {
+      "name": "Admin - Modules",
+      "description": "Admin modules"
+    },
+    {
       "name": "Admin - Dashboard",
       "description": "Dashboard statistics and analytics"
     },
@@ -1179,6 +1254,44 @@
             "$ref": "#/components/responses/500"
           }
         }
+      },
+      "delete": {
+        "operationId": "delete-admin-audit-logs",
+        "summary": "Delete audit logs older than a specified period",
+        "description": "Bulk delete audit logs that are older than the given number of days",
+        "tags": [
+          "Admin - Audit"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Returns count of deleted logs"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
       }
     },
     "/admin/me": {
@@ -1282,11 +1395,11 @@
         }
       }
     },
-    "/admin/dashboard/stats": {
+    "/admin/dashboard/widgets/admin-stats": {
       "get": {
-        "operationId": "get-admin-dashboard-stats",
-        "summary": "Get dashboard statistics",
-        "description": "Retrieve comprehensive dashboard statistics including users, orders, revenue, and trends",
+        "operationId": "get-admin-dashboard-widgets-admin-stats",
+        "summary": "Get admin system stats",
+        "description": "Admin users, roles, permissions, audit logs",
         "tags": [
           "Admin - Dashboard"
         ],
@@ -1297,24 +1410,80 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Returns comprehensive dashboard statistics"
-                }
-              }
-            }
-          },
           "400": {
             "$ref": "#/components/responses/400"
           },
-          "401": {
-            "$ref": "#/components/responses/401"
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/admin/dashboard/widgets/commerce-stats": {
+      "get": {
+        "operationId": "get-admin-dashboard-widgets-commerce-stats",
+        "summary": "Get commerce stats (only when commerce module enabled)",
+        "description": "Products, orders, revenue",
+        "tags": [
+          "Admin - Dashboard"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
           },
-          "403": {
-            "$ref": "#/components/responses/403"
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/admin/dashboard/widgets/content-stats": {
+      "get": {
+        "operationId": "get-admin-dashboard-widgets-content-stats",
+        "summary": "Get content stats (only when content module enabled)",
+        "description": "Posts, categories, tags",
+        "tags": [
+          "Admin - Dashboard"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/admin/dashboard/widgets/user-stats": {
+      "get": {
+        "operationId": "get-admin-dashboard-widgets-user-stats",
+        "summary": "Get user/member stats (only when user module enabled)",
+        "description": "Members, user growth",
+        "tags": [
+          "Admin - Dashboard"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
           },
           "500": {
             "$ref": "#/components/responses/500"
@@ -1400,6 +1569,28 @@
           },
           "403": {
             "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "put": {
+        "operationId": "put-admin-members",
+        "summary": "Bulk update/delete members",
+        "description": "Perform bulk actions (activate/deactivate/delete) on multiple members",
+        "tags": [
+          "Admin - Members"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
           },
           "500": {
             "$ref": "#/components/responses/500"
@@ -1663,6 +1854,30 @@
         }
       }
     },
+    "/admin/modules/state": {
+      "get": {
+        "operationId": "get-admin-modules-state",
+        "summary": "get modules state",
+        "description": "get modules state",
+        "tags": [
+          "Admin - modules"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
     "/admin/orders": {
       "get": {
         "operationId": "get-admin-orders",
@@ -1757,6 +1972,28 @@
           },
           "403": {
             "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "put": {
+        "operationId": "put-admin-orders",
+        "summary": "Bulk update/delete orders",
+        "description": "",
+        "tags": [
+          "Admin - Orders"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
           },
           "500": {
             "$ref": "#/components/responses/500"
@@ -2226,6 +2463,53 @@
             "$ref": "#/components/responses/500"
           }
         }
+      },
+      "put": {
+        "operationId": "put-admin-posts",
+        "summary": "bulk update post",
+        "description": "bulk update a post (article or page)",
+        "tags": [
+          "Admin - Posts"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkUpdatePostsBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Post updated successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
       }
     },
     "/admin/tags": {
@@ -2442,6 +2726,55 @@
         }
       }
     },
+    "/admin/posts/import": {
+      "post": {
+        "operationId": "post-admin-posts-import",
+        "summary": "Bulk import posts",
+        "description": "Import multiple articles at once from JSON array. Slug is auto-generated from title. Status defaults to DRAFT. Categories are matched by name.",
+        "tags": [
+          "Admin - Posts"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportPostItem[]"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Import result with success/fail counts"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
     "/admin/posts/stats": {
       "get": {
         "operationId": "get-admin-posts-stats",
@@ -2607,6 +2940,28 @@
           },
           "403": {
             "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "put": {
+        "operationId": "put-admin-products",
+        "summary": "Bulk update/delete products",
+        "description": "",
+        "tags": [
+          "Admin - Products"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
           },
           "500": {
             "$ref": "#/components/responses/500"
@@ -3485,6 +3840,243 @@
         }
       }
     },
+    "/admin/settings": {
+      "get": {
+        "operationId": "get-admin-settings",
+        "summary": "Get all settings",
+        "description": "Admin endpoint to get all settings by category",
+        "tags": [
+          "Admin - Settings"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "put": {
+        "operationId": "put-admin-settings",
+        "summary": "Update settings",
+        "description": "Admin endpoint to update settings by category",
+        "tags": [
+          "Admin - Settings"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/admin/social/comments": {
+      "get": {
+        "operationId": "get-admin-social-comments",
+        "summary": "Get all comments for admin",
+        "description": "Admin endpoint to list all comments with filters",
+        "tags": [
+          "Admin - Social"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "put": {
+        "operationId": "put-admin-social-comments",
+        "summary": "Bulk update comment status",
+        "description": "Admin endpoint to approve/reject multiple comments",
+        "tags": [
+          "Admin - Social"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete-admin-social-comments",
+        "summary": "Bulk delete comments",
+        "description": "Admin endpoint to delete multiple comments",
+        "tags": [
+          "Admin - Social"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/admin/social/comments/{id}": {
+      "get": {
+        "operationId": "get-admin-social-comments-{id}",
+        "summary": "Get single comment with replies",
+        "description": "Admin endpoint to get comment details",
+        "tags": [
+          "Admin - Social"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "put": {
+        "operationId": "put-admin-social-comments-{id}",
+        "summary": "Update comment status",
+        "description": "Admin endpoint to approve/reject a comment",
+        "tags": [
+          "Admin - Social"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete-admin-social-comments-{id}",
+        "summary": "Delete comment",
+        "description": "Admin endpoint to delete a comment",
+        "tags": [
+          "Admin - Social"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/admin/social/comments/{id}/replies": {
+      "put": {
+        "operationId": "put-admin-social-comments-{id}-replies",
+        "summary": "Update reply status",
+        "description": "Admin endpoint to approve/reject a reply",
+        "tags": [
+          "Admin - Social"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete-admin-social-comments-{id}-replies",
+        "summary": "Delete reply",
+        "description": "Admin endpoint to delete a reply",
+        "tags": [
+          "Admin - Social"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
     "/admin/users": {
       "get": {
         "operationId": "get-admin-users",
@@ -3565,6 +4157,28 @@
           },
           "403": {
             "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "put": {
+        "operationId": "put-admin-users",
+        "summary": "Bulk update/delete admin users",
+        "description": "Perform bulk actions (activate/deactivate/delete) on multiple admin users",
+        "tags": [
+          "Admin - Users"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
           },
           "500": {
             "$ref": "#/components/responses/500"
@@ -4220,6 +4834,136 @@
               }
             }
           },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/settings": {
+      "get": {
+        "operationId": "get-settings",
+        "summary": "Get all public settings",
+        "description": "Public endpoint to get all settings. Admin settings are only included for authenticated admins.",
+        "tags": [
+          "Settings"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/social/comments": {
+      "get": {
+        "operationId": "get-social-comments",
+        "summary": "Get comments for a target",
+        "description": "Public endpoint to get approved comments for a blog/page/product",
+        "tags": [
+          "Social - Comments"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "post": {
+        "operationId": "post-social-comments",
+        "summary": "Create a new comment",
+        "description": "Public endpoint to create a comment (requires login)",
+        "tags": [
+          "Social - Comments"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/social/likes": {
+      "post": {
+        "operationId": "post-social-likes",
+        "summary": "Toggle like status",
+        "description": "Public endpoint to like or unlike a blog/page/product (requires login)",
+        "tags": [
+          "Social - Likes"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "get": {
+        "operationId": "get-social-likes",
+        "summary": "Get like count and user status",
+        "description": "Public endpoint to get like count and user's like status",
+        "tags": [
+          "Social - Likes"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/social/replies": {
+      "post": {
+        "operationId": "post-social-replies",
+        "summary": "Create a reply to a comment",
+        "description": "Public endpoint to create a reply (requires login)",
+        "tags": [
+          "Social - Replies"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "responses": {
           "400": {
             "$ref": "#/components/responses/400"
           },

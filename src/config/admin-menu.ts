@@ -4,6 +4,8 @@ import {
   FileText,
   History,
   Key,
+  MessageSquare,
+  Settings,
   Package,
   ShieldCheck,
   ShoppingCart,
@@ -46,12 +48,19 @@ export const adminMenuConfig: AdminMenuGroup[] = [
     ],
   },
   {
+    groupKey: 'group_social',
+    items: [
+      { path: 'social/comments', icon: MessageSquare, labelKey: 'comments' },
+    ],
+  },
+  {
     groupKey: 'group_system',
     items: [
       { path: 'users', icon: UserSquare2, labelKey: 'users' },
       { path: 'roles', icon: ShieldCheck, labelKey: 'roles' },
       { path: 'permissions', icon: Key, labelKey: 'permissions' },
-      { path: 'audit-logs', icon: History, labelKey: 'audit_logs' }
+      { path: 'audit-logs', icon: History, labelKey: 'audit_logs' },
+      { path: 'settings', icon: Settings, labelKey: 'settings' },
     ],
   }
 ]

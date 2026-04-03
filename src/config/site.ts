@@ -3,16 +3,16 @@ export const siteConfig = {
   favicon: '/favicon.svg',
 
   // API docs is enabled or disabled
-  enable_api_docs: true,
+  enable_api_docs: process.env.NEXT_PUBLIC_ENABLE_API_DOCS,
 
   // Theme configuration
   theme: {
     // Default theme mode: 'light', 'dark', or 'system'
-    default: 'system',
+    default: process.env.NEXT_PUBLIC_SYTEM_THEME ?? 'system',
     // DaisyUI light theme name
-    lightTheme: 'silk',
+    lightTheme: process.env.NEXT_PUBLIC_LIGHT_THEME ?? 'silk',
     // DaisyUI dark theme name
-    darkTheme: 'sunset',
+    darkTheme: process.env.NEXT_PUBLIC_DARK_THEME ?? 'sunset',
   },
 
   // Locale configuration
@@ -31,7 +31,7 @@ export const siteConfig = {
   upload: {
     image: {
       // Maximum file size for image uploads in bytes (e.g., 5MB)
-      maxSize: 1024 * 1024 * 5,
+      maxSize: 5,
       // Allowed MIME types for image images
       allowedTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
     },
@@ -55,8 +55,8 @@ export const siteConfig = {
 
   // Admin configuration
   admin: {
-    // Admin path prefix
-    path: '/admin',
+    // change Admin path
+    path: process.env.NEXT_PUBLIC_ADMIN_PATH ?? '/admin',
     pageSize: 10,
     password: {
       // Minimum password strength level required: 'weak', 'medium', or 'strong'

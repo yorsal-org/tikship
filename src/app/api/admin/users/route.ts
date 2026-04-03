@@ -6,7 +6,7 @@ import { PERMISSIONS } from '@/config/permissions'
 import { createAdminUser } from '@/lib/admin'
 import { logAudit, AUDIT_ACTIONS } from '@/lib/audit/service'
 import { checkPasswordStrength } from '@/lib/utils/validators'
-import { siteConfig } from '@/config/site'
+import { settingsService } from '@/lib/settings/service'
 
 import type { CreateAdminUserBody } from '@/types/api'
 
@@ -106,8 +106,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Validate password strength
-    const minStrength = siteConfig.admin.password.minStrength as 'weak' | 'medium' | 'strong'
-    const { isValid } = checkPasswordStrength(password, minStrength)
+    const adminSettings = await settingsService.getAdminSettings()
+    const { isValid } = checkPasswordStrength(password, adminSettings.passwordMinStrength)
 
     if (!isValid) {
       return await ApiResponse.adminError('password_too_weak', 400)

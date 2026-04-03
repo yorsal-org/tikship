@@ -61,6 +61,14 @@
       "description": "Admin user management"
     },
     {
+      "name": "Admin - Social",
+      "description": "Admin social (comment, reply, like) endpoints"
+    },
+    {
+      "name": "Admin - Modules",
+      "description": "Admin modules"
+    },
+    {
       "name": "Admin - Dashboard",
       "description": "Dashboard statistics and analytics"
     },

@@ -3,10 +3,9 @@ import { prisma } from '@/lib/db/prisma'
 import { requireAdminAuth } from '@/lib/admin'
 import { ApiResponse } from '@/lib/utils/api-response'
 import { PERMISSIONS } from '@/config/permissions'
-import { siteConfig } from '@/config/site'
+import { settingsService } from '@/lib/settings/service'
 
 type MemberBulkAction = 'activate' | 'deactivate' | 'delete'
-
 
 /**
  * Get members list
@@ -27,7 +26,10 @@ export async function GET(req: NextRequest) {
     const search = searchParams.get('search') || ''
     const status = searchParams.get('status') // 'active' or 'inactive'
     const page = parseInt(searchParams.get('page') || '1')
-    const pageSize = parseInt(searchParams.get('pageSize') || siteConfig.admin.pageSize.toString())
+
+    // Get page size from settings
+    const adminSettings = await settingsService.getAdminSettings()
+    const pageSize = parseInt(searchParams.get('pageSize') || String(adminSettings.pageSize))
 
     const where: { AND: Array<Record<string, unknown>> } = {
       AND: [],

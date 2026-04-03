@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import '@/app/globals.css'
 import '@/styles/datepicker.css'
 import { themeInitScript } from '@/lib/utils/theme'
-import { siteConfig } from '@/config/site'
+import { settingsService } from '@/lib/settings/service'
 import { getLocale } from '@/lib/i18n/config'
 import { getTranslations } from 'next-intl/server'
 
@@ -14,6 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const siteName = t('name')
   const siteDescription = t('description')
   const siteKeywords = t('keywords')
+  const systemSettings = await settingsService.getSystemSettings()
 
   return {
     metadataBase: new URL(BASE_URL),
@@ -40,8 +41,8 @@ export async function generateMetadata(): Promise<Metadata> {
       creator: `@${siteName.toLowerCase()}`,
     },
     icons: {
-      icon: siteConfig.favicon,
-      shortcut: siteConfig.favicon,
+      icon: systemSettings.favicon,
+      shortcut: systemSettings.favicon,
     },
     robots: {
       index: true,

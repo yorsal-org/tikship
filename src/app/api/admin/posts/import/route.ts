@@ -6,7 +6,7 @@ import { PERMISSIONS } from '@/config/permissions'
 import { logAudit, AUDIT_ACTIONS } from '@/lib/audit/service'
 import { PostStatus, PostType } from '@/types/post'
 import { prisma } from '@/lib/db/prisma'
-import { siteConfig } from '@/config/site'
+import { settingsService } from '@/lib/settings/service'
 
 interface ImportPostItem {
   title: string
@@ -38,8 +38,9 @@ export async function POST(req: NextRequest) {
       return await ApiResponse.adminError('required_fields_missing', 400)
     }
 
-    const importLimit = siteConfig.admin.articlesImportLimits
-    if (body.length > importLimit) {
+    // Get import limit from settings
+    const adminSettings = await settingsService.getAdminSettings()
+    if (body.length > adminSettings.articlesImportLimits) {
       return await ApiResponse.adminError('import_limit_exceeded', 400)
     }
 

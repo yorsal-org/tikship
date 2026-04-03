@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { User, CheckCircle2 } from 'lucide-react'
@@ -13,42 +13,23 @@ import { useApi } from '@/hooks/useApi'
 export default function ProfileEditor() {
   const { data: session, update } = useSession()
   const t = useTranslations('user_profile')
-  const [name, setName] = useState(() => session?.user?.name || '')
-  const [image, setImage] = useState(() => session?.user?.image || '')
 
-  useEffect(() => {
-    if (session?.user) {
-      const newName = session.user.name || ''
-      const newImage = session.user.image || ''
-      if (newName !== name) setName(newName)
-      if (newImage !== image) setImage(newImage)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.user?.name, session?.user?.image])
+  // Local state for form inputs - initialized from session
+  const [name, setName] = useState(session?.user?.name || '')
+  const [image, setImage] = useState(session?.user?.image || '')
 
   const profileApi = useApi('/api/user/me', 'PATCH')
 
   const handleSave = async () => {
-    await profileApi.request(
-      { name, image },
-      {
-        onSuccess: async () => {
-          toast.success(t('update_success'))
-          // Update local session
-          await update({
-            ...session,
-            user: {
-              ...session?.user,
-              name,
-              image,
-            },
-          })
-        },
-        onError: (err: string) => {
-          toast.error(err || t('update_error'))
-        },
-      }
-    )
+    const result = await profileApi.request({ name, image })
+
+    if (result.success) {
+      toast.success(t('update_success'))
+      // Sync session with new values after successful API call
+      await update({ ...session, user: { ...session?.user, name, image } })
+    } else {
+      toast.error(result.error || t('update_error'))
+    }
   }
 
   return (

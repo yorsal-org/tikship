@@ -6,7 +6,9 @@ import { PERMISSIONS } from '@/config/permissions'
 
 /**
  * Get content stats (only when content module enabled)
- * Posts, categories, tags
+ * @description Posts, categories, tags
+ * @tag Admin - Dashboard
+ * @auth bearerAuth
  */
 export async function GET(req: NextRequest) {
   try {

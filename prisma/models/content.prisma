@@ -1,29 +1,29 @@
 // Content Management Models
 
 model Post {
-  id              String      @id @default(cuid())
-  title           String
-  content         String      @db.Text
-  slug            String      @unique
-  excerpt         String?     @db.Text
-  featuredImage   String?
-  type            String      @default("ARTICLE") // ARTICLE, PAGE
-  status          String      @default("DRAFT")   // DRAFT, PUBLISHED, SCHEDULED, TRASH
-  
-  seoTitle        String?
-  seoDescription  String?
+  id            String  @id @default(cuid())
+  title         String
+  content       String  @db.Text
+  slug          String  @unique
+  excerpt       String? @db.Text
+  featuredImage String?
+  type          String  @default("ARTICLE") // ARTICLE, PAGE
+  status        String  @default("DRAFT") // DRAFT, PUBLISHED, SCHEDULED, TRASH
 
-  publishedAt     DateTime?
-  modifiedAt      DateTime    @default(now())
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  seoTitle       String?
+  seoDescription String?
 
-  authorId        String
-  author          AdminUser   @relation(fields: [authorId], references: [id])
+  publishedAt DateTime?
+  modifiedAt  DateTime  @default(now())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  categories      PostCategory[]
-  tags            PostTag[]
-  metas           PostMeta[]
+  authorId String
+  author   AdminUser @relation(fields: [authorId], references: [id])
+
+  categories PostCategory[]
+  tags       PostTag[]
+  metas      PostMeta[]
 
   @@index([authorId])
   @@index([status])
@@ -51,19 +51,19 @@ model Category {
 }
 
 model Tag {
-  id          String    @id @default(cuid())
-  name        String    @unique
-  slug        String    @unique
-  posts       PostTag[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id        String    @id @default(cuid())
+  name      String    @unique
+  slug      String    @unique
+  posts     PostTag[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model PostCategory {
-  postId      String
-  categoryId  String
-  post        Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
-  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  postId     String
+  categoryId String
+  post       Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@id([postId, categoryId])
   @@index([postId])
@@ -71,10 +71,10 @@ model PostCategory {
 }
 
 model PostTag {
-  postId      String
-  tagId       String
-  post        Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
-  tag         Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  postId String
+  tagId  String
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@id([postId, tagId])
   @@index([postId])
@@ -82,11 +82,11 @@ model PostTag {
 }
 
 model PostMeta {
-  id      String @id @default(cuid())
-  postId  String
-  key     String
-  value   String @db.Text
-  post    Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  postId String
+  key    String
+  value  String @db.Text
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@unique([postId, key])
   @@index([postId])

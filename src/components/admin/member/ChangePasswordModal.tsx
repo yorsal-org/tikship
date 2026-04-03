@@ -7,7 +7,7 @@ import { useTranslations } from 'next-intl'
 import { useApi } from '@/hooks/useApi'
 import { toast } from '@/lib/utils/toast'
 import { checkPasswordStrength } from '@/lib/utils/validators'
-import { siteConfig } from '@/config/site'
+import { useAdminSettings } from '@/hooks/useSettings'
 import PasswordStrengthIndicator from '@/components/auth/register/PasswordStrengthIndicator'
 import { Eye, EyeOff } from 'lucide-react'
 import { validationConfig } from '@/config/validation'
@@ -32,6 +32,7 @@ export function ChangePasswordModal({
   userEmail,
 }: ChangePasswordModalProps) {
   const t = useTranslations('admin.members')
+  const { admin } = useAdminSettings()
   const [formData, setFormData] = useState({
     newPassword: '',
     confirmPassword: '',
@@ -43,7 +44,7 @@ export function ChangePasswordModal({
   const submitApi = useApi('', 'PUT')
   const checkPasswordApi = useApi<UserPasswordResponse>('', 'GET')
 
-  const minStrength = siteConfig.admin.password.minStrength as 'weak' | 'medium' | 'strong'
+  const minStrength = admin.passwordMinStrength
 
   // Check if user has password when modal opens
   useEffect(() => {

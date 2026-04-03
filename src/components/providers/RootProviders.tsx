@@ -4,6 +4,7 @@ import { ReactNode } from 'react'
 import { SessionProvider } from 'next-auth/react'
 import { ThemeProvider } from '@/components/providers/ThemeProvider'
 import { LocaleProvider } from '@/components/providers/LocaleProvider'
+import { SettingsProvider } from '@/hooks/useSettings'
 
 interface Props {
   children: ReactNode
@@ -16,7 +17,9 @@ export function RootProviders({ children, initialLocale, initialMessages }: Prop
   return (
     <LocaleProvider initialLocale={initialLocale} initialMessages={initialMessages}>
       <SessionProvider>
-        <ThemeProvider>{children}</ThemeProvider>
+        <SettingsProvider>
+          <ThemeProvider>{children}</ThemeProvider>
+        </SettingsProvider>
       </SessionProvider>
     </LocaleProvider>
   )

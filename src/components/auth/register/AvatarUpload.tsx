@@ -5,7 +5,7 @@ import { Upload, X, Loader2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useApi } from '@/hooks/useApi'
 import { ApiResponse } from '@/types/api'
-import { siteConfig } from '@/config/site'
+import { useUploadSettings } from '@/hooks/useSettings'
 import { mimeTypesToFormatNames } from '@/lib/utils/common'
 import Image from 'next/image'
 
@@ -20,12 +20,13 @@ interface UploadResponse {
 
 export default function AvatarUpload({ value, onUpload }: AvatarUploadProps) {
   const t = useTranslations('register')
+  const { upload } = useUploadSettings()
   const [preview, setPreview] = useState<string | null>(() => value || null)
   const [error, setError] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Get format names from allowed types
-  const formatNames = mimeTypesToFormatNames(siteConfig.upload.image.allowedTypes)
+  const formatNames = mimeTypesToFormatNames(upload.imageAllowedTypes)
   const formatsText = formatNames.join(', ')
 
   const uploadApi = useApi<UploadResponse>('/api/upload/avatar', 'POST')
@@ -49,13 +50,13 @@ export default function AvatarUpload({ value, onUpload }: AvatarUploadProps) {
     setError('')
 
     // Validate file type
-    if (!(siteConfig.upload.image.allowedTypes as readonly string[]).includes(file.type)) {
+    if (!upload.imageAllowedTypes.includes(file.type)) {
       setError(t('avatar_upload.error_type', { formats: formatsText }))
       return
     }
 
     // Validate file size
-    if (file.size > siteConfig.upload.image.maxSize) {
+    if (file.size > upload.imageMaxSizeMB * 1024 * 1024) {
       setError(t('avatar_upload.error_size'))
       return
     }
@@ -134,7 +135,7 @@ export default function AvatarUpload({ value, onUpload }: AvatarUploadProps) {
             ref={fileInputRef}
             type="file"
             className="file-input file-w-full"
-            accept={siteConfig.upload.image.allowedTypes.join(',')}
+            accept={upload.imageAllowedTypes.join(',')}
             onChange={handleFileSelect}
             disabled={uploadApi.loading}
           />

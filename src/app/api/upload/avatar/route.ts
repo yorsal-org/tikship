@@ -1,9 +1,8 @@
 import { NextRequest } from 'next/server'
 import { uploadService } from '@/lib/upload/service'
-import { siteConfig } from '@/config/site'
 import { getApiTranslations } from '@/lib/i18n/config'
 import { ApiResponse } from '@/lib/utils/api-response'
-// import { getAuthenticatedUser } from '@/lib/auth/utils'
+import { settingsService } from '@/lib/settings/service'
 import { mimeTypesToFormatNames } from '@/lib/utils/common'
 
 /**
@@ -19,10 +18,8 @@ export async function POST(request: NextRequest) {
   const t = await getApiTranslations()
 
   try {
-    // const user = await getAuthenticatedUser(request)
-    // if (!user) {
-    //   return ApiResponse.error(t('unauthorized'), 401)
-    // }
+    // Get upload settings
+    const uploadSettings = await settingsService.getUploadSettings()
 
     const formData = await request.formData()
     const file = formData.get('file') as File
@@ -32,16 +29,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Get format names from allowed types
-    const formatNames = mimeTypesToFormatNames(siteConfig.upload.image.allowedTypes)
+    const formatNames = mimeTypesToFormatNames(uploadSettings.imageAllowedTypes)
     const formatsText = formatNames.join(', ')
 
     // Validate file type
-    if (!(siteConfig.upload.image.allowedTypes as readonly string[]).includes(file.type)) {
+    if (!uploadSettings.imageAllowedTypes.includes(file.type)) {
       return ApiResponse.error(t('upload.invalid_type', { formats: formatsText }))
     }
 
     // Validate file size
-    if (file.size > siteConfig.upload.image.maxSize) {
+    if (file.size > uploadSettings.imageMaxSizeMB * 1024 * 1024) {
       return ApiResponse.error(t('upload.max_size'))
     }
 

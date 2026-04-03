@@ -2,7 +2,7 @@ import { Resend } from 'resend'
 import Mailgun from 'mailgun.js'
 import formData from 'form-data'
 import { SendEmailOptions, ReceiveEmailOptions, EmailResult } from '@/types/email'
-import { siteConfig } from '@/config/site'
+import { settingsService } from '@/lib/settings/service'
 
 // Initialize resend
 const resend = new Resend(process.env.RESEND_API_KEY)
@@ -25,8 +25,11 @@ async function sendEmailWithResend(options: SendEmailOptions): Promise<EmailResu
   try {
     const { to, subject, html, text, from, replyTo, cc, bcc, headers } = options
 
+    // Get support email from settings
+    const systemSettings = await settingsService.getSystemSettings()
+
     const fromAddress =
-      from || process.env.RESEND_FROM_EMAIL || `noreply@${siteConfig.supportEmail.split('@')[1]}`
+      from || process.env.RESEND_FROM_EMAIL || `noreply@${systemSettings.supportEmail.split('@')[1]}`
 
     const result = await resend.emails.send({
       from: fromAddress,
@@ -71,8 +74,11 @@ async function sendEmailWithMailgun(options: SendEmailOptions): Promise<EmailRes
 
     const { to, subject, html, text, from, replyTo, cc, bcc, headers } = options
 
+    // Get support email from settings
+    const systemSettings = await settingsService.getSystemSettings()
+
     const fromAddress =
-      from || process.env.MAILGUN_FROM_EMAIL || `noreply@${siteConfig.supportEmail.split('@')[1]}`
+      from || process.env.MAILGUN_FROM_EMAIL || `noreply@${systemSettings.supportEmail.split('@')[1]}`
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const messageData: any = {

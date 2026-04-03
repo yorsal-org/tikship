@@ -5,30 +5,38 @@ import dotenv from 'dotenv'
 // Load environment variables
 dotenv.config()
 
-const SCHEMA_PATH = path.join(process.cwd(), 'prisma/models/schema.prisma')
+const MODELS_DIR = path.join(process.cwd(), 'prisma/models')
 const DATABASE_URL = process.env.DATABASE_URL || ''
 
-function setupDbProvider() {
-  if (!fs.existsSync(SCHEMA_PATH)) {
-    console.error('schema.prisma not found')
-    process.exit(1)
-  }
-
-  let schema = fs.readFileSync(SCHEMA_PATH, 'utf8')
-  let provider = 'postgresql' // default
-
+function getDatabaseProvider(): string {
   if (DATABASE_URL.startsWith('file:') || DATABASE_URL.includes('.db')) {
-    provider = 'sqlite'
+    return 'sqlite'
   } else if (DATABASE_URL.startsWith('mysql://')) {
-    provider = 'mysql'
+    return 'mysql'
   } else if (DATABASE_URL.startsWith('postgresql://') || DATABASE_URL.startsWith('postgres://')) {
-    provider = 'postgresql'
+    return 'postgresql'
+  }
+  return 'postgresql'
+}
+
+function getPrismaFiles(dir: string): string[] {
+  if (!fs.existsSync(dir)) {
+    console.error(`Directory not found: ${dir}`)
+    return []
   }
 
-  console.log(`Detected database provider: ${provider}`)
+  return fs
+    .readdirSync(dir)
+    .filter(file => file.endsWith('.prisma'))
+    .map(file => path.join(dir, file))
+}
+
+function processPrismaFile(filePath: string, provider: string) {
+  let content = fs.readFileSync(filePath, 'utf8')
+  const fileName = path.basename(filePath)
 
   // Update the provider within the datasource block
-  schema = schema.replace(
+  content = content.replace(
     /(datasource\s+db\s+{[\s\S]*?provider\s*=\s*")([^"]*)("[\s\S]*?})/,
     `$1${provider}$3`
   )
@@ -36,23 +44,42 @@ function setupDbProvider() {
   // Handle @db.Text annotations based on provider
   if (provider === 'sqlite') {
     // For SQLite: comment out @db.Text (SQLite doesn't support this annotation)
-    console.log('Commenting out @db.Text annotations for SQLite...')
+    console.log(`Commenting out @db.Text annotations in ${fileName}...`)
     // Only add // before @db.Text if not already commented
-    schema = schema.replace(/(\s+)@db\.Text/g, (match, whitespace) => {
+    content = content.replace(/(\s+)@db\.Text/g, (match, whitespace) => {
       // Check if this line already has // @db.Text
-      const lines = schema.split('\n')
+      const lines = content.split('\n')
       const matchingLine = lines.find(line => line.includes(match) && !line.includes('// @db.Text'))
       return matchingLine ? `${whitespace}// @db.Text` : match
     })
   } else {
     // For MySQL/PostgreSQL: uncomment @db.Text
-    console.log('Enabling @db.Text annotations for MySQL/PostgreSQL...')
+    console.log(`Enabling @db.Text annotations in ${fileName}...`)
     // Remove // before @db.Text
-    schema = schema.replace(/(\s+)\/\/\s*@db\.Text/g, '$1@db.Text')
+    content = content.replace(/(\s+)\/\/\s*@db\.Text/g, '$1@db.Text')
   }
 
-  fs.writeFileSync(SCHEMA_PATH, schema)
-  console.log(`Successfully updated schema.prisma provider to: ${provider}`)
+  fs.writeFileSync(filePath, content)
+  console.log(`Successfully updated ${fileName} provider to: ${provider}`)
+}
+
+function setupDbProvider() {
+  const files = getPrismaFiles(MODELS_DIR)
+
+  if (files.length === 0) {
+    console.error('No .prisma files found in prisma/models/')
+    process.exit(1)
+  }
+
+  const provider = getDatabaseProvider()
+  console.log(`Detected database provider: ${provider}`)
+  console.log(`Found ${files.length} .prisma files to process\n`)
+
+  for (const file of files) {
+    processPrismaFile(file, provider)
+  }
+
+  console.log(`\nSuccessfully updated all ${files.length} prisma files`)
 }
 
 try {

@@ -8,6 +8,7 @@ export interface ModuleState {
   content: boolean
   commerce: boolean
   user: boolean
+  social: boolean
 }
 
 // Key files to check for each module
@@ -15,6 +16,7 @@ const moduleKeyFiles: Record<keyof ModuleState, string> = {
   content: 'src/app/admin/articles/page.tsx',
   commerce: 'src/app/admin/products/page.tsx',
   user: 'src/app/admin/members/page.tsx',
+  social: 'src/lib/social/index.ts',
 }
 
 export function getModuleState(): ModuleState {
@@ -24,6 +26,7 @@ export function getModuleState(): ModuleState {
     content: fs.existsSync(path.join(projectRoot, moduleKeyFiles.content)),
     commerce: fs.existsSync(path.join(projectRoot, moduleKeyFiles.commerce)),
     user: fs.existsSync(path.join(projectRoot, moduleKeyFiles.user)),
+    social: fs.existsSync(path.join(projectRoot, moduleKeyFiles.social)),
   }
 }
 
@@ -35,6 +38,7 @@ export function getEnabledMenuGroups(groups: { groupKey: string; items: unknown[
     if (group.groupKey === 'group_content' && !state.content) return false
     if (group.groupKey === 'group_commerce' && !state.commerce) return false
     if (group.groupKey === 'group_user' && !state.user) return false
+    if (group.groupKey === 'group_social' && !state.social) return false
     return true
   })
 }

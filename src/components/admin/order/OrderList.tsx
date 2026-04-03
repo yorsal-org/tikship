@@ -15,7 +15,6 @@ import { truncateId } from '@/lib/utils/string'
 import { getOrderStatusVariant } from '@/lib/utils/badge'
 import { useApi } from '@/hooks/useApi'
 import { useAdminPagination as usePagination } from '@/hooks/useAdminPagination'
-import { siteConfig } from '@/config/site'
 import type { Order, OrdersListResponse } from '@/types/order'
 
 type OrderBulkAction = 'completed' | 'failed' | 'refunded' | 'delete'

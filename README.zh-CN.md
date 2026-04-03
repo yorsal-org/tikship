@@ -25,6 +25,9 @@
 - **产品管理** - 支持一次性支付和订阅模式
 - **订单管理** - 完整的订单生命周期管理
 - **仪表板** - 实时统计数据和图表展示
+- **社交管理** - 评论和回复管理，支持审核功能
+- **系统设置** - 站点名称、logo、联系方式、SEO 等全局配置
+- **主题配置** - 主题模式切换和品牌颜色自定义
 
 ### 用户端功能
 
@@ -33,6 +36,7 @@
 - **博客系统** - 文章列表、详情页、分类筛选
 - **产品购买** - 支持 Stripe 和 PayPal 双支付方式
 - **订单中心** - 查看订单历史、状态跟踪
+- **社交互动** - 文章/产品点赞和评论，支持嵌套回复
 
 ### 支付集成
 
@@ -45,13 +49,15 @@
 ### 技术亮点
 
 - **多语言支持** - 中文、英文、西班牙语（基于 next-intl）
-- **主题系统** - 33 种 DaisyUI 主题，支持亮色/暗色模式切换
+- **主题系统** - 33 种 DaisyUI 主题，支持亮色/暗色模式切换和品牌颜色自定义
 - **文件上传** - 支持本地存储和 ImgBB 图床
 - **邮件服务** - Resend 邮件发送（验证码、密码重置、订单通知）
 - **API 文档** - OpenAPI 3.0 规范，交互式 API 文档
 - **组件文档** - Storybook 组件库，100+ 交互式示例
 - **安全防护** - CORS、CSRF、速率限制、输入验证
 - **多数据库支持** - PostgreSQL / MySQL / SQLite
+- **社交系统** - 点赞、评论、回复功能，支持用户互动追踪
+- **系统设置** - 动态站点配置 API，支持全局设置管理
 
 ## 📦 技术栈
 
@@ -214,7 +220,76 @@ npm run dev
 
 ## 📚 核心功能详解
 
-### 1. RBAC 权限系统
+### 1. 社交系统
+
+完整的用户互动社交系统：
+
+**评论系统**：
+
+- 嵌套回复，支持线程式对话
+- 评论审核（管理员可删除不当评论）
+- 用户 @ 提及支持
+- 自动归属作者信息
+
+**点赞系统**：
+
+- 文章和产品点赞
+- 评论和回复点赞
+- 重复点赞防护
+- 实时点赞数更新
+
+**社交 API 端点**：
+
+- `POST /api/social/comments` - 创建评论
+- `GET /api/social/comments` - 获取评论列表
+- `POST /api/social/likes` - 切换点赞
+- `POST /api/social/replies` - 创建回复
+- 管理端评论管理接口
+
+### 2. 系统设置
+
+动态全局配置管理：
+
+**可配置项**：
+
+- 站点名称和 logo
+- 联系信息（邮箱、电话、地址）
+- 社交媒体链接
+- SEO 默认值（标题、描述、关键词）
+- 版权信息
+- 自定义品牌颜色
+
+**设置 API**：
+
+- `GET /api/settings` - 公开站点设置
+- `GET /api/admin/settings` - 管理端设置管理
+- `PUT /api/admin/settings` - 更新设置
+- 实时设置同步
+
+### 3. 主题配置
+
+增强的主题系统，支持品牌定制：
+
+**主题模式**：
+
+- `light` - 亮色模式
+- `dark` - 暗色模式
+- `system` - 跟随系统
+
+**自定义品牌颜色**：
+
+- 主色
+- 辅助色
+- 强调色
+- 中性色
+
+**预设主题**：
+
+- 33 种 DaisyUI 预设主题
+- 自定义亮色/暗色主题选择
+- 品牌颜色继承
+
+### 4. RBAC 权限系统
 
 完整的基于角色的访问控制系统：
 
@@ -242,7 +317,7 @@ export async function GET(req: NextRequest) {
 }
 ```
 
-### 2. 支付系统
+### 5. 支付系统
 
 支持 Stripe 和 PayPal 双支付方式：
 
@@ -268,7 +343,7 @@ export async function GET(req: NextRequest) {
 - Stripe：`checkout.session.completed`、`checkout.session.expired` 等
 - PayPal：`PAYMENT.CAPTURE.COMPLETED`、`BILLING.SUBSCRIPTION.ACTIVATED` 等
 
-### 3. 内容管理系统
+### 6. 内容管理系统
 
 功能完整的 CMS：
 
@@ -297,7 +372,7 @@ export async function GET(req: NextRequest) {
 - 支持图片、链接、列表等
 - 实时预览
 
-### 4. 文件上传系统
+### 7. 文件上传系统
 
 灵活的文件上传方案：
 
@@ -319,7 +394,7 @@ export async function GET(req: NextRequest) {
 - 文件大小限制（默认 5MB）
 - 用户认证检查
 
-### 5. 邮件通知系统
+### 8. 邮件通知系统
 
 基于 Resend 的邮件服务：
 
@@ -337,7 +412,7 @@ export async function GET(req: NextRequest) {
 - 纯文本备用版本
 - 品牌一致的设计
 
-### 6. 多语言系统
+### 9. 多语言系统
 
 基于 next-intl 的国际化方案：
 
@@ -365,23 +440,7 @@ function MyComponent() {
 }
 ```
 
-### 7. 主题系统
-
-自定义主题管理系统：
-
-**主题模式**：
-
-- `light` - 亮色模式
-- `dark` - 暗色模式
-- `system` - 跟随系统
-
-**DaisyUI 主题**：
-
-- 33 种预设主题
-- 可自定义亮色/暗色主题
-- 通过环境变量配置
-
-### 8. API 文档系统
+### 10. API 文档系统
 
 基于 OpenAPI 3.0 的交互式文档：
 
@@ -404,7 +463,7 @@ npm run openapi:generate
 - 在线文档：http://localhost:3000/api-docs
 - OpenAPI JSON：http://localhost:3000/openapi.json
 
-### 9. Storybook 组件库
+### 11. Storybook 组件库
 
 完整的组件文档系统：
 
@@ -430,7 +489,7 @@ npm run storybook
 
 访问：http://localhost:6006
 
-### 10. 安全功能
+### 12. 安全功能
 
 多层安全防护：
 

@@ -7,9 +7,7 @@ datasource db {
 
 generator client {
   provider = "prisma-client-js"
-  output = "../generated"
-  
+  output   = "../generated"
 }
-
 
 // Models are split into separate files in ./models/

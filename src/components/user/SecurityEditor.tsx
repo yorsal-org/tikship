@@ -9,7 +9,7 @@ import { toast } from '@/lib/utils/toast'
 import PasswordStrengthIndicator from '@/components/auth/register/PasswordStrengthIndicator'
 import { useApi } from '@/hooks/useApi'
 import { validatePasswordStrength } from '@/lib/utils/validators'
-import { siteConfig } from '@/config/site'
+import { useAuthSettings } from '@/hooks/useSettings'
 
 interface UserMeResponse {
   hasPassword: boolean
@@ -17,6 +17,7 @@ interface UserMeResponse {
 
 export default function SecurityEditor() {
   const t = useTranslations('user_profile')
+  const { auth } = useAuthSettings()
   const [hasPassword, setHasPassword] = useState<boolean | null>(null)
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
@@ -39,7 +40,7 @@ export default function SecurityEditor() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const minStrength = siteConfig.auth.password.minStrength as 'weak' | 'medium' | 'strong'
+  const minStrength = auth.passwordMinStrength
   const strengthResult = validatePasswordStrength(newPassword)
   const strengthWeight: Record<string, number> = {
     none: 0,

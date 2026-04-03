@@ -32,7 +32,7 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { useTranslations, useLocale } from 'next-intl'
-import { siteConfig } from '@/config/site'
+import { useLocaleSettings } from '@/hooks/useSettings'
 import { DeleteConfirmModal } from '@/components/admin/common/DeleteConfirmModal'
 import { useModalState } from '@/hooks/useModalState'
 import { toast } from '@/lib/utils/toast'
@@ -211,6 +211,7 @@ interface EditModalProps {
 }
 
 function EditCategoryModal({ cat, onClose, onSaved, t }: EditModalProps) {
+  const { locale: localeSettings } = useLocaleSettings()
   const [name, setName] = useState(cat.name)
   const [description, setDescription] = useState(cat.description || '')
   const [locale, setLocale] = useState(cat.locale || 'en')
@@ -258,7 +259,7 @@ function EditCategoryModal({ cat, onClose, onSaved, t }: EditModalProps) {
               value={locale}
               onChange={e => setLocale(e.target.value)}
             >
-              {siteConfig.locale.supported.map(lang => (
+              {localeSettings.supported.map(lang => (
                 <option key={lang.value} value={lang.value}>
                   {lang.nativeName} ({lang.label})
                 </option>
@@ -317,6 +318,7 @@ function EditCategoryModal({ cat, onClose, onSaved, t }: EditModalProps) {
 export default function CategoriesPage() {
   const t = useTranslations('admin.posts.categories')
   const currentLocale = useLocale()
+  const { locale: localeSettings } = useLocaleSettings()
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [parentId, setParentId] = useState<string>('')
@@ -351,10 +353,10 @@ export default function CategoriesPage() {
 
   const flatList = flattenTree(localTree)
   const parentOptions = flatList.filter(c => c.depth < 2 && c.locale === locale)
-  const groupedTrees = siteConfig.locale.supported
+  const groupedTrees = localeSettings.supported
     .map(lang => ({
       lang,
-      nodes: localTree.filter(cat => (cat.locale || siteConfig.locale.default) === lang.value),
+      nodes: localTree.filter(cat => (cat.locale || localeSettings.default) === lang.value),
     }))
     .filter(group => group.nodes.length > 0)
 
@@ -458,7 +460,7 @@ export default function CategoriesPage() {
                 value={locale}
                 onChange={e => setLocale(e.target.value)}
               >
-                {siteConfig.locale.supported.map(lang => (
+                {localeSettings.supported.map(lang => (
                   <option key={lang.value} value={lang.value}>
                     {lang.nativeName} ({lang.label})
                   </option>
