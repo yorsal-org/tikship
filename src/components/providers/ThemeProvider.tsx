@@ -42,6 +42,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     return currentTheme
   }
 
+  const [isCustom, setIsCustom] = useState<boolean | undefined>(false)
+
   const [theme, setThemeState] = useState(() => {
     if (typeof window === 'undefined') return defaultTheme
     const storedTheme = localStorage.getItem('theme') as string | null
@@ -59,10 +61,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   })
 
   // Apply theme to document
-  const applyTheme = (actualTheme: string, custom?: boolean) => {
+  const applyTheme = (actualTheme: string) => {
     if (typeof window === 'undefined') return
     const themeValue = actualTheme === 'dark' ? darkTheme : lightTheme
-    document.documentElement.setAttribute('data-theme', custom ? actualTheme : themeValue)
+    document.documentElement.setAttribute('data-theme', isCustom ? actualTheme : themeValue)
   }
 
   // Apply theme on mount and when theme settings change
@@ -94,7 +96,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     const resolved = resolveTheme(newTheme)
     setResolvedTheme(resolved)
-    applyTheme(resolved, custom)
+    setIsCustom(custom)
+    applyTheme(resolved)
   }
 
   // Always provide context to avoid "useTheme must be used within ThemeProvider" error
