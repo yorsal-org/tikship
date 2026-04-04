@@ -479,6 +479,27 @@ export async function getAdminReplies({
   }
 }
 
+// ============ Comment Stats ============
+
+/**
+ * Get comment statistics
+ */
+export async function getCommentStats() {
+  const [total, approved, pending, rejected] = await Promise.all([
+    prisma.comment.count(),
+    prisma.comment.count({ where: { status: 'APPROVED' } }),
+    prisma.comment.count({ where: { status: 'PENDING' } }),
+    prisma.comment.count({ where: { status: 'REJECTED' } }),
+  ])
+
+  return {
+    total,
+    approved,
+    pending,
+    rejected,
+  }
+}
+
 // ============ Like Service ============
 
 /**

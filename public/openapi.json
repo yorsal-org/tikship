@@ -4028,6 +4028,30 @@
         }
       }
     },
+    "/admin/social/comments/stats": {
+      "get": {
+        "operationId": "get-admin-social-comments-stats",
+        "summary": "Get comment statistics",
+        "description": "Retrieve comment statistics including total, approved, pending, and rejected counts",
+        "tags": [
+          "Admin - Social"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
     "/admin/social/comments/{id}/replies": {
       "put": {
         "operationId": "put-admin-social-comments-{id}-replies",

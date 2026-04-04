@@ -1083,7 +1083,11 @@
         "close": "关闭",
         "approve": "通过",
         "reject": "拒绝",
-        "delete": "删除"
+        "delete": "删除",
+        "stats_total": "评论总数",
+        "stats_approved": "已通过",
+        "stats_pending": "待审核",
+        "stats_rejected": "已拒绝"
       },
       "settings": {
         "title": "社交设置",

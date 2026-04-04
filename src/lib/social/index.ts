@@ -23,6 +23,7 @@ import {
   toggleLike,
   getLikeInfo,
   isFeatureEnabled,
+  getCommentStats,
 } from './service'
 
 export const socialService = {
@@ -43,4 +44,5 @@ export const socialService = {
   toggleLike,
   getLikeInfo,
   isFeatureEnabled,
+  getCommentStats,
 }

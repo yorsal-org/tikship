@@ -1084,7 +1084,11 @@
         "close": "Close",
         "approve": "Approve",
         "reject": "Reject",
-        "delete": "Delete"
+        "delete": "Delete",
+        "stats_total": "Total Comments",
+        "stats_approved": "Approved",
+        "stats_pending": "Pending",
+        "stats_rejected": "Rejected"
       },
       "settings": {
         "title": "Social Settings",

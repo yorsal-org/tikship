@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useTranslations } from 'next-intl'
 import { toast } from '@/lib/utils/toast'
 import { Table, Column } from '@/components/ui/Table'
+import { CommentStats } from '@/components/admin/social/CommentStats'
 import { DeleteConfirmModal } from '@/components/admin/common/DeleteConfirmModal'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { RepliesModal } from '@/components/admin/social/RepliesModal'
@@ -250,6 +251,9 @@ export default function CommentsPage() {
         <h1 className="text-3xl font-bold">{t('title')}</h1>
         <p className="mt-2 text-base-content/70">{t('subtitle')}</p>
       </div>
+
+      {/* Stats */}
+      <CommentStats />
 
       {/* Filters */}
       <div className="flex gap-4 flex-wrap">
