@@ -5,6 +5,7 @@ import { postService } from '@/lib/post/service'
 import { PERMISSIONS } from '@/config/permissions'
 import { logAudit, AUDIT_ACTIONS } from '@/lib/audit/service'
 import { PostStatus, PostType, PostInput, PostBulkAction } from '@/types/post'
+import { parsePagination } from '@/lib/utils/pagination'
 import type { CreatePostBody, BulkUpdatePostsBody } from '@/types/api'
 
 /**
@@ -31,8 +32,11 @@ export async function GET(req: NextRequest) {
     const categoryId = searchParams.get('categoryId') || undefined
     const tagId = searchParams.get('tagId') || undefined
     const search = searchParams.get('search') || ''
-    const page = parseInt(searchParams.get('page') || '1')
-    const pageSize = parseInt(searchParams.get('pageSize') || '10')
+    const { page, pageSize } = parsePagination(
+      searchParams.get('page'),
+      searchParams.get('pageSize'),
+      { defaultPageSize: 10 }
+    )
 
     const result = await postService.listPosts({
       type,

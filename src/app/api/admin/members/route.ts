@@ -4,6 +4,7 @@ import { requireAdminAuth } from '@/lib/admin'
 import { ApiResponse } from '@/lib/utils/api-response'
 import { PERMISSIONS } from '@/config/permissions'
 import { settingsService } from '@/lib/settings/service'
+import { parsePagination } from '@/lib/utils/pagination'
 
 type MemberBulkAction = 'activate' | 'deactivate' | 'delete'
 
@@ -25,11 +26,14 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url)
     const search = searchParams.get('search') || ''
     const status = searchParams.get('status') // 'active' or 'inactive'
-    const page = parseInt(searchParams.get('page') || '1')
 
     // Get page size from settings
     const adminSettings = await settingsService.getAdminSettings()
-    const pageSize = parseInt(searchParams.get('pageSize') || String(adminSettings.pageSize))
+    const { page, pageSize } = parsePagination(
+      searchParams.get('page'),
+      searchParams.get('pageSize'),
+      { defaultPageSize: adminSettings.pageSize }
+    )
 
     const where: { AND: Array<Record<string, unknown>> } = {
       AND: [],

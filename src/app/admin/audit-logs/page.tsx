@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/Button'
 import { useApi } from '@/hooks/useApi'
 import { toast } from '@/lib/utils/toast'
 import { AuditLog, AuditLogsListResponse } from '@/types/admin'
-import { useAdminPagination as usePagination } from '@/hooks/useAdminPagination'
+import { useTablePagination } from '@/hooks/useTablePagination'
 import { truncateId } from '@/lib/utils/string'
 import { getAuditActionVariant, getBadgeClassName } from '@/lib/utils/badge'
 import { formatters } from '@/lib/utils/formatters'
@@ -22,7 +22,7 @@ export default function AuditLogsPage() {
     handlePageSizeChange,
     getParam,
     pageSize,
-  } = usePagination()
+  } = useTablePagination()
 
   const actionParam = getParam('action')
   const resourceParam = getParam('resource')
@@ -104,7 +104,7 @@ export default function AuditLogsPage() {
 
   const fetchLogs = useCallback(
     async (page: number) => {
-      const { success, data: result } = await auditLogsApi.request(undefined, {
+      const result = await auditLogsApi.request(undefined, {
         params: {
           page,
           pageSize,
@@ -114,13 +114,13 @@ export default function AuditLogsPage() {
         onError: (err: string) => toast.error(err),
       })
 
-      if (success && result) {
-        setLogs(result.logs)
+      if (result.success && 'data' in result) {
+        setLogs(result.data.logs)
         setPagination({
-          page: result.page,
-          pageSize: result.pageSize,
-          total: result.total,
-          totalPages: result.totalPages,
+          page: result.data.page,
+          pageSize: result.data.pageSize,
+          total: result.data.total,
+          totalPages: result.data.totalPages,
         })
       }
     },

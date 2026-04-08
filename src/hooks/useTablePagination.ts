@@ -6,15 +6,16 @@ import { useAdminSettings } from '@/hooks/useSettings'
 
 const PAGESIZE_STORAGE_KEY = 'admin_pageSize'
 
-export interface UsePaginationOptions {
+export interface UseTablePaginationOptions {
   pageSize?: number
   debounceMs?: number
 }
 
 /**
  * Hook to manage pagination and search state synchronized with URL parameters.
+ * Designed for use with Table components in admin pages.
  */
-export function useAdminPagination({ pageSize: initialPageSize, debounceMs = 500 }: UsePaginationOptions = {}) {
+export function useTablePagination({ pageSize: initialPageSize, debounceMs = 500 }: UseTablePaginationOptions = {}) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { admin } = useAdminSettings()
@@ -40,7 +41,8 @@ export function useAdminPagination({ pageSize: initialPageSize, debounceMs = 500
     setIsHydrated(true)
   }, [])
 
-  const page = parseInt(searchParams.get('page') || '1', 10)
+  const pageRaw = parseInt(searchParams.get('page') || '', 10)
+  const page = isNaN(pageRaw) || pageRaw < 1 ? 1 : pageRaw
   const search = searchParams.get('search') || ''
 
   // Update local search input if URL changes externally (e.g., browser back button)

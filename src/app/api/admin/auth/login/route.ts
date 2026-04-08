@@ -31,7 +31,12 @@ export async function POST(req: NextRequest) {
     })
 
     // Generate JWT token
-    const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET || 'secret')
+    const secret = process.env.NEXTAUTH_SECRET
+    if (!secret) {
+      console.error('Admin login error: NEXTAUTH_SECRET environment variable is not set')
+      return await ApiResponse.adminError('server_configuration_error', 500)
+    }
+    const secretEncoder = new TextEncoder().encode(secret)
     const alg = 'HS256'
     const token = await new SignJWT({
       id: adminUser.id,
@@ -41,7 +46,7 @@ export async function POST(req: NextRequest) {
       .setProtectedHeader({ alg })
       .setIssuedAt()
       .setExpirationTime('24h')
-      .sign(secret)
+      .sign(secretEncoder)
 
     // Set cookie
     const cookieStore = await cookies()

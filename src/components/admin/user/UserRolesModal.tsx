@@ -28,10 +28,10 @@ export function UserRolesModal({ isOpen, onClose, onSuccess, user }: UserRolesMo
   const submitApi = useApi('', 'POST')
 
   const fetchRoles = async () => {
-    const { success, data: result } = await rolesApi.request(undefined)
+    const result = await rolesApi.request(undefined)
 
-    if (success && result) {
-      setRoles(result.roles)
+    if (result.success && 'data' in result) {
+      setRoles(result.data.roles)
     }
   }
 

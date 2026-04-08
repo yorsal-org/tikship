@@ -68,9 +68,9 @@ export default function SettingsPage() {
   // Load settings on mount and update forms when data loads
   useEffect(() => {
     const fetchSettings = async () => {
-      const { success, data } = await settingsApi.request(undefined)
-      if (success && data) {
-        const s = data.settings
+      const result = await settingsApi.request(undefined)
+      if (result.success && 'data' in result) {
+        const s = result.data.settings
         setSocialForm(s.social)
         setSystemForm(s.system)
         setLocaleForm(s.locale)

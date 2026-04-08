@@ -7,7 +7,7 @@ import { Globe, CreditCard, Trash2, Power, PowerOff } from 'lucide-react'
 import { RichTextEditor } from '@/components/admin/post/RichTextEditor'
 import { ImageUpload } from '@/components/ui/ImageUpload'
 import { Button } from '@/components/ui/Button'
-import { useApi } from '@/hooks/useApi'
+import { useApi, ApiSuccess } from '@/hooks/useApi'
 import { toast } from '@/lib/utils/toast'
 import { generateSlug } from '@/lib/utils/common'
 import { validationConfig } from '@/config/validation'
@@ -78,12 +78,12 @@ export function ProductForm({ product }: ProductFormProps) {
   useEffect(() => {
     if (isEditing && product) {
       const loadMethods = async () => {
-        const { success, data } = await methodsApi.request(undefined, {
+        const result = await methodsApi.request(undefined, {
           onError: () => {},
         })
 
-        if (success && data?.paymentMethods) {
-          data.paymentMethods.forEach((m) => {
+        if (result.success && 'data' in result) {
+          result.data.paymentMethods.forEach((m) => {
             const method: PaymentMethodForm = {
               id: m.id,
               provider: m.provider,
@@ -135,14 +135,14 @@ export function ProductForm({ product }: ProductFormProps) {
       setCheckingPriceId(true)
       setStripePriceIdError('')
 
-      const { success, data } = await checkPriceIdApi.request(undefined, {
+      const result = await checkPriceIdApi.request(undefined, {
         params: { stripePriceId: stripeMethod.stripePriceId },
         onError: () => {},
       })
 
       setCheckingPriceId(false)
 
-      if (success && data?.exists) {
+      if (result.success && 'data' in result && result.data.exists) {
         setStripePriceIdError(t('stripe_price_id_exists'))
       }
     }, 500)
@@ -168,14 +168,14 @@ export function ProductForm({ product }: ProductFormProps) {
       setCheckingPlanId(true)
       setPaypalPlanIdError('')
 
-      const { success, data } = await checkPlanIdApi.request(undefined, {
+      const result = await checkPlanIdApi.request(undefined, {
         params: { paypalPlanId: paypalMethod.paypalPlanId },
         onError: () => {},
       })
 
       setCheckingPlanId(false)
 
-      if (success && data?.exists) {
+      if (result.success && 'data' in result && result.data.exists) {
         setPaypalPlanIdError(t('paypal_plan_id_exists'))
       }
     }, 500)
@@ -211,13 +211,13 @@ export function ProductForm({ product }: ProductFormProps) {
       }
       
       // Final check for uniqueness before saving
-      const { success, data } = await checkPriceIdApi.request(undefined, {
+      const result = await checkPriceIdApi.request(undefined, {
         params: { stripePriceId: stripeMethod.stripePriceId },
         onError: () => {},
       })
-      
+
       // Only check if creating new payment method (no id)
-      if (success && data?.exists && !stripeMethod.id) {
+      if (result.success && 'data' in result && result.data.exists && !stripeMethod.id) {
         toast.error(t('stripe_price_id_exists'))
         return
       }
@@ -237,13 +237,13 @@ export function ProductForm({ product }: ProductFormProps) {
         }
         
         // Final check for uniqueness before saving
-        const { success, data } = await checkPlanIdApi.request(undefined, {
+        const result = await checkPlanIdApi.request(undefined, {
           params: { paypalPlanId: paypalMethod.paypalPlanId },
           onError: () => {},
         })
-        
+
         // Only check if creating new payment method (no id)
-        if (success && data?.exists && !paypalMethod.id) {
+        if (result.success && 'data' in result && result.data.exists && !paypalMethod.id) {
           toast.error(t('paypal_plan_id_exists'))
           return
         }
@@ -261,7 +261,7 @@ export function ProductForm({ product }: ProductFormProps) {
 
     // Save product first
     const api = isEditing ? updateApi : createApi
-    const { success, data } = await api.request(
+    const result = await api.request(
       {
         name,
         description,
@@ -279,12 +279,12 @@ export function ProductForm({ product }: ProductFormProps) {
       }
     )
 
-    if (!success || !data) {
+    if (!result.success || !('data' in result)) {
       console.error('Failed to save product')
       return
     }
 
-    const productId = isEditing ? product!.id : (data as { product: Product }).product.id
+    const productId = isEditing ? product!.id : (result.data as { product: Product }).product.id
     console.log('Product saved, ID:', productId)
 
     // Save payment methods

@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/db/prisma'
 import { ApiResponse } from '@/lib/utils/api-response'
 import { getAuthenticatedUser } from '@/lib/auth/utils'
+import { parsePagination } from '@/lib/utils/pagination'
 
 
 /**
@@ -24,8 +25,11 @@ export async function GET(req: NextRequest) {
     }
 
     const { searchParams } = new URL(req.url)
-    const page = parseInt(searchParams.get('page') || '1')
-    const pageSize = parseInt(searchParams.get('pageSize') || '10')
+    const { page, pageSize } = parsePagination(
+      searchParams.get('page'),
+      searchParams.get('pageSize'),
+      { defaultPageSize: 10 }
+    )
     const status = searchParams.get('status') || ''
     const skip = (page - 1) * pageSize
 

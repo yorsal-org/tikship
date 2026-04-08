@@ -4,6 +4,7 @@ import { ApiResponse } from '@/lib/utils/api-response'
 import { socialService } from '@/lib/social'
 import { PERMISSIONS } from '@/config/permissions'
 import { logAudit, AUDIT_ACTIONS } from '@/lib/audit/service'
+import { parsePagination } from '@/lib/utils/pagination'
 import type { CommentStatus, TargetType } from '@/types/social'
 
 /**
@@ -21,8 +22,10 @@ export async function GET(req: NextRequest) {
     const status = searchParams.get('status') as CommentStatus | null
     const targetType = searchParams.get('targetType') as TargetType | null
     const search = searchParams.get('search') || ''
-    const page = parseInt(searchParams.get('page') || '1')
-    const pageSize = parseInt(searchParams.get('pageSize') || '20')
+    const { page, pageSize } = parsePagination(
+      searchParams.get('page'),
+      searchParams.get('pageSize')
+    )
 
     const result = await socialService.getAdminComments({
       status: status || undefined,

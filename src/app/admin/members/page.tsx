@@ -13,7 +13,7 @@ import { useApi } from '@/hooks/useApi'
 import { toast } from '@/lib/utils/toast'
 import { Member, MemberStats as MemberStatsType, MembersListResponse } from '@/types/admin'
 import Image from 'next/image'
-import { useAdminPagination as usePagination } from '@/hooks/useAdminPagination'
+import { useTablePagination } from '@/hooks/useTablePagination'
 import { useModalState } from '@/hooks/useModalState'
 import { useDataFetch } from '@/hooks/useDataFetch'
 import { formatters } from '@/lib/utils/formatters'
@@ -32,7 +32,7 @@ export default function AdminMembersPage() {
     handleFilterChange: syncFilters,
     getParam,
     pageSize,
-  } = usePagination()
+  } = useTablePagination()
 
   const statusParam = getParam('status')
 
@@ -62,9 +62,9 @@ export default function AdminMembersPage() {
   // Fetch stats on mount
   useEffect(() => {
     const fetchStats = async () => {
-      const { success, data } = await statsApi.request(undefined)
-      if (success && data) {
-        setStats(data)
+      const result = await statsApi.request(undefined)
+      if (result.success && 'data' in result) {
+        setStats(result.data)
       }
     }
     fetchStats()
@@ -73,7 +73,7 @@ export default function AdminMembersPage() {
 
   const fetchUsers = useCallback(
     async (page: number) => {
-      const { success, data: result } = await membersApi.request(undefined, {
+      const result = await membersApi.request(undefined, {
         params: {
           search: searchParam,
           status: statusParam || undefined,
@@ -83,15 +83,15 @@ export default function AdminMembersPage() {
         onError: (err: string) => toast.error(err),
       })
 
-      if (success && result) {
-        const nextUsers = result.users
+      if (result.success && 'data' in result) {
+        const nextUsers = result.data.users
         setUsers(nextUsers)
         setSelectedIds(current => current.filter(id => nextUsers.some(u => u.id === id)))
         setPagination({
-          page: result.page,
-          pageSize: result.pageSize,
-          total: result.total,
-          totalPages: result.totalPages,
+          page: result.data.page,
+          pageSize: result.data.pageSize,
+          total: result.data.total,
+          totalPages: result.data.totalPages,
         })
       }
     },
@@ -172,12 +172,12 @@ export default function AdminMembersPage() {
 
   const handleBulkConfirm = async () => {
     if (!pendingBulkAction) return
-    const { success, data } = await bulkMembersApi.request(
+    const result = await bulkMembersApi.request(
       { ids: selectedIds, action: pendingBulkAction },
       { onError: handleError }
     )
-    if (success) {
-      const count = data?.count ?? selectedIds.length
+    if (result.success && 'data' in result) {
+      const count = result.data.count ?? selectedIds.length
       toast.success(
         t(pendingBulkAction === 'delete' ? 'bulk_delete_success' : 'bulk_status_updated', { count })
       )

@@ -8,7 +8,7 @@ import { CategoriesTreeResponse } from '@/types/admin'
 
 type CategoryTreeNode = CategoriesTreeResponse['categories'][number]
 import { ApiResponse } from '@/types/api'
-import { useApi } from '@/hooks/useApi'
+import { useApi, ApiSuccess } from '@/hooks/useApi'
 import { Globe, History, ArrowLeft } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { toast } from '@/lib/utils/toast'
@@ -80,8 +80,8 @@ export function PostEditor({ initialData, type }: PostEditorProps) {
   useEffect(() => {
     if (type === PostType.ARTICLE) {
       fetchCategories(undefined, {
-        onSuccess: (res: ApiResponse<CategoriesTreeResponse>) => {
-          if (res.data?.categories) {
+        onSuccess: (res: ApiSuccess<CategoriesTreeResponse>) => {
+          if (res.data.categories) {
             setAllCategories(res.data.categories)
           }
         },

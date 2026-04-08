@@ -22,12 +22,12 @@ export function MemberDetailsModal({ isOpen, onClose, userId }: MemberDetailsMod
   const memberApi = useApi<MemberDetailResponse>('', 'GET')
 
   const fetchUser = async () => {
-    const { success, data: result } = await memberApi.request(undefined, {
+    const result = await memberApi.request(undefined, {
       urlOverride: `/api/admin/members/${userId}`,
     })
 
-    if (success && result) {
-      setUser(result.user)
+    if (result.success && 'data' in result) {
+      setUser(result.data.user)
     }
   }
 

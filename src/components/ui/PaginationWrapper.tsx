@@ -1,7 +1,8 @@
 'use client'
 
 import { ReactNode } from 'react'
-import { ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react'
+import { ChevronDown } from 'lucide-react'
+import { Pagination } from '@/components/ui/Pagination'
 
 export type PaginationType = 'traditional' | 'loadMore' | 'infinite'
 
@@ -59,60 +60,16 @@ export function PaginationWrapper({
   const renderTraditionalPagination = () => {
     if (totalPages <= 1) return null
 
-    const buttons = []
-    for (let i = 1; i <= totalPages; i++) {
-      if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
-        buttons.push(
-          <button
-            key={i}
-            className={`btn btn-sm join-item ${currentPage === i ? 'btn-primary' : ''}`}
-            onClick={() => onPageChange(i)}
-            disabled={loading}
-          >
-            {i}
-          </button>
-        )
-      } else if (
-        (i === 2 && currentPage > 3) ||
-        (i === totalPages - 1 && currentPage < totalPages - 2)
-      ) {
-        buttons.push(
-          <button key={`ellipsis-${i}`} className="btn btn-sm btn-disabled join-item">
-            ...
-          </button>
-        )
-      }
-    }
-
     return (
-      <div className="mt-12 flex flex-col sm:flex-row items-center justify-between gap-4">
-        {showSummary && (
-          <div className="text-sm text-base-content/60">
-            Showing {(currentPage - 1) * pageSize + 1} to{' '}
-            {Math.min(currentPage * pageSize, totalCount)} of {totalCount} results
-          </div>
-        )}
-
-        <div className="join">
-          <button
-            className="btn btn-sm join-item"
-            disabled={currentPage === 1 || loading}
-            onClick={() => onPageChange(currentPage - 1)}
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-
-          {buttons}
-
-          <button
-            className="btn btn-sm join-item"
-            disabled={currentPage === totalPages || loading}
-            onClick={() => onPageChange(currentPage + 1)}
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        pageSize={pageSize}
+        totalCount={totalCount}
+        onPageChange={onPageChange}
+        showSummary={showSummary}
+        loading={loading}
+      />
     )
   }
 
@@ -148,7 +105,7 @@ export function PaginationWrapper({
   // Infinite scroll indicator and trigger
   const renderInfiniteScrollIndicator = () => {
     return (
-      <div ref={observerTarget} className="mt-12 flex justify-center min-h-[100px]">
+      <div ref={observerTarget} className="mt-12 flex justify-center min-h-25">
         {loading && hasMore && <span className="loading loading-spinner loading-lg" />}
         {!hasMore && <p className="text-base-content/60">{noMoreText}</p>}
       </div>

@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { ApiResponse } from '@/lib/utils/api-response'
 import { postService } from '@/lib/post/service'
+import { parsePagination } from '@/lib/utils/pagination'
 import { PostType } from '@/types/post'
 
 
@@ -18,8 +19,11 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url)
     const categoryId = searchParams.get('categoryId') || searchParams.get('category') || undefined
     const tagId = searchParams.get('tagId') || undefined
-    const page = parseInt(searchParams.get('page') || '1')
-    const pageSize = parseInt(searchParams.get('pageSize') || '12')
+    const { page, pageSize } = parsePagination(
+      searchParams.get('page'),
+      searchParams.get('pageSize'),
+      { defaultPageSize: 12 }
+    )
     const locale = searchParams.get('locale') || undefined
 
     let categoryIds: string[] | undefined

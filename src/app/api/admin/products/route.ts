@@ -4,6 +4,7 @@ import { requireAdminAuth } from '@/lib/admin'
 import { ApiResponse } from '@/lib/utils/api-response'
 import { PERMISSIONS } from '@/config/permissions'
 import { logAudit } from '@/lib/audit/service'
+import { parsePagination } from '@/lib/utils/pagination'
 import type { CreateProductBody } from '@/types/api'
 
 type ProductBulkAction = 'activate' | 'deactivate' | 'delete'
@@ -24,8 +25,11 @@ export async function GET(req: NextRequest) {
     if (error) return error
 
     const { searchParams } = new URL(req.url)
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('pageSize') || '10')
+    const { page, pageSize: limit } = parsePagination(
+      searchParams.get('page'),
+      searchParams.get('pageSize'),
+      { defaultPageSize: 10 }
+    )
     const search = searchParams.get('search') || ''
     const status = searchParams.get('status') || ''
     const skip = (page - 1) * limit

@@ -252,22 +252,24 @@ export type UpdateOrderStatusBody = {
   status: string // Order status
 }
 
-// API Response Types
-export type ApiResponse<T = unknown> = {
-  success: boolean
-  data?: T
+// API Response Types — discriminated union
+export type ApiSuccess<T> = {
+  success: true
+  data: T
   message?: string
 }
 
-export type UseApiOptions<T = unknown> = {
-  urlOverride?: string
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
-  params?: Record<string, string | number | boolean | undefined>
-  headers?: Record<string, string>
-  transform?: (data: T) => T
-  onSuccess?: (result: ApiResponse<T>) => void
-  onError?: (error: string) => void
+export type ApiFailure = {
+  success: false
+  error: string
+  message?: string
 }
+
+export type ApiResponse<T = unknown> = ApiSuccess<T> | ApiFailure
+
+// UseApiOptions is defined in @/hooks/useApi
+// Re-export here for backwards compatibility
+export type { UseApiOptions } from '@/hooks/useApi'
 
 // Public Post Query Types
 export type PublicPostQueryParams = {

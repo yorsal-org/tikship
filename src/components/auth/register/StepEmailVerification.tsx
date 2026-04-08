@@ -43,9 +43,9 @@ export default function StepEmailVerification({ onNext }: StepEmailVerificationP
   }
 
   const handleVerifyCode = async () => {
-    const { success, data } = await verifyCodeApi.request({ email, code })
-    if (success && data?.token) {
-      onNext(email, data.token)
+    const result = await verifyCodeApi.request({ email, code })
+    if (result.success && 'data' in result && result.data.token) {
+      onNext(email, result.data.token)
     }
   }
 

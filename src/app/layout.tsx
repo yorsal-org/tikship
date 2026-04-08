@@ -6,7 +6,7 @@ import { settingsService } from '@/lib/settings/service'
 import { getLocale } from '@/lib/i18n/config'
 import { getTranslations } from 'next-intl/server'
 
-const BASE_URL = process.env.NEXTAUTH_URL || ''
+const BASE_URL = process.env.NEXTAUTH_URL || 'http://localhost:3000'
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale()
@@ -17,7 +17,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const systemSettings = await settingsService.getSystemSettings()
 
   return {
-    metadataBase: new URL(BASE_URL),
+    metadataBase: BASE_URL ? new URL(BASE_URL) : undefined,
     title: {
       default: siteName,
       template: `%s | ${siteName}`,
@@ -68,8 +68,9 @@ export default async function RootLayout({
   children: React.ReactNode
 }>) {
   const locale = await getLocale()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const messages: Record<string, any> = (await import(`../locales/${locale}.json`)).default
+  const messages: Record<string, unknown> = (
+      await import(`../locales/${locale}.json`)
+    ).default as Record<string, unknown>
 
   return (
     <html lang={locale} suppressHydrationWarning>

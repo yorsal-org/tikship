@@ -40,9 +40,9 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
 
   const checkSession = async () => {
     try {
-      const { success, data } = await meApi.request(undefined)
-      if (success && data?.user) {
-        setAdminUser(data.user)
+      const result = await meApi.request(undefined)
+      if (result.success && 'data' in result && result.data.user) {
+        setAdminUser(result.data.user)
       } else {
         setAdminUser(null)
       }
@@ -55,16 +55,18 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const login = async (username: string, password: string) => {
-    const { success, data, error } = await loginApi.request({
+    const result = await loginApi.request({
       username,
       password,
     })
-    if (success && data?.user) {
-      const user = data.user
+    if (result.success && 'data' in result && result.data.user) {
+      const user = result.data.user
       setAdminUser(user)
       // localStorage.setItem('adminUser', JSON.stringify(user)) // Removed: Secure session only
+    } else if ('error' in result) {
+      throw new Error(result.error || 'Login failed')
     } else {
-      throw new Error(error || 'Login failed')
+      throw new Error('Login failed')
     }
   }
 

@@ -17,15 +17,15 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
   useEffect(() => {
     const fetchProduct = async () => {
-      const { success, data } = await productApi.request(undefined, {
+      const result = await productApi.request(undefined, {
         onError: (err: string) => {
           toast.error(err)
           router.push(`${siteConfig.admin.path}/products`)
         },
       })
 
-      if (success && data) {
-        setProduct(data.product)
+      if (result.success && 'data' in result) {
+        setProduct(result.data.product)
       }
     }
 

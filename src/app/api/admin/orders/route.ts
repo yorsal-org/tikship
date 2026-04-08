@@ -4,6 +4,7 @@ import { requireAdminAuth } from '@/lib/admin'
 import { ApiResponse } from '@/lib/utils/api-response'
 import { PERMISSIONS } from '@/config/permissions'
 import { getModuleState } from '@/lib/module-state'
+import { parsePagination } from '@/lib/utils/pagination'
 
 type OrderBulkAction = 'completed' | 'failed' | 'refunded' | 'delete'
 
@@ -24,8 +25,11 @@ export async function GET(req: NextRequest) {
     if (error) return error
 
     const { searchParams } = new URL(req.url)
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('pageSize') || '10')
+    const { page, pageSize: limit } = parsePagination(
+      searchParams.get('page'),
+      searchParams.get('pageSize'),
+      { defaultPageSize: 10 }
+    )
     const status = searchParams.get('status') || ''
     const paymentProvider = searchParams.get('paymentProvider') || ''
     const search = searchParams.get('search') || ''

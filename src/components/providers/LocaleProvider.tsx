@@ -24,7 +24,7 @@ interface LocaleProviderProps {
   children: ReactNode
   initialLocale?: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  initialMessages?: Record<string, any>
+  initialMessages?: Record<string, unknown>
 }
 
 export function LocaleProvider({
@@ -37,7 +37,7 @@ export function LocaleProvider({
 
   const [locale, setLocaleState] = useState<string>(defaultLocale)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [messages, setMessages] = useState<Record<string, any>>(initialMessages)
+  const [messages, setMessages] = useState<Record<string, unknown>>(initialMessages)
 
   const setLocale = async (newLocale: string) => {
     try {

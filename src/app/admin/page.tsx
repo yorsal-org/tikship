@@ -31,6 +31,7 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import { useApi } from '@/hooks/useApi'
+import { useModuleState } from '@/components/providers/ModuleStateProvider'
 import Link from 'next/link'
 import { siteConfig } from '@/config/site'
 
@@ -60,14 +61,9 @@ interface ContentStats {
   charts: { postTrend: Array<{ date: string; count: number }> }
 }
 
-interface ModuleState {
-  content: boolean
-  commerce: boolean
-  user: boolean
-}
-
 export default function AdminDashboard() {
   const t = useTranslations('admin.dashboard')
+  const { moduleState } = useModuleState()
   const [adminStats, setAdminStats] = useState<AdminStats | null>(null)
   const [userStats, setUserStats] = useState<UserStats | null>(null)
   const [commerceStats, setCommerceStats] = useState<CommerceStats | null>(null)
@@ -79,7 +75,6 @@ export default function AdminDashboard() {
   const userStatsApi = useApi<UserStats>('/api/admin/dashboard/widgets/user-stats', 'GET')
   const commerceStatsApi = useApi<CommerceStats>('/api/admin/dashboard/widgets/commerce-stats', 'GET')
   const contentStatsApi = useApi<ContentStats>('/api/admin/dashboard/widgets/content-stats', 'GET')
-  const moduleStateApi = useApi<ModuleState>('/api/admin/modules/state', 'GET')
 
   const adminPath = siteConfig.admin.path
 
@@ -93,9 +88,6 @@ export default function AdminDashboard() {
     setError(false)
 
     try {
-      // Fetch module state
-      const moduleStateResult = await moduleStateApi.request(undefined)
-
       // Fetch admin stats (always needed)
       const adminResult = await adminStatsApi.request(undefined)
       if (!adminResult.success || !adminResult.data) {
@@ -106,7 +98,7 @@ export default function AdminDashboard() {
       setAdminStats(adminResult.data)
 
       // Fetch user stats if module enabled
-      if (moduleStateResult.success && moduleStateResult.data?.user) {
+      if (moduleState?.user) {
         const userResult = await userStatsApi.request(undefined)
         if (userResult.success && userResult.data) {
           setUserStats(userResult.data)
@@ -114,7 +106,7 @@ export default function AdminDashboard() {
       }
 
       // Fetch commerce stats if module enabled
-      if (moduleStateResult.success && moduleStateResult.data?.commerce) {
+      if (moduleState?.commerce) {
         const commerceResult = await commerceStatsApi.request(undefined)
         if (commerceResult.success && commerceResult.data) {
           setCommerceStats(commerceResult.data)
@@ -122,7 +114,7 @@ export default function AdminDashboard() {
       }
 
       // Fetch content stats if module enabled
-      if (moduleStateResult.success && moduleStateResult.data?.content) {
+      if (moduleState?.content) {
         const contentResult = await contentStatsApi.request(undefined)
         if (contentResult.success && contentResult.data) {
           setContentStats(contentResult.data)

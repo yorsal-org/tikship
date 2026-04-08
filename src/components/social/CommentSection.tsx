@@ -6,7 +6,7 @@ import { MessageSquare, Send, Reply, ChevronDown, ChevronUp, Info } from 'lucide
 import { Button } from '@/components/ui/Button'
 import { Textarea } from '@/components/ui/Textarea'
 import { PaginationWrapper } from '@/components/ui/PaginationWrapper'
-import { usePagination } from '@/hooks/usePagination'
+import { usePaginationWrapper } from '@/hooks/usePaginationWrapper'
 import { useSession } from 'next-auth/react'
 import { toast } from '@/lib/utils/toast'
 import type { Comment, TargetType } from '@/types/social'
@@ -75,7 +75,7 @@ export function CommentSection({
     loading,
     goToPage,
     refresh,
-  } = usePagination<Comment>({ fetchFunction: fetchComments, pageSize: 10 })
+  } = usePaginationWrapper<Comment>({ fetchFunction: fetchComments, pageSize: 10 })
 
   const handleSubmitComment = async () => {
     if (!newComment.trim() || !isLoggedIn) return

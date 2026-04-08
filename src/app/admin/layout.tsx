@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useAdminAuth } from '@/components/providers/AdminAuthProvider'
 import { AdminAuthProvider } from '@/components/providers/AdminAuthProvider'
+import { ModuleStateProvider } from '@/components/providers/ModuleStateProvider'
 import { ThemeToggler } from '@/components/theme/ThemeToggler'
 import { LanguageSwitcher } from '@/components/locale/LanguageSwitcher'
 import { SidebarMenu } from '@/components/admin/common/SidebarMenu'
@@ -191,7 +192,9 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <AdminAuthProvider>
-      <AdminLayoutContent>{children}</AdminLayoutContent>
+      <ModuleStateProvider>
+        <AdminLayoutContent>{children}</AdminLayoutContent>
+      </ModuleStateProvider>
     </AdminAuthProvider>
   )
 }

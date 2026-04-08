@@ -5,7 +5,7 @@ import { getTranslations } from 'next-intl/server'
  * Consistent API response helper
  */
 export const ApiResponse = {
-  success(data: Record<string, unknown> | unknown[] = {}, status = 200) {
+  success<T = unknown>(data: T, status = 200) {
     return NextResponse.json(
       {
         success: true,

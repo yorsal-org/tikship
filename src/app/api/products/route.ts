@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/db/prisma'
 import { ApiResponse } from '@/lib/utils/api-response'
+import { parsePagination } from '@/lib/utils/pagination'
 
 /**
  * Get active products list
@@ -13,8 +14,11 @@ import { ApiResponse } from '@/lib/utils/api-response'
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
-    const page = parseInt(searchParams.get('page') || '1')
-    const pageSize = parseInt(searchParams.get('pageSize') || '12')
+    const { page, pageSize } = parsePagination(
+      searchParams.get('page'),
+      searchParams.get('pageSize'),
+      { defaultPageSize: 12 }
+    )
 
     // Build where clause - only return active products
     const where = {

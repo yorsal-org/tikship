@@ -14,7 +14,7 @@ import { formatters } from '@/lib/utils/formatters'
 import { truncateId } from '@/lib/utils/string'
 import { getOrderStatusVariant } from '@/lib/utils/badge'
 import { useApi } from '@/hooks/useApi'
-import { useAdminPagination as usePagination } from '@/hooks/useAdminPagination'
+import { useTablePagination } from '@/hooks/useTablePagination'
 import type { Order, OrdersListResponse } from '@/types/order'
 
 type OrderBulkAction = 'completed' | 'failed' | 'refunded' | 'delete'
@@ -33,7 +33,7 @@ export function OrderList() {
     handleFilterChange: syncFilters,
     getParam,
     pageSize,
-  } = usePagination()
+  } = useTablePagination()
 
   const statusParam = getParam('status')
   const paymentProviderParam = getParam('paymentProvider')
@@ -191,17 +191,17 @@ export function OrderList() {
   const handleBulkAction = async (action: OrderBulkAction) => {
     if (selectedIds.length === 0) return
 
-    const { success, data } = await bulkOrdersApi.request(
+    const result = await bulkOrdersApi.request(
       { ids: selectedIds, action },
       {
         onError: (err: string) => toast.error(err),
       }
     )
 
-    if (success) {
+    if (result.success) {
       toast.success(
         t(action === 'delete' ? 'bulk_delete_success' : 'bulk_status_updated', {
-          count: data?.count ?? selectedIds.length,
+          count: result.data?.count ?? selectedIds.length,
         })
       )
       setSelectedIds([])

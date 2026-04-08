@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { ShoppingBag, Package, Clock, CheckCircle, XCircle, RefreshCw } from 'lucide-react'
 import { PaginationWrapper } from '@/components/ui/PaginationWrapper'
-import { usePagination } from '@/hooks/usePagination'
+import { usePaginationWrapper } from '@/hooks/usePaginationWrapper'
 
 interface Product {
   id: string
@@ -119,7 +119,7 @@ export default function UserOrdersPage() {
     pageSize,
     loading,
     goToPage,
-  } = usePagination<Order>({
+  } = usePaginationWrapper<Order>({
     fetchFunction: fetchOrders,
     pageSize: 10,
     type: 'traditional',

@@ -10,7 +10,7 @@ import { Table, Column } from '@/components/ui/Table'
 import { DeleteConfirmModal } from '@/components/admin/common/DeleteConfirmModal'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { useApi } from '@/hooks/useApi'
-import { useAdminPagination as usePagination } from '@/hooks/useAdminPagination'
+import { useTablePagination } from '@/hooks/useTablePagination'
 import { siteConfig } from '@/config/site'
 import type { Product, ProductsListResponse } from '@/types/product'
 
@@ -30,7 +30,7 @@ export function ProductList() {
     handleFilterChange: syncFilters,
     getParam,
     pageSize,
-  } = usePagination()
+  } = useTablePagination()
 
   const statusParam = getParam('status')
 
@@ -149,17 +149,17 @@ export function ProductList() {
   const handleBulkAction = async (action: ProductBulkAction) => {
     if (selectedIds.length === 0) return
 
-    const { success, data } = await bulkProductsApi.request(
+    const result = await bulkProductsApi.request(
       { ids: selectedIds, action },
       {
         onError: (err: string) => toast.error(err),
       }
     )
 
-    if (success) {
+    if (result.success) {
       toast.success(
         t(action === 'delete' ? 'bulk_delete_success' : 'bulk_status_updated', {
-          count: data?.count ?? selectedIds.length,
+          count: result.data?.count ?? selectedIds.length,
         })
       )
       setSelectedIds([])

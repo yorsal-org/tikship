@@ -1,10 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { siteConfig } from '@/config/site'
-import { useApi } from '@/hooks/useApi'
+import { useModuleState } from '@/components/providers/ModuleStateProvider'
 import {
   adminDashboardItem,
   adminMenuConfig,
@@ -15,13 +14,6 @@ import {
 interface SidebarMenuProps {
   isActive: (path: string) => boolean
   isCollapsed?: boolean
-}
-
-interface ModuleState {
-  content: boolean
-  commerce: boolean
-  user: boolean
-  social: boolean
 }
 
 function MenuLink({
@@ -92,37 +84,18 @@ function MenuGroup({
 export function SidebarMenu({ isActive, isCollapsed = false }: SidebarMenuProps) {
   const t = useTranslations('admin.layout')
   const adminPath = siteConfig.admin.path
-  const [enabledGroups, setEnabledGroups] = useState<AdminMenuGroup[]>(adminMenuConfig)
-  const [isLoading, setIsLoading] = useState(true)
+  const { moduleState, loading } = useModuleState()
 
-  const moduleStateApi = useApi<ModuleState>('/api/admin/modules/state', 'GET')
+  const enabledGroups = adminMenuConfig.filter(group => {
+    if (!moduleState) return true
+    if (group.groupKey === 'group_content' && !moduleState.content) return false
+    if (group.groupKey === 'group_commerce' && !moduleState.commerce) return false
+    if (group.groupKey === 'group_user' && !moduleState.user) return false
+    if (group.groupKey === 'group_social' && !moduleState.social) return false
+    return true
+  })
 
-  useEffect(() => {
-    fetchModuleState()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  const fetchModuleState = async () => {
-    try {
-      const result = await moduleStateApi.request(undefined)
-      if (result.success && result.data) {
-        const filtered = adminMenuConfig.filter(group => {
-          if (group.groupKey === 'group_content' && !result.data!.content) return false
-          if (group.groupKey === 'group_commerce' && !result.data!.commerce) return false
-          if (group.groupKey === 'group_user' && !result.data!.user) return false
-          if (group.groupKey === 'group_social' && !result.data!.social) return false
-          return true
-        })
-        setEnabledGroups(filtered)
-      }
-    } catch (error) {
-      console.error('Failed to fetch module state:', error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  if (isLoading) {
+  if (loading) {
     return (
       <ul className="menu menu-md p-0 gap-1">
         <li>

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Post, PostStatus, PostType, Category, PostBulkAction, PostsListResponse } from '@/types/post'
 import { CategoriesListResponse } from '@/types/admin'
 import { ApiResponse, BulkUpdatePostsBody } from '@/types/api'
+import { ApiSuccess } from '@/hooks/useApi'
 import { Plus, Search, ExternalLink, Edit, Trash2, RotateCcw, Upload } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { DeleteConfirmModal } from '@/components/admin/common/DeleteConfirmModal'
@@ -15,7 +16,7 @@ import { toast } from '@/lib/utils/toast'
 import { getEffectivePostStatus } from '@/lib/utils/post'
 import { formatters } from '@/lib/utils/formatters'
 import { useApi } from '@/hooks/useApi'
-import { useAdminPagination as usePagination } from '@/hooks/useAdminPagination'
+import { useTablePagination } from '@/hooks/useTablePagination'
 import { siteConfig } from '@/config/site'
 
 interface PostListProps {
@@ -36,7 +37,7 @@ export function PostList({ type }: PostListProps) {
     handleFilterChange: syncFilters,
     getParam,
     pageSize,
-  } = usePagination()
+  } = useTablePagination()
 
   const statusParam = getParam('status')
   const categoryParam = getParam('categoryId')
@@ -112,8 +113,8 @@ export function PostList({ type }: PostListProps) {
   useEffect(() => {
     if (type === PostType.ARTICLE) {
       fetchCategories(undefined, {
-        onSuccess: (res: ApiResponse<CategoriesListResponse>) => {
-          if (res.data?.categories) {
+        onSuccess: (res: ApiSuccess<CategoriesListResponse>) => {
+          if (res.data.categories) {
             setAllCategories(res.data.categories)
           }
         },
@@ -212,16 +213,16 @@ export function PostList({ type }: PostListProps) {
   const handleBulkAction = async (action: PostBulkAction) => {
     if (selectedIds.length === 0) return
 
-    const { success, data } = await bulkUpdatePosts({
+    const result = await bulkUpdatePosts({
       ids: selectedIds,
       action,
       type,
     })
 
-    if (success) {
+    if (result.success) {
       toast.success(
         t(action === 'delete' ? 'bulk_delete_success' : 'bulk_status_updated', {
-          count: data?.count ?? selectedIds.length,
+          count: result.data?.count ?? selectedIds.length,
         })
       )
       resetBulkState()

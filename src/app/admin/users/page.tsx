@@ -16,7 +16,7 @@ import { UserPlus, Search, Edit, Power, PowerOff, Shield, Trash2 } from 'lucide-
 
 type AdminUserBulkAction = 'activate' | 'deactivate' | 'delete'
 import { AdminUserWithRoles, AdminUsersListResponse } from '@/types/admin'
-import { useAdminPagination as usePagination } from '@/hooks/useAdminPagination'
+import { useTablePagination } from '@/hooks/useTablePagination'
 import { useModalState } from '@/hooks/useModalState'
 import { useDataFetch } from '@/hooks/useDataFetch'
 
@@ -31,7 +31,7 @@ export default function AdminUsersPage() {
     handlePageChange,
     handlePageSizeChange,
     pageSize,
-  } = usePagination()
+  } = useTablePagination()
 
   const { handleSuccess, handleError } = useDataFetch()
   const { adminUser: currentUser } = useAdminAuth()
@@ -56,7 +56,7 @@ export default function AdminUsersPage() {
 
   const fetchUsers = useCallback(
     async (page: number) => {
-      const { success, data: result } = await usersApi.request(undefined, {
+      const result = await usersApi.request(undefined, {
         params: {
           search: searchParam || undefined,
           page,
@@ -65,15 +65,15 @@ export default function AdminUsersPage() {
         onError: (err: string) => toast.error(err),
       })
 
-      if (success && result) {
-        const nextUsers = result.users
+      if (result.success && 'data' in result) {
+        const nextUsers = result.data.users
         setUsers(nextUsers)
         setSelectedIds(current => current.filter(id => nextUsers.some(u => u.id === id)))
         setPagination({
-          page: result.page,
-          pageSize: result.pageSize,
-          total: result.total,
-          totalPages: result.totalPages,
+          page: result.data.page,
+          pageSize: result.data.pageSize,
+          total: result.data.total,
+          totalPages: result.data.totalPages,
         })
       }
     },
@@ -179,12 +179,12 @@ export default function AdminUsersPage() {
 
   const handleBulkConfirm = async () => {
     if (!pendingBulkAction) return
-    const { success, data } = await bulkUsersApi.request(
+    const result = await bulkUsersApi.request(
       { ids: selectedIds, action: pendingBulkAction },
       { onError: handleError }
     )
-    if (success) {
-      const count = data?.count ?? selectedIds.length
+    if (result.success && 'data' in result) {
+      const count = result.data.count ?? selectedIds.length
       toast.success(
         t(pendingBulkAction === 'delete' ? 'bulk_delete_success' : 'bulk_status_updated', { count })
       )

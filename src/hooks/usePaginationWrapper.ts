@@ -3,14 +3,14 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { PaginationType } from '@/components/ui/PaginationWrapper'
 
-export interface UsePaginationOptions<T> {
+export interface UsePaginationWrapperOptions<T> {
   fetchFunction: (page: number, pageSize: number) => Promise<{ items: T[]; totalCount: number }>
   pageSize?: number
   type?: PaginationType
   initialPage?: number
 }
 
-export interface UsePaginationReturn<T> {
+export interface UsePaginationWrapperReturn<T> {
   items: T[]
   currentPage: number
   totalCount: number
@@ -26,12 +26,16 @@ export interface UsePaginationReturn<T> {
   observerTarget: React.RefObject<HTMLDivElement | null>
 }
 
-export function usePagination<T>({
+/**
+ * Hook to manage pagination with data fetching for use with PaginationWrapper component.
+ * Supports traditional, loadMore, and infinite scroll pagination types.
+ */
+export function usePaginationWrapper<T>({
   fetchFunction,
   pageSize = 12,
   type = 'traditional',
   initialPage = 1,
-}: UsePaginationOptions<T>): UsePaginationReturn<T> {
+}: UsePaginationWrapperOptions<T>): UsePaginationWrapperReturn<T> {
   const [items, setItems] = useState<T[]>([])
   const [currentPage, setCurrentPage] = useState(initialPage)
   const [totalCount, setTotalCount] = useState(0)

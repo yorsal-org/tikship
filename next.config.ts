@@ -63,6 +63,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  reactStrictMode: false,
 }
 
 export default withNextIntl(nextConfig)

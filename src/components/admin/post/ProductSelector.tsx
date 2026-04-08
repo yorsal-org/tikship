@@ -1,9 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useApi } from '@/hooks/useApi'
+import { useApi, ApiSuccess } from '@/hooks/useApi'
 import { Product, ProductsListResponse } from '@/types/product'
-import { ApiResponse } from '@/types/api'
 import { Search, Package, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
@@ -39,8 +38,8 @@ export function ProductSelector({ onSelect, onClose }: ProductSelectorProps) {
 
     await fetchProducts(undefined, {
       urlOverride: `/api/admin/products?${params.toString()}`,
-      onSuccess: (res: ApiResponse<ProductsListResponse>) => {
-        if (res.data?.products) {
+      onSuccess: (res: ApiSuccess<ProductsListResponse>) => {
+        if (res.data.products) {
           setProducts(res.data.products)
         }
       },

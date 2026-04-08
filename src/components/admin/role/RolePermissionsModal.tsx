@@ -33,10 +33,10 @@ export function RolePermissionsModal({
   const updatePermissionsApi = useApi('', 'PUT')
 
   const fetchPermissions = async () => {
-    const { success, data: result } = await permissionsApi.request(undefined)
+    const result = await permissionsApi.request(undefined)
 
-    if (success && result) {
-      setAllPermissions(result.permissions)
+    if (result.success && 'data' in result) {
+      setAllPermissions(result.data.permissions)
     }
   }
 

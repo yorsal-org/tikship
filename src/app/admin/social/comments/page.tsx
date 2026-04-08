@@ -9,7 +9,7 @@ import { DeleteConfirmModal } from '@/components/admin/common/DeleteConfirmModal
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { RepliesModal } from '@/components/admin/social/RepliesModal'
 import { useApi } from '@/hooks/useApi'
-import { useAdminPagination } from '@/hooks/useAdminPagination'
+import { useTablePagination } from '@/hooks/useTablePagination'
 import type { Comment, CommentStatus, TargetType, CommentWithReplies } from '@/types/social'
 import { MessageCircle } from 'lucide-react'
 
@@ -28,7 +28,7 @@ export default function CommentsPage() {
     handleFilterChange: syncFilters,
     getParam,
     pageSize,
-  } = useAdminPagination()
+  } = useTablePagination()
 
   const statusParam = getParam('status') as CommentStatus | undefined
   const targetTypeParam = getParam('targetType') as TargetType | undefined
@@ -141,15 +141,15 @@ export default function CommentsPage() {
         ? { ids: selectedIds }
         : { ids: selectedIds, action: action === 'approve' ? 'approve' : 'reject' }
 
-    const { success, data } = await bulkActionApi.request(body as Record<string, unknown>, {
+    const result = await bulkActionApi.request(body as Record<string, unknown>, {
       method: method as 'DELETE' | 'PUT',
       onError: (err: string) => toast.error(err),
     })
 
-    if (success) {
+    if (result.success) {
       toast.success(
         t(action === 'delete' ? 'bulk_delete_success' : 'bulk_update_success', {
-          count: data?.count ?? selectedIds.length,
+          count: result.data?.count ?? selectedIds.length,
         })
       )
       setSelectedIds([])

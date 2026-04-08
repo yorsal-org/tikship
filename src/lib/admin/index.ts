@@ -5,6 +5,7 @@ import { logAudit, AUDIT_ACTIONS } from '@/lib/audit/service'
 import { AdminUser } from '@/types/admin'
 import { ApiResponse } from '@/lib/utils/api-response'
 import { hasAnyPermission } from '@/lib/admin/rbac'
+import { PERMISSIONS } from '@/config/permissions'
 
 import { cookies } from 'next/headers'
 
@@ -210,4 +211,207 @@ export async function getAdminUserByUsername(username: string): Promise<AdminUse
   })
 
   return adminUser
+}
+
+// ---------------------------------------------------------------------------
+// Admin User Service — business logic for route handlers
+// ---------------------------------------------------------------------------
+
+export interface ListAdminUsersParams {
+  search?: string
+  page: number
+  pageSize: number
+}
+
+export interface ListAdminUsersResult {
+  users: Array<{
+    id: string
+    username: string
+    email: string
+    name: string | null
+    avatar: string | null
+    isSuperuser: boolean
+    isActive: boolean
+    lastLoginAt: Date | null
+    createdAt: Date
+    roles: Array<{ role: { id: string; name: string } }>
+  }>
+  total: number
+  page: number
+  pageSize: number
+  totalPages: number
+}
+
+/**
+ * List admin users with pagination and search
+ */
+export async function listAdminUsers({
+  search,
+  page,
+  pageSize,
+}: ListAdminUsersParams): Promise<ListAdminUsersResult> {
+  const where = search
+    ? {
+        OR: [
+          { username: { contains: search, mode: 'insensitive' as const } },
+          { email: { contains: search, mode: 'insensitive' as const } },
+          { name: { contains: search, mode: 'insensitive' as const } },
+        ],
+      }
+    : {}
+
+  const [users, total] = await Promise.all([
+    prisma.adminUser.findMany({
+      where,
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        name: true,
+        avatar: true,
+        isSuperuser: true,
+        isActive: true,
+        lastLoginAt: true,
+        createdAt: true,
+        roles: {
+          include: {
+            role: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+    }),
+    prisma.adminUser.count({ where }),
+  ])
+
+  return {
+    users: users as unknown as ListAdminUsersResult['users'],
+    total,
+    page,
+    pageSize,
+    totalPages: Math.ceil(total / pageSize),
+  }
+}
+
+export interface CreateAdminUserWithRolesParams {
+  username: string
+  email: string
+  password: string
+  name?: string
+  isSuperuser?: boolean
+  roleIds?: string[]
+  assignedBy?: string
+}
+
+/**
+ * Create admin user and optionally assign roles
+ * Throws: 'USERNAME_EXISTS' | 'EMAIL_EXISTS'
+ */
+export async function createAdminUserWithRoles({
+  username,
+  email,
+  password,
+  name,
+  isSuperuser = false,
+  roleIds,
+  assignedBy,
+}: CreateAdminUserWithRolesParams) {
+  const user = await createAdminUser({
+    username,
+    email,
+    password,
+    name,
+    isSuperuser,
+    assignDefaultRole: !roleIds || roleIds.length === 0,
+  })
+
+  if (roleIds && Array.isArray(roleIds) && roleIds.length > 0) {
+    await Promise.all(
+      roleIds.map((roleId: string) =>
+        prisma.adminUserRole.create({
+          data: {
+            adminUserId: user.id,
+            roleId,
+            assignedBy: assignedBy || null,
+          },
+        })
+      )
+    )
+  }
+
+  return user
+}
+
+export type BulkAdminUserAction = 'activate' | 'deactivate' | 'delete'
+
+export interface BulkAdminUsersParams {
+  ids: string[]
+  action: BulkAdminUserAction
+  actorId: string
+}
+
+/**
+ * Bulk update (activate/deactivate/delete) admin users
+ * Returns affected count and skips protected users (superuser/self)
+ */
+export async function bulkAdminUsers({
+  ids,
+  action,
+  actorId,
+}: BulkAdminUsersParams): Promise<{ count: number }> {
+  // Never touch superusers or the current user
+  const safeIds = (ids as string[]).filter(id => id !== actorId)
+  const superusers = await prisma.adminUser.findMany({
+    where: { id: { in: safeIds }, isSuperuser: true },
+    select: { id: true },
+  })
+  const superuserIds = new Set(superusers.map(u => u.id))
+  const targetIds = safeIds.filter(id => !superuserIds.has(id))
+
+  if (targetIds.length === 0) {
+    throw new Error('NO_TARGET_USERS')
+  }
+
+  if (action === 'delete') {
+    // Only allow deleting disabled non-superuser admins
+    const adminsToDelete = await prisma.adminUser.findMany({
+      where: { id: { in: targetIds } },
+      select: { id: true, isActive: true, isSuperuser: true },
+    })
+
+    const invalidAdmins = adminsToDelete.filter(a => a.isActive || a.isSuperuser)
+    if (invalidAdmins.length > 0) {
+      throw new Error('CANNOT_DELETE_ACTIVE_OR_SUPERUSER')
+    }
+
+    const { count } = await prisma.adminUser.deleteMany({
+      where: { id: { in: targetIds }, isActive: false, isSuperuser: false },
+    })
+
+    await logAudit({
+      adminUserId: actorId,
+      action: AUDIT_ACTIONS.ADMIN_USER_DELETE,
+      resource: 'admin_user',
+      details: { ids: targetIds, bulkCount: count },
+    })
+
+    return { count }
+  }
+
+  const isActive = action === 'activate'
+  const { count } = await prisma.adminUser.updateMany({
+    where: { id: { in: targetIds } },
+    data: { isActive },
+  })
+
+  await logAudit({
+    adminUserId: actorId,
+    action: isActive ? AUDIT_ACTIONS.ADMIN_USER_ACTIVATE : AUDIT_ACTIONS.ADMIN_USER_DEACTIVATE,
+    resource: 'admin_user',
+    details: { ids: targetIds, isActive, bulkCount: count },
+  })
+
+  return { count }
 }

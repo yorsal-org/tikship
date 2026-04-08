@@ -3,6 +3,7 @@ import { requireAdminAuth } from '@/lib/admin'
 import { ApiResponse } from '@/lib/utils/api-response'
 import { PERMISSIONS } from '@/config/permissions'
 import { getAuditLogs, deleteOldAuditLogs } from '@/lib/audit/service'
+import { parsePagination } from '@/lib/utils/pagination'
 
 
 /**
@@ -28,8 +29,10 @@ export async function GET(req: NextRequest) {
       ? new Date(searchParams.get('startDate')!)
       : undefined
     const endDate = searchParams.get('endDate') ? new Date(searchParams.get('endDate')!) : undefined
-    const page = parseInt(searchParams.get('page') || '1')
-    const pageSize = parseInt(searchParams.get('pageSize') || '20')
+    const { page, pageSize } = parsePagination(
+      searchParams.get('page'),
+      searchParams.get('pageSize')
+    )
 
     const result = await getAuditLogs({
       adminUserId: filterAdminUserId,

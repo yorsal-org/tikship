@@ -5,7 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Package, Grid3x3, List, Layers, ArrowRight } from 'lucide-react'
 import { PaginationWrapper } from '@/components/ui/PaginationWrapper'
-import { usePagination } from '@/hooks/usePagination'
+import { usePaginationWrapper } from '@/hooks/usePaginationWrapper'
 import { useTranslations } from 'next-intl'
 
 interface Product {
@@ -51,7 +51,7 @@ export default function ProductsShowcasePage() {
     type,
     setType,
     observerTarget,
-  } = usePagination<Product>({
+  } = usePaginationWrapper<Product>({
     fetchFunction: fetchProducts,
     pageSize: 12,
     type: 'traditional',

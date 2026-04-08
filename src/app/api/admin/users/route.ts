@@ -1,16 +1,13 @@
 import { NextRequest } from 'next/server'
-import { prisma } from '@/lib/db/prisma'
-import { requireAdminAuth } from '@/lib/admin'
+import { requireAdminAuth, createAdminUserWithRoles, bulkAdminUsers, listAdminUsers } from '@/lib/admin'
+import type { BulkAdminUserAction } from '@/lib/admin'
 import { ApiResponse } from '@/lib/utils/api-response'
 import { PERMISSIONS } from '@/config/permissions'
-import { createAdminUser } from '@/lib/admin'
-import { logAudit, AUDIT_ACTIONS } from '@/lib/audit/service'
 import { checkPasswordStrength } from '@/lib/utils/validators'
 import { settingsService } from '@/lib/settings/service'
+import { parsePagination } from '@/lib/utils/pagination'
 
 import type { CreateAdminUserBody } from '@/types/api'
-
-type AdminUserBulkAction = 'activate' | 'deactivate' | 'delete'
 
 /**
  * Get admin users
@@ -29,52 +26,13 @@ export async function GET(req: NextRequest) {
 
     const { searchParams } = new URL(req.url)
     const search = searchParams.get('search') || ''
-    const page = parseInt(searchParams.get('page') || '1')
-    const pageSize = parseInt(searchParams.get('pageSize') || '20')
+    const { page, pageSize } = parsePagination(
+      searchParams.get('page'),
+      searchParams.get('pageSize')
+    )
 
-    const where = search
-      ? {
-          OR: [
-            { username: { contains: search, mode: 'insensitive' as const } },
-            { email: { contains: search, mode: 'insensitive' as const } },
-            { name: { contains: search, mode: 'insensitive' as const } },
-          ],
-        }
-      : {}
-
-    const [users, total] = await Promise.all([
-      prisma.adminUser.findMany({
-        where,
-        select: {
-          id: true,
-          username: true,
-          email: true,
-          name: true,
-          avatar: true,
-          isSuperuser: true,
-          isActive: true,
-          lastLoginAt: true,
-          createdAt: true,
-          roles: {
-            include: {
-              role: true,
-            },
-          },
-        },
-        orderBy: { createdAt: 'desc' },
-        skip: (page - 1) * pageSize,
-        take: pageSize,
-      }),
-      prisma.adminUser.count({ where }),
-    ])
-
-    return ApiResponse.success({
-      users,
-      total,
-      page,
-      pageSize,
-      totalPages: Math.ceil(total / pageSize),
-    })
+    const result = await listAdminUsers({ search, page, pageSize })
+    return ApiResponse.success(result)
   } catch (error) {
     console.error('Get admin users error:', error)
     return await ApiResponse.adminError('server_error', 500)
@@ -95,7 +53,6 @@ export async function POST(req: NextRequest) {
   try {
     const { adminUserId, error } = await requireAdminAuth(req, PERMISSIONS.ADMIN_USER_CREATE)
     if (error) return error
-
     if (!adminUserId) return await ApiResponse.adminError('unauthorized', 401)
 
     const { username, email, password, name, isSuperuser, roleIds } =
@@ -113,44 +70,20 @@ export async function POST(req: NextRequest) {
       return await ApiResponse.adminError('password_too_weak', 400)
     }
 
-    // Create admin user (existence checks are now inside createAdminUser)
-    const user = await createAdminUser({
+    const user = await createAdminUserWithRoles({
       username,
       email,
       password,
       name,
       isSuperuser: isSuperuser || false,
-      assignDefaultRole: !roleIds || roleIds.length === 0,
-    })
-
-    // Assign roles if provided
-    if (roleIds && Array.isArray(roleIds) && roleIds.length > 0) {
-      await Promise.all(
-        roleIds.map((roleId: string) =>
-          prisma.adminUserRole.create({
-            data: {
-              adminUserId: user.id,
-              roleId,
-              assignedBy: adminUserId,
-            },
-          })
-        )
-      )
-    }
-
-    await logAudit({
-      adminUserId,
-      action: AUDIT_ACTIONS.ADMIN_USER_CREATE,
-      resource: 'admin_user',
-      resourceId: user.id,
-      details: { username, email, name, isSuperuser, roleIds },
+      roleIds,
+      assignedBy: adminUserId,
     })
 
     return ApiResponse.success({ user }, 201)
   } catch (error: unknown) {
     console.error('Create admin user error:', error)
 
-    // Handle specific errors from createAdminUser
     if (error instanceof Error) {
       if (error.message === 'USERNAME_EXISTS') {
         return await ApiResponse.adminError('username_exists', 400)
@@ -160,7 +93,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Handle Prisma unique constraint errors (P2002) as a fallback
+    // Handle Prisma unique constraint errors (P2002)
     if (typeof error === 'object' && error !== null && 'code' in error && error.code === 'P2002') {
       const prismaError = error as { meta?: { target?: string[] } }
       const targets = prismaError.meta?.target
@@ -196,71 +129,35 @@ export async function PUT(req: NextRequest) {
       return await ApiResponse.adminError('required_fields_missing', 400)
     }
 
-    const validActions: AdminUserBulkAction[] = ['activate', 'deactivate', 'delete']
-    if (!validActions.includes(action as AdminUserBulkAction)) {
+    const validActions: BulkAdminUserAction[] = ['activate', 'deactivate', 'delete']
+    if (!validActions.includes(action as BulkAdminUserAction)) {
       return await ApiResponse.adminError('invalid_params', 400)
     }
 
-    const bulkAction = action as AdminUserBulkAction
-
-    // Never touch superusers or the current user
-    const safeIds = (ids as string[]).filter(id => id !== adminUserId)
-    const superusers = await prisma.adminUser.findMany({
-      where: { id: { in: safeIds }, isSuperuser: true },
-      select: { id: true },
-    })
-    const superuserIds = new Set(superusers.map(u => u.id))
-    const targetIds = safeIds.filter(id => !superuserIds.has(id))
-
-    if (targetIds.length === 0) {
-      return await ApiResponse.adminError('cannot_modify_superuser', 400)
-    }
-
-    if (bulkAction === 'delete') {
+    if (action === 'delete') {
       const { error: deleteError } = await requireAdminAuth(req, PERMISSIONS.ADMIN_USER_DELETE)
       if (deleteError) return deleteError
-
-      // Only allow deleting disabled non-superuser admins
-      const adminsToDelete = await prisma.adminUser.findMany({
-        where: { id: { in: targetIds } },
-        select: { id: true, isActive: true, isSuperuser: true },
-      })
-
-      const invalidAdmins = adminsToDelete.filter(a => a.isActive || a.isSuperuser)
-      if (invalidAdmins.length > 0) {
-        return await ApiResponse.adminError('cannot_delete_active_or_superuser', 400)
-      }
-
-      const { count } = await prisma.adminUser.deleteMany({
-        where: { id: { in: targetIds }, isActive: false, isSuperuser: false },
-      })
-
-      await logAudit({
-        adminUserId,
-        action: AUDIT_ACTIONS.ADMIN_USER_DELETE,
-        resource: 'admin_user',
-        details: { ids: targetIds, bulkCount: count },
-      })
-
-      return ApiResponse.success({ count })
     }
 
-    const isActive = bulkAction === 'activate'
-    const { count } = await prisma.adminUser.updateMany({
-      where: { id: { in: targetIds } },
-      data: { isActive },
+    const result = await bulkAdminUsers({
+      ids: ids as string[],
+      action: action as BulkAdminUserAction,
+      actorId: adminUserId,
     })
 
-    await logAudit({
-      adminUserId,
-      action: isActive ? AUDIT_ACTIONS.ADMIN_USER_ACTIVATE : AUDIT_ACTIONS.ADMIN_USER_DEACTIVATE,
-      resource: 'admin_user',
-      details: { ids: targetIds, isActive, bulkCount: count },
-    })
-
-    return ApiResponse.success({ count })
-  } catch (error) {
+    return ApiResponse.success(result)
+  } catch (error: unknown) {
     console.error('Bulk update admin users error:', error)
+
+    if (error instanceof Error) {
+      if (error.message === 'NO_TARGET_USERS') {
+        return await ApiResponse.adminError('cannot_modify_superuser', 400)
+      }
+      if (error.message === 'CANNOT_DELETE_ACTIVE_OR_SUPERUSER') {
+        return await ApiResponse.adminError('cannot_delete_active_or_superuser', 400)
+      }
+    }
+
     return await ApiResponse.adminError('server_error', 500)
   }
 }

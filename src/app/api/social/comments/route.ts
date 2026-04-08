@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth/options'
 import { ApiResponse } from '@/lib/utils/api-response'
 import { socialService } from '@/lib/social'
+import { parsePagination } from '@/lib/utils/pagination'
 import type { CreateCommentBody, TargetType } from '@/types/social'
 
 /**
@@ -16,8 +17,11 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url)
     const targetType = searchParams.get('targetType') as TargetType
     const targetId = searchParams.get('targetId')
-    const page = parseInt(searchParams.get('page') || '1')
-    const pageSize = parseInt(searchParams.get('pageSize') || '20')
+    const { page, pageSize } = parsePagination(
+      searchParams.get('page'),
+      searchParams.get('pageSize'),
+      { defaultPageSize: 20 }
+    )
 
     if (!targetType || !targetId) {
       return ApiResponse.error('targetType and targetId are required', 400)

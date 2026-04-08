@@ -31,9 +31,9 @@ export default function SecurityEditor() {
 
   useEffect(() => {
     const fetchUser = async () => {
-      const { success, data } = await userApi.request()
-      if (success && data?.hasPassword !== undefined) {
-        setHasPassword(data.hasPassword)
+      const result = await userApi.request()
+      if (result.success && 'data' in result && result.data.hasPassword !== undefined) {
+        setHasPassword(result.data.hasPassword)
       }
     }
     fetchUser()
@@ -66,19 +66,19 @@ export default function SecurityEditor() {
       return
     }
 
-    const { success, error } = await passwordApi.request({
+    const result = await passwordApi.request({
       ...(hasPassword && { currentPassword }),
       newPassword,
     })
 
-    if (success) {
+    if (result.success) {
       toast.success(t('password_update_success'))
       setCurrentPassword('')
       setNewPassword('')
       setConfirmPassword('')
       setHasPassword(true) // User now has a password
-    } else {
-      toast.error(error || t('password_update_error'))
+    } else if ('error' in result) {
+      toast.error(result.error || t('password_update_error'))
     }
   }
 

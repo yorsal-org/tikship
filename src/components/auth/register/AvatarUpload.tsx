@@ -3,8 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Upload, X, Loader2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useApi } from '@/hooks/useApi'
-import { ApiResponse } from '@/types/api'
+import { useApi, ApiSuccess } from '@/hooks/useApi'
 import { useUploadSettings } from '@/hooks/useSettings'
 import { mimeTypesToFormatNames } from '@/lib/utils/common'
 import Image from 'next/image'
@@ -77,8 +76,8 @@ export default function AvatarUpload({ value, onUpload }: AvatarUploadProps) {
         setError(err)
         setPreview(null)
       },
-      onSuccess: (res: ApiResponse<{ url: string }>) => {
-        if (res.data?.url) {
+      onSuccess: (res: ApiSuccess<{ url: string }>) => {
+        if (res.data.url) {
           onUpload(res.data.url)
         }
       },

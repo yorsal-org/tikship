@@ -10,7 +10,7 @@ interface Props {
   children: ReactNode
   initialLocale: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  initialMessages: Record<string, any>
+  initialMessages: Record<string, unknown>
 }
 
 export function RootProviders({ children, initialLocale, initialMessages }: Props) {

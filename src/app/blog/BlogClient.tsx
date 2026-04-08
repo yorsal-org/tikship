@@ -6,7 +6,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { FileText, ChevronRight, ChevronDown, Layers, List, Grid3x3 } from 'lucide-react'
 import { PaginationWrapper } from '@/components/ui/PaginationWrapper'
-import { usePagination } from '@/hooks/usePagination'
+import { usePaginationWrapper } from '@/hooks/usePaginationWrapper'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useTranslations, useLocale } from 'next-intl'
 
@@ -185,7 +185,7 @@ export default function BlogPage() {
     type,
     setType,
     observerTarget,
-  } = usePagination<Post>({ fetchFunction: fetchPosts, pageSize: 12, type: 'traditional' })
+  } = usePaginationWrapper<Post>({ fetchFunction: fetchPosts, pageSize: 12, type: 'traditional' })
 
   const selectedCategoryName = selectedCategory
     ? findCategoryName(categoryTree, selectedCategory)

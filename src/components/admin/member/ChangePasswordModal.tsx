@@ -50,11 +50,11 @@ export function ChangePasswordModal({
   useEffect(() => {
     if (isOpen && userId) {
       const checkPassword = async () => {
-        const { success, data } = await checkPasswordApi.request(undefined, {
+        const result = await checkPasswordApi.request(undefined, {
           urlOverride: `/api/admin/members/${userId}/password-status`,
         })
-        if (success && data) {
-          setHasPassword(data.hasPassword)
+        if (result.success && 'data' in result) {
+          setHasPassword(result.data.hasPassword)
         }
       }
       checkPassword()

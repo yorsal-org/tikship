@@ -67,14 +67,14 @@ export function ImportPostsModal({ isOpen, onClose, onSuccess }: ImportPostsModa
       return
     }
 
-    const { success, data } = await importPosts(parsed, {
+    const result = await importPosts(parsed, {
       onError: (err: string) => toast.error(err),
     })
 
-    if (success && data) {
-      setImportResults(data.results)
-      toast.success(t('import_success', { success: data.successCount, fail: data.failCount }))
-      if (data.successCount > 0) {
+    if (result.success && 'data' in result) {
+      setImportResults(result.data.results)
+      toast.success(t('import_success', { success: result.data.successCount, fail: result.data.failCount }))
+      if (result.data.successCount > 0) {
         onSuccess()
       }
     }

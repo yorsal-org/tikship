@@ -13,7 +13,8 @@ export function Pagination({
   onPageChange,
   onPageSizeChange,
   showSummary = true,
-}: PaginationProps & { onPageSizeChange?: (pageSize: number) => void }) {
+  loading = false,
+}: PaginationProps & { onPageSizeChange?: (pageSize: number) => void; loading?: boolean }) {
   const t = useTranslations('common.pagination')
   const [inputValue, setInputValue] = useState<string>(pageSize.toString())
 
@@ -54,6 +55,7 @@ export function Pagination({
           <button
             key={i}
             className={`btn btn-sm join-item ${currentPage === i ? 'btn-primary' : ''}`}
+            disabled={loading}
             onClick={() => onPageChange(i)}
           >
             {i}
@@ -107,7 +109,7 @@ export function Pagination({
         <div className="join">
           <button
             className="btn btn-sm join-item"
-            disabled={currentPage === 1}
+            disabled={currentPage === 1 || loading}
             onClick={() => onPageChange(currentPage - 1)}
           >
             <ChevronLeft className="w-4 h-4" />
@@ -117,7 +119,7 @@ export function Pagination({
 
           <button
             className="btn btn-sm join-item"
-            disabled={currentPage === totalPages}
+            disabled={currentPage === totalPages || loading}
             onClick={() => onPageChange(currentPage + 1)}
           >
             <ChevronRight className="w-4 h-4" />

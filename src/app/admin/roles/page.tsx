@@ -28,12 +28,12 @@ export default function RolesPage() {
   const deleteRoleApi = useApi('', 'DELETE')
 
   const fetchRoles = async () => {
-    const { success, data: result } = await rolesApi.request(undefined, {
+    const result = await rolesApi.request(undefined, {
       onError: (err: string) => toast.error(err),
     })
 
-    if (success && result) {
-      setRoles(result.roles)
+    if (result.success && 'data' in result) {
+      setRoles(result.data.roles)
     }
   }
 
@@ -51,14 +51,14 @@ export default function RolesPage() {
   }
 
   const handleManagePermissions = async (role: RoleWithCounts) => {
-    const { success, result, data } = await roleDetailApi.request(undefined, {
+    const result = await roleDetailApi.request(undefined, {
       urlOverride: `/api/admin/roles/${role.id}`,
     })
 
-    if (success && data) {
-      permissionsModal.open(data.role)
-    } else {
-      toast.error(result?.message || 'Failed to fetch role details')
+    if (result.success && 'data' in result) {
+      permissionsModal.open(result.data.role)
+    } else if ('error' in result) {
+      toast.error(result.message || result.error || 'Failed to fetch role details')
     }
   }
 
