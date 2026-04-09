@@ -58,6 +58,7 @@ export async function POST(req: NextRequest) {
       secure: isHttps,
       sameSite: 'lax',
       path: '/',
+      maxAge: 60 * 60 * 24,
     })
 
     return ApiResponse.success({

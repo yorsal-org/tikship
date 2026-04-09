@@ -9,7 +9,6 @@ import { SettingsProvider } from '@/hooks/useSettings'
 interface Props {
   children: ReactNode
   initialLocale: string
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   initialMessages: Record<string, unknown>
 }
 
