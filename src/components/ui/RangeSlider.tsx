@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils/common'
 
 interface RangeSliderProps {
@@ -25,47 +25,31 @@ export function RangeSlider({
   className,
 }: RangeSliderProps) {
   const [localValue, setLocalValue] = useState<[number, number]>(value)
-  const minRef = useRef(value[0])
-  const maxRef = useRef(value[1])
 
   // Sync with external value
   useEffect(() => {
     setLocalValue(value)
-    minRef.current = value[0]
-    maxRef.current = value[1]
   }, [value])
 
-  // Calculate track highlight positions
-  const getLeftPercent = (val: number) => ((val - min) / (max - min)) * 100
-  const getRightPercent = (val: number) => 100 - ((val - min) / (max - min)) * 100
+  const leftPercent = ((localValue[0] - min) / (max - min)) * 100
+  const rightPercent = ((localValue[1] - min) / (max - min)) * 100
 
-  const leftPercent = getLeftPercent(localValue[0])
-  const rightPercent = getRightPercent(localValue[1])
+  const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newMin = Math.min(Number(e.target.value), localValue[1] - step)
+    const newValue: [number, number] = [newMin, localValue[1]]
+    setLocalValue(newValue)
+    onChange(newValue)
+  }
 
-  const handleMinChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const newMin = Math.min(Number(e.target.value), localValue[1] - step)
-      minRef.current = newMin
-      const newValue: [number, number] = [newMin, localValue[1]]
-      setLocalValue(newValue)
-      onChange(newValue)
-    },
-    [localValue, onChange, step]
-  )
-
-  const handleMaxChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const newMax = Math.max(Number(e.target.value), localValue[0] + step)
-      maxRef.current = newMax
-      const newValue: [number, number] = [localValue[0], newMax]
-      setLocalValue(newValue)
-      onChange(newValue)
-    },
-    [localValue, onChange, step]
-  )
+  const handleMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newMax = Math.max(Number(e.target.value), localValue[0] + step)
+    const newValue: [number, number] = [localValue[0], newMax]
+    setLocalValue(newValue)
+    onChange(newValue)
+  }
 
   return (
-    <div className={cn('relative w-full h-12 flex items-center', disabled && 'opacity-50 pointer-events-none', className)}>
+    <div className={cn('relative w-full h-12 flex items-center', disabled ? 'opacity-50 pointer-events-none' : '', className)}>
       {/* Track background */}
       <div className="absolute left-0 right-0 h-2 bg-base-300 rounded-full" />
 
